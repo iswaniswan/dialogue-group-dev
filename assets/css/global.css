@@ -1,0 +1,405 @@
+/*
+*CSS UNTUK MEMPERKECIL HEIGHT TABEL
+*/
+
+/* html {
+    zoom: 85%;
+} */
+
+.middle {
+    vertical-align: middle !important;
+}
+
+.table>thead>tr>th {
+    padding: 5px 4px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+.table>tbody>tr>td,
+.table>tbody>tr>th,
+.table>tfoot>tr>td,
+.table>tfoot>tr>th,
+.table>thead>tr>td,
+.table>thead>tr>th {
+    padding: 5px 4px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+.table>thead>tr>td {
+    padding: 3px 3px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+#sitabel td {
+    padding: 3px 3px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+#sitabelview td {
+    padding: 5px 5px !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+}
+
+.nowrap {
+    white-space: nowrap !important;
+}
+
+#tabledatax>thead>tr>th {
+    padding: 8px 8px;
+}
+
+#tabledatax td {
+    padding: 7px 8px;
+}
+
+#tabledatax td {
+    white-space: nowrap !important;
+}
+
+#tabledatax tr:hover {
+    background-color: #ddd;
+    /* font-weight: bold;white */
+}
+
+.tabledatax>thead>tr>th {
+    padding: 8px 8px !important;
+}
+
+.tabledatax td {
+    padding: 7px 8px !important;
+}
+
+.tabledatax tr:hover {
+    background-color: #ddd;
+    /* font-weight: bold !important; */
+}
+
+#tabledatalistx>thead>tr>th {
+    padding: 8px 8px;
+}
+
+#tabledatalistx td {
+    padding: 7px 8px;
+}
+
+#tabledatalistx tr:hover {
+    background-color: #ddd;
+    font-weight: bold;
+}
+
+#tabledatay>thead>tr>th {
+    padding: 8px 8px;
+}
+
+#tabledatay td {
+    padding: 7px 8px;
+}
+
+
+/*END CSS TABLE*/
+
+
+/*CSS NOTE*/
+
+.note {
+    font-size: 12px;
+    color: #8B0000;
+}
+
+.notekode {
+    font-size: 14px;
+    color: #8B0000;
+    /*font-family: "Lucida Console", Courier New, monospace;*/
+}
+
+
+/* CSS warna tf */
+
+.tdna {
+    font-size: 16px;
+    background-color: #ddd;
+    font-weight: bold;
+}
+
+.hejo {
+    font-size: 14px;
+    background-color: #e1f1e4;
+}
+
+.abu {
+    font-size: 14px;
+    background-color: #ddd;
+}
+
+.pudding {
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+
+/* Form Validation */
+
+.my-error-class {
+    color: #8B0000;
+    border-color: #fb9678;
+    /* red */
+}
+
+.my-valid-class {
+    color: #00C292;
+    border-color: #00C292;
+    /*border: 1px solid #00C292;*/
+    /* green */
+}
+
+
+/* th,
+td {
+    padding: 0.60rem !important;
+} */
+
+.table {
+    white-space: nowrap !important;
+}
+
+.link {
+    background-color: #009999 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.formula {
+    background-color: #CC6600 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.inputan {
+    background-color: #336600 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.hasil {
+    background-color: #202020 !important;
+    color: white !important;
+    border-color: white !important;
+}
+
+.informasi {
+    background-color: #404040 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.table_freeze {
+    background-color: #424242 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.table_input {
+    background-color: #2E7D32 !important;
+    border-color: white !important;
+    color: white;
+}
+
+.tooltip {
+    position: relative !important;
+    display: inline-block !important;
+    border-bottom: 1px dotted black !important;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden !important;
+    width: 120px !important;
+    background-color: black !important;
+    color: #fff !important;
+    text-align: center !important;
+    border-radius: 6px;
+    padding: 5px 0;
+    /* Position the tooltip */
+    position: absolute !important;
+    z-index: 1 !important;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible !important;
+}
+
+.tooltip .tooltiptext {
+    width: 120px !important;
+    bottom: 100% !important;
+    left: 50% !important;
+    margin-left: -60px !important;
+    /* Use half of the width (120/2 = 60), to center the tooltip */
+}
+
+
+/* Menu */
+/* nav ul li ul {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+} */
+
+.dropdown-submenu {
+    position: relative;
+}
+
+.dropdown-submenu a::after {
+    transform: rotate(-90deg);
+    position: absolute;
+    right: 6px;
+    top: .8em;
+}
+
+.dropdown-submenu .dropdown-menu {
+    top: 0;
+    left: 100%;
+    margin-left: .1rem;
+    margin-right: .1rem;
+}
+
+.dropdown-menu {
+    margin-top: -2px;
+}
+
+li.dropdown .dropdown-menu .dropdown-menu {
+    left: 100%;
+    margin-top: -30px;
+}
+
+.dropdown-reverse {
+    left: auto !important;
+    right: 100% !important;
+}
+
+.shadow {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.panel {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+}
+
+.white-box {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+}
+
+.blog-shadow-dreamy {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.07), 0 4px 8px rgba(0, 0, 0, 0.07), 0 8px 16px rgba(0, 0, 0, 0.07), 0 16px 32px rgba(0, 0, 0, 0.07), 0 32px 64px rgba(0, 0, 0, 0.07);
+    /* box-shadow: 0 -3px 10px 3px rgba(0, 0, 0, 0.2); */
+}
+
+
+/* 
+
+.shadow:before,
+.shadow:after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background: linear-gradient(45deg, #fb0094, #0000ff, #00ff00, #ffff00, #ff0000, #fb0094, #0000ff, #00ff00, #ffff00, #ff0000);
+    background-size: 400%;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    z-index: -1;
+    animation: animate 20s linear infinite;
+}
+
+.shadow:after {
+    filter: blur(10px);
+}
+
+@keyframes animate {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: 300% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+} */
+
+.bold {
+    font-weight: bold;
+}
+
+.w50 {
+    min-width: 50px !important;
+    max-width: 100% !important;
+}
+
+.w75 {
+    min-width: 75px !important;
+    max-width: 100% !important;
+}
+
+.w80 {
+    min-width: 80px !important;
+    max-width: 100% !important;
+}
+
+.w85 {
+    min-width: 85px !important;
+    max-width: 100% !important;
+}
+
+.w90 {
+    min-width: 90px !important;
+    max-width: 100% !important;
+}
+
+.w95 {
+    min-width: 95px !important;
+    max-width: 100% !important;
+}
+
+.w100 {
+    min-width: 100px !important;
+    max-width: 100% !important;
+}
+
+.w125 {
+    min-width: 125px !important;
+    max-width: 100% !important;
+}
+
+.w150 {
+    min-width: 150px !important;
+    max-width: 100% !important;
+}
+
+.w200 {
+    min-width: 200px !important;
+    max-width: 100% !important;
+}
+
+.w250 {
+    min-width: 250px !important;
+    max-width: 100% !important;
+}
+
+.w300 {
+    min-width: 300px !important;
+    max-width: 100% !important;
+}
+
+.w350 {
+    min-width: 350px !important;
+    max-width: 100% !important;
+}
+
+.w400 {
+    min-width: 400px !important;
+    max-width: 100% !important;
+}

@@ -1,0 +1,79 @@
+/* Ensure that the demo table scrolls */
+
+th,
+td {
+    white-space: nowrap;
+}
+
+div.dataTables_wrapper {
+    /* width: 100% !important; */
+    margin: 0 auto;
+}
+
+.bold {
+    font-weight: bold !important;
+    color: #145A32;
+}
+
+.red_bold {
+    font-weight: bold !important;
+    color: #922B21;
+}
+
+table.dataTable tbody td {
+    padding: 3px 3px !important;
+}
+
+table.dataTable thead th {
+    padding: 0px 0px !important;
+}
+
+table.dataTable thead th,
+table.dataTable thead td {
+    padding: 3px;
+}
+
+.middle {
+    vertical-align: middle !important;
+}
+
+table.dataTable tr th,
+tr td {
+    font-size: 11px !important;
+}
+
+body {
+    zoom: 0.9;
+    -moz-transform: scale(1);
+    -moz-transform-origin: 0 0;
+}
+
+
+/* @import url('https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap'); */
+
+
+/* body {
+margin: 0px;
+padding: 0px;
+font-family: "Courier Prime", monospace;
+background-color: #fdfdfe;
+} */
+
+header {
+    /* width: 50%; */
+    height: 5vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+header h1 {
+    font-size: 30px;
+    font-weight: 500;
+    color: #2E86C1;
+    /* border-right: 4px solid #000;
+animation: cursor 1s infinite step-end, typing 15s infinite steps(14); */
+    white-space: nowrap;
+    overflow: hidden;
+}

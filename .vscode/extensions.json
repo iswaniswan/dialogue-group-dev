@@ -1,0 +1,7 @@
+{
+    "recommendations": [
+        "esbenp.prettier-vscode",
+        "sophisticode.php-formatter",
+        "small.php-ci"
+    ]
+}
