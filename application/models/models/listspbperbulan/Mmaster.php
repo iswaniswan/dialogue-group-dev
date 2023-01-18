@@ -1,0 +1,475 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+use Ozdemir\Datatables\Datatables;
+use Ozdemir\Datatables\DB\CodeigniterAdapter;
+
+class Mmaster extends CI_Model {
+
+    public function cekarea($username, $idcompany){
+        $this->db->select('i_area');
+        $this->db->from('public.tm_user_area');
+        $this->db->where('username', $username);
+        $this->db->where('id_company', $idcompany);
+        $this->db->where('i_area', '00');
+        $query = $this->db->get();
+        if ($query->num_rows()>0) {
+            return '00';
+        }else{
+            return 'xx';
+        }
+    }
+
+    public function area($username, $idcompany){
+        return  $this->db->query("
+            SELECT
+                *
+            FROM
+                tr_area
+            WHERE
+                i_area IN (
+                SELECT
+                    i_area
+                FROM
+                    public.tm_user_area
+                WHERE
+                    username = '$username'
+                    AND id_company = '$idcompany')
+        ", FALSE);
+    }
+
+    public function bacagroup(){
+        $this->db->select('*');
+        $this->db->from('tr_product_group');
+        $this->db->where('f_spb', 'true');
+        $this->db->order_by('e_product_groupname');
+        $query = $this->db->get();
+        if ($query->num_rows() > 0){          
+            return $query->result();
+        }
+    }
+
+    public function interval($dfrom,$dto){
+        if($dfrom!=''){
+            $dfrom = date('Y-m-d', strtotime($dfrom));
+        }
+        if($dto!=''){
+            $dto = date('Y-m-d', strtotime($dto));
+        }
+
+        $this->db->select("(DATE_PART('year', '$dto'::date) - DATE_PART('year', '$dfrom'::date)) * 12 +
+           (DATE_PART('month', '$dto'::date) - DATE_PART('month', '$dfrom'::date)) as inter ",false);
+        $query = $this->db->get();
+        if($query->num_rows() > 0){
+            $tmp=$query->row();
+            return $tmp->inter+1;
+        }
+    }
+    
+    public function bacaperiode($dfrom,$dto,$iarea,$interval,$iproductgroup){
+        $bl  = date('m', strtotime($dfrom));
+        $tgl = date('Y-m-d', strtotime($dfrom));
+        if($iarea=='NA'){
+            $sql=" a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis, a.iarea, a.icity, ";
+            switch ($bl){
+                case '01' :
+                $sql.=" sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, 
+                sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, 
+                sum(a.Nov) as spbnov, sum(a.Des) as spbdes ";
+                break;
+                case '02' :
+                $sql.=" sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, 
+                sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, 
+                sum(a.Des) as spbdes, sum(a.Jan) as spbjan ";
+                break;
+                case '03' :
+                $sql.=" sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, 
+                sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, 
+                sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb ";
+                break;
+                case '04' :
+                $sql.=" sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar ";
+                break;
+                case '05' :
+                $sql.=" sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr ";
+                break;
+                case '06' :
+                $sql.=" sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, 
+                sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, 
+                sum(a.Apr) as spbapr, sum(a.May) as spbmay ";
+                break;
+                case '07' :
+                $sql.=" sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, 
+                sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, 
+                sum(a.May) as spbmay, sum(a.Jun) as spbjun ";
+                break;
+                case '08' :
+                $sql.=" sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, 
+                sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, 
+                sum(a.Jun) as spbjun, sum(a.Jul) as spbjul ";
+                break;
+                case '09' :
+                $sql.=" sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, 
+                sum(a.Jul) as spbjul, sum(a.Aug) as spbaug ";
+                break;
+                case '10' :
+                $sql.=" sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, 
+                sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, 
+                sum(a.Aug) as spbaug, sum(a.Sep) as spbsep ";
+                break;
+                case '11' :
+                $sql.=" sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, 
+                sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct ";
+                break;
+                case '12' :
+                $sql.=" sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, 
+                sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, 
+                sum(a.Oct) as spboct, sum(a.Nov) as spbnov ";
+                break;
+            }
+
+            $sql.=" from ( select kode, nama, alamat, kota, area, jenis, iarea, icity, ";
+            switch ($bl){
+                case '01' :
+                $sql.=" Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des ";
+                break;
+                case '02' :
+                $sql.=" Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan ";
+                break;
+                case '03' :
+                $sql.=" Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb ";
+                break;
+                case '04' :
+                $sql.=" Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar ";
+                break;
+                case '05' :
+                $sql.=" May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr ";
+                break;
+                case '06' :
+                $sql.=" Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May ";
+                break;
+                case '07' :
+                $sql.=" Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun ";
+                break;
+                case '08' :
+                $sql.=" Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul ";
+                break;
+                case '09' :
+                $sql.=" Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug ";
+                break;
+                case '10' :
+                $sql.=" Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep ";
+                break;
+                case '11' :
+                $sql.=" Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct ";
+                break;
+                case '12' :
+                $sql.=" Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov ";
+                break;
+            }
+            if($iproductgroup == 'NA'){          
+                $sql.=" from public.crosstab
+                ('SELECT a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, e.e_customer_classname, 
+                a.i_area, b.i_city, to_number(to_char(a.d_spb, ''mm''),''99'') as bln, sum(a.v_spb) AS jumlah
+                FROM tm_spb a, tr_customer b, tr_city c, tr_area d, tr_customer_class e
+                WHERE a.f_spb_cancel = false AND b.i_customer = a.i_customer and a.f_spb_cancel=''f'' 
+                and b.i_city=c.i_city and b.i_area=c.i_area and b.i_area=d.i_area
+                AND b.i_customer_class=e.i_customer_class
+                AND (a.d_spb >= to_date(''$dfrom'',''dd-mm-yyyy'') AND a.d_spb <= to_date(''$dto'',''dd-mm-yyyy''))
+                GROUP BY a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, 
+                e.e_customer_classname, a.i_area, b.i_city,
+                to_char(a.d_spb, ''mm'')
+                order by a.i_customer, b.e_customer_name, to_char(a.d_spb, ''mm'')','select (SELECT EXTRACT(MONTH FROM date_trunc(''month'', 
+                ''$tgl''::date)::date + s.a * ''1 month''::interval))
+                from generate_series(0, 11) as s(a)')
+                as
+                (kode text, nama text, alamat text, kota text, area text, jenis text, iarea text, icity text,";
+            }else{
+                $sql.=" from public.crosstab
+                ('SELECT a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, e.e_customer_classname, 
+                a.i_area, b.i_city, to_number(to_char(a.d_spb, ''mm''),''99'') as bln, sum(a.v_spb) AS jumlah
+                FROM tm_spb a, tr_customer b, tr_city c, tr_area d, tr_customer_class e
+                WHERE a.f_spb_cancel = false AND b.i_customer = a.i_customer and a.f_spb_cancel=''f'' 
+                and b.i_city=c.i_city and b.i_area=c.i_area and b.i_area=d.i_area
+                AND b.i_customer_class=e.i_customer_class
+                AND a.i_product_group = ''$iproductgroup''
+                AND (a.d_spb >= to_date(''$dfrom'',''dd-mm-yyyy'') AND a.d_spb <= to_date(''$dto'',''dd-mm-yyyy''))
+                GROUP BY a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, 
+                e.e_customer_classname, a.i_area, b.i_city,
+                to_char(a.d_spb, ''mm'')
+                order by a.i_customer, b.e_customer_name, to_char(a.d_spb, ''mm'')','select (SELECT EXTRACT(MONTH FROM date_trunc(''month'', 
+                ''$tgl''::date)::date + s.a * ''1 month''::interval))
+                from generate_series(0, 11) as s(a)')
+                as
+                (kode text, nama text, alamat text, kota text, area text, jenis text, iarea text, icity text,";
+            }
+            switch ($bl){
+                case '01' :
+                $sql.=" Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, 
+                Oct integer, Nov integer, Des integer) ";
+                break;
+                case '02' :
+                $sql.=" Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, 
+                Nov integer, Des integer, Jan integer) ";
+                break;
+                case '03' :
+                $sql.=" Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, 
+                Des integer, Jan integer, Feb integer) ";
+                break;
+                case '04' :
+                $sql.=" Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, 
+                Jan integer, Feb integer, Mar integer) ";
+                break;
+                case '05' :
+                $sql.=" May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, 
+                Feb integer, Mar integer, Apr integer) ";
+                break;
+                case '06' :
+                $sql.=" Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, 
+                Mar integer, Apr integer, May integer) ";
+                break;
+                case '07' :
+                $sql.=" Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, 
+                Apr integer, May integer, Jun integer) ";
+                break;
+                case '08' :
+                $sql.=" Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, 
+                May integer, Jun integer, Jul integer) ";
+                break;
+                case '09' :
+                $sql.=" Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, 
+                Jun integer, Jul integer, Aug integer) ";
+                break;
+                case '10' :
+                $sql.=" Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, 
+                Jul integer, Aug integer, Sep integer) ";
+                break;
+                case '11' :
+                $sql.=" Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, 
+                Aug integer, Sep integer, Oct integer) ";
+                break;
+                case '12' :
+                $sql.=" Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, 
+                Sep integer, Oct integer, Nov integer) ";
+                break;
+            }
+            $sql.=" ) as a
+            group by a.iarea, a.icity, a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis
+            order by a.iarea, a.icity, a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis";
+        }else{
+            $sql=" a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis, a.iarea, a.icity, ";
+            switch ($bl){
+                case '01' :
+                $sql.=" sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, 
+                sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, 
+                sum(a.Nov) as spbnov, sum(a.Des) as spbdes ";
+                break;
+                case '02' :
+                $sql.=" sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, 
+                sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, 
+                sum(a.Des) as spbdes, sum(a.Jan) as spbjan ";
+                break;
+                case '03' :
+                $sql.=" sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, 
+                sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, 
+                sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb ";
+                break;
+                case '04' :
+                $sql.=" sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar ";
+                break;
+                case '05' :
+                $sql.=" sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr ";
+                break;
+                case '06' :
+                $sql.=" sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, 
+                sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, 
+                sum(a.Apr) as spbapr, sum(a.May) as spbmay ";
+                break;
+                case '07' :
+                $sql.=" sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, 
+                sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, 
+                sum(a.May) as spbmay, sum(a.Jun) as spbjun ";
+                break;
+                case '08' :
+                $sql.=" sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, 
+                sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, 
+
+                sum(a.Jun) as spbjun, sum(a.Jul) as spbjul ";
+                break;
+                case '09' :
+                $sql.=" sum(a.Sep) as spbsep, sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, 
+
+                sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, 
+                sum(a.Jul) as spbjul, sum(a.Aug) as spbaug ";
+                break;
+                case '10' :
+                $sql.=" sum(a.Oct) as spboct, sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, 
+
+                sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, 
+                sum(a.Aug) as spbaug, sum(a.Sep) as spbsep ";
+                break;
+                case '11' :
+                $sql.=" sum(a.Nov) as spbnov, sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, 
+                sum(a.Apr) as spbapr, sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, 
+                sum(a.Sep) as spbsep, sum(a.Oct) as spboct ";
+                break;
+                case '12' :
+                $sql.=" sum(a.Des) as spbdes, sum(a.Jan) as spbjan, sum(a.Feb) as spbfeb, sum(a.Mar) as spbmar, sum(a.Apr) as spbapr, 
+                sum(a.May) as spbmay, sum(a.Jun) as spbjun, sum(a.Jul) as spbjul, sum(a.Aug) as spbaug, sum(a.Sep) as spbsep, 
+                sum(a.Oct) as spboct, sum(a.Nov) as spbnov ";
+                break;
+            }
+
+            $sql.=" from ( select kode, nama, alamat, kota, area, jenis, iarea, icity, ";
+            switch ($bl){
+                case '01' :
+                $sql.=" Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des ";
+                break;
+                case '02' :
+                $sql.=" Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan ";
+                break;
+                case '03' :
+                $sql.=" Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb ";
+                break;
+                case '04' :
+                $sql.=" Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar ";
+                break;
+                case '05' :
+                $sql.=" May, Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr ";
+                break;
+                case '06' :
+                $sql.=" Jun, Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May ";
+                break;
+                case '07' :
+                $sql.=" Jul, Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun ";
+                break;
+                case '08' :
+                $sql.=" Aug, Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul ";
+                break;
+                case '09' :
+                $sql.=" Sep, Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug ";
+                break;
+                case '10' :
+                $sql.=" Oct, Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep ";
+                break;
+                case '11' :
+                $sql.=" Nov, Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct ";
+                break;
+                case '12' :
+                $sql.=" Des, Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov ";
+                break;
+            }
+            if($iproductgroup == 'NA'){ 
+                $sql.=" from public.crosstab
+                ('SELECT a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, e.e_customer_classname, 
+                a.i_area, b.i_city, to_number(to_char(a.d_spb, ''mm''),''99'') as bln, sum(a.v_spb) AS jumlah
+                FROM tm_spb a, tr_customer b, tr_city c, tr_area d, tr_customer_class e
+                WHERE a.f_spb_cancel = false AND b.i_customer = a.i_customer and a.f_spb_cancel=''f'' 
+                AND b.i_city=c.i_city and b.i_area=c.i_area and b.i_area=d.i_area
+                AND b.i_customer_class=e.i_customer_class AND a.i_area=''$iarea''
+                AND (a.d_spb >= to_date(''$dfrom'',''dd-mm-yyyy'') AND a.d_spb <= to_date(''$dto'',''dd-mm-yyyy''))
+                GROUP BY a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, 
+                e.e_customer_classname, a.i_area, b.i_city,
+                to_char(a.d_spb, ''mm'')
+                order by a.i_customer, b.e_customer_name, to_char(a.d_spb, ''mm'')','select (SELECT EXTRACT(MONTH FROM date_trunc(''month'', 
+                ''$tgl''::date)::date + s.a * ''1 month''::interval))
+                from generate_series(0, 11) as s(a)')
+                as
+
+                (kode text, nama text, alamat text, kota text, area text, jenis text, iarea text, icity text,";
+            }else{
+                $sql.=" from public.crosstab
+                ('SELECT a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, e.e_customer_classname, 
+                a.i_area, b.i_city, to_number(to_char(a.d_spb, ''mm''),''99'') as bln, sum(a.v_spb) AS jumlah
+                FROM tm_spb a, tr_customer b, tr_city c, tr_area d, tr_customer_class e
+                WHERE a.f_spb_cancel = false AND b.i_customer = a.i_customer and a.f_spb_cancel=''f'' 
+                AND b.i_city=c.i_city and b.i_area=c.i_area and b.i_area=d.i_area
+                AND b.i_customer_class=e.i_customer_class AND a.i_area=''$iarea''
+                AND a.i_product_group = ''$iproductgroup''
+                AND (a.d_spb >= to_date(''$dfrom'',''dd-mm-yyyy'') AND a.d_spb <= to_date(''$dto'',''dd-mm-yyyy''))
+                GROUP BY a.i_customer, b.e_customer_name, b.e_customer_address, c.e_city_name, d.e_area_name, 
+                e.e_customer_classname, a.i_area, b.i_city,
+                to_char(a.d_spb, ''mm'')
+                order by a.i_customer, b.e_customer_name, to_char(a.d_spb, ''mm'')','select (SELECT EXTRACT(MONTH FROM date_trunc(''month'', 
+                ''$tgl''::date)::date + s.a * ''1 month''::interval))
+                from generate_series(0, 11) as s(a)')
+                as
+
+                (kode text, nama text, alamat text, kota text, area text, jenis text, iarea text, icity text,";
+            }
+            switch ($bl){
+                case '01' :
+                $sql.=" Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, 
+
+                Oct integer, Nov integer, Des integer) ";
+                break;
+                case '02' :
+                $sql.=" Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, 
+
+                Nov integer, Des integer, Jan integer) ";
+                break;
+                case '03' :
+                $sql.=" Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, 
+                Des integer, Jan integer, Feb integer) ";
+                break;
+                case '04' :
+                $sql.=" Apr integer, May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, 
+                Jan integer, Feb integer, Mar integer) ";
+                break;
+                case '05' :
+                $sql.=" May integer, Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, 
+                Feb integer, Mar integer, Apr integer) ";
+                break;
+                case '06' :
+                $sql.=" Jun integer, Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, 
+                Mar integer, Apr integer, May integer) ";
+                break;
+                case '07' :
+                $sql.=" Jul integer, Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, 
+                Apr integer, May integer, Jun integer) ";
+                break;
+                case '08' :
+                $sql.=" Aug integer, Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, 
+                May integer, Jun integer, Jul integer) ";
+                break;
+                case '09' :
+                $sql.=" Sep integer, Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, 
+                Jun integer, Jul integer, Aug integer) ";
+                break;
+                case '10' :
+                $sql.=" Oct integer, Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, 
+                Jul integer, Aug integer, Sep integer) ";
+                break;
+                case '11' :
+                $sql.=" Nov integer, Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, 
+                Aug integer, Sep integer, Oct integer) ";
+                break;
+                case '12' :
+                $sql.=" Des integer, Jan integer, Feb integer, Mar integer, Apr integer, May integer, Jun integer, Jul integer, Aug integer, 
+                Sep integer, Oct integer, Nov integer) ";
+                break;
+            }
+            $sql.=" ) as a
+            group by a.iarea, a.icity, a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis
+            order by a.iarea, a.icity, a.kode, a.nama, a.alamat, a.kota, a.area, a.jenis";
+        }
+        $this->db->select($sql,false);
+        $query = $this->db->get();
+        if ($query->num_rows() > 0){
+            return $query->result();
+        }
+    }
+}
+
+/* End of file Mmaster.php */
