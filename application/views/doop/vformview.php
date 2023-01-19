@@ -78,8 +78,44 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
+                <?php
                     if ($datadetail) {
+                        if($data->e_jenis_spb == 'Transfer') { 
+                            $i = 0;
+                            $ii = 0;
+                            $group = "";
+                            foreach ($datadetail as $d) {
+                                $ii++;
+                                if ($group != $d->i_product_base) {
+                                    $i++; ?>
+                                    <tr class="tr list-item tr_first<?= $i ?>">
+                                        <td class="text-center">
+                                            <spanlistx id="snum<?= $i ?>"><b><?= $i ?></b></spanlistx>
+                                        </td>
+                                        <td><?= $d->i_product_base ?></td>
+                                        <td><?= $d->e_product_basename ?></td>
+                                        <td colspan="2"></td>
+                                        <td class="text-right"><?= $d->nquantity_permintaan ?></td>
+                                        <td colspan="2"></td>
+                                    </tr>
+                                <?php }
+                                $group = $d->i_product_base; ?>
+                                <tr>
+                                    <td class="text-center"><i class="fa fa-check-circle-o fa-lg text-info" aria-hidden="true"></i></td>
+                                    <td><?= $d->i_product_base; ?></td>
+                                    <td><?= $d->e_product_basename; ?></td>
+                                    <td><?= $d->e_color_name; ?></td>
+                                    <td class="text-right"><?= $d->n_quantity_fc; ?></td>
+                                    <!-- <td class="text-right"><?= $d->saldo_akhir; ?></td>
+                                    <td class="text-right"><?= $d->n_stock_outstanding; ?></td> -->
+                                    <td class="text-right"><?= $d->nquantity_permintaan; ?></td>
+                                    <td class="text-right"><?= $d->n_quantity; ?></td>
+                                    <td><?= $d->e_remark; ?></td>
+                                </tr>
+                                <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
+                        <?php } ?>
+                            <input type="hidden" name="jml" id="jml" value="<?= $ii; ?>">
+                        <?php } else {
                         $i = 0;
                         foreach ($datadetail as $row) {
                             $i++;
@@ -90,15 +126,18 @@
                                 <td><?= $row->e_product_basename; ?></td>
                                 <td><?= $row->e_color_name; ?></td>
                                 <td class="text-right"><?= $row->n_quantity_fc; ?></td>
-                                <!-- td class="text-right"><?= $row->saldo_akhir; ?></td>
+                                <!-- <td class="text-right"><?= $row->saldo_akhir; ?></td>
                                 <td class="text-right"><?= $row->n_stock_outstanding; ?></td> -->
                                 <td class="text-right"><?= $row->nquantity_permintaan; ?></td>
                                 <td class="text-right"><?= $row->n_quantity; ?></td>
                                 <td><?= $row->e_remark; ?></td>
                             </tr>
-                            <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
+                            
+                    <?php }  ?>
+                        <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
                     <?php }
-                    } ?>
+                    ?>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>

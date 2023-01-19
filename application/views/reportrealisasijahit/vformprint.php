@@ -56,30 +56,56 @@
                         <thead>
                             <tr>
                                 <th class="table-active text-center middle" rowspan="2">#</th>
-                                <th class="table-active text-center middle" colspan="6">Schedule</th>
-                                <th class="table-success text-center middle" colspan="6">Realisasi</th>
+                                <th class="table-active text-center middle" rowspan="2">Tanggal</th>
+                                <th class="table-active text-center middle" colspan="3">Schedule</th>
+                                <th class="table-active text-center middle" rowspan="2">Quantity<br/>Actual<br/>Schedule</th>
+                                <th class="table-active text-center middle" colspan="3">Realisasi</th>
+                                <th class="table-active text-center middle" rowspan="2">Quantity<br/>Actual<br/>Realisasi</th>
+                                <th class="table-active text-center middle" rowspan="2">Keterangan</th>
                             </tr>
                             <tr>
                                 <th class="table-active text-center middle">Kode</th>
                                 <th class="table-active text-center middle">Nama Barang</th>
                                 <th class="table-active text-center middle">Warna</th>
-                                <th class="table-active text-center middle">Tanggal</th>
-                                <th class="table-active text-center middle">Quantity</th>
                                 <th class="table-success text-center middle">Kode</th>
                                 <th class="table-success text-center middle">Nama Barang</th>
                                 <th class="table-success text-center middle">Warna</th>
-                                <th class="table-success text-center middle">Tanggal</th>
-                                <th class="table-success text-center middle">Quantity</th>
                             </tr>
                         </thead>
                         <tbody>
+                        <?php $counter = 1; ?>
+                        <?php foreach ($data->result() as $item) { ?>
+                            <tr>
+                                <td><?= $counter++ ?></td>
+                                <td><?= $item->d_document ?></td>
+                                <!-- schedule -->
+                                <td><?= $item->kode ?></td>
+                                <td><?= $item->e_product_wipname ?></td>
+                                <td><?= $item->e_color_name ?></td>
+                                <td><?= $item->n_quantity ?></td>
+                                <!-- realisasi -->
+                                <td><?= $item->realisasi_i_product_wip ?></td>
+                                <td><?= $item->realisasi_e_product_wipname ?></td>
+                                <td><?= $item->realisasi_e_color_name ?></td>
+                                <td><?= $item->realisasi_n_quantity ?></td>
+                                <td>
+                                    <?php
+//                                        $itemSchedule = $item->kode . $item->e_product_wipname . $item->e_color_name . $item->n_quantity;
+//                                        $itemRealisasi =  $item->realisasi_i_product_wip . $item->realisasi_e_product_wipname . $item->realisasi_e_color_name . $item->realisasi_n_quantity;
+//                                        $isMatch = $itemSchedule == $itemRealisasi ? 'Sesuai' : 'Tidak sesuai';
+
+                                        $isMatch = $item->kode == $item->realisasi_i_product_wip ? 'Sesuai' : 'Tidak sesuai';
+                                        echo $isMatch;
+                                    ?>
+                                </td>
+                            </tr>
+                        <?php } ?>
                         </tbody>
                     </table>
                     <!-- </div> -->
                 </div>
             </div>
         </div>
-    </div>
     </div>
 </body>
 <script src="<?= base_url(); ?>assets/js/jquery-3.5.1.js"></script>
@@ -105,13 +131,12 @@
             buttons: [{
                 text: 'Export Data',
                 action: function(e, dt, node, config) {
-                    console.log("under develepment")
-                    return false;
+                    console.log("export data")
                     $("#tabledata").table2excel({
                         // exclude CSS class
                         // exclude: ".floatThead-col",
                         name: "Worksheet Name",
-                        filename: "Report_Mutasi_Jahit", //do not include extension
+                        filename: "Report_schedule_excel_", //do not include extension
                         fileext: ".xls" // file extension
                     });
                 }

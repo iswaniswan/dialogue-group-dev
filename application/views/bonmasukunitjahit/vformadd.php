@@ -87,14 +87,15 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="3%">No</th>
-                        <th width="12%">Kode Barang</th>
-                        <th>Nama Barang</th>
-                        <th class="text-right" width="10%;">Qty Kirim</th>
-                        <th class="text-right" width="10%;">Qty Terima</th>
-                        <th class="text-right" width="10%;">Qty BS/Tidak Set</th>
-                        <th class="" width="10%;">Periode</th>
-                        <th>Keterangan</th>
-                        <th class="text-center" width="3%"><input type="checkbox" class="form-control input-sm" id="checkAll"></th>
+                        <th style="width: 120px">Kode Barang</th>
+                        <th style="width: 350px; max-width: 1000px">Nama Barang</th>
+                        <th class="text-center" style="width: 150px">Warna</th>
+                        <th class="text-center" style="width: 50px">Qty<br/>Kirim</th>
+                        <th class="text-center" style="width: 50px">Qty<br/>Terima</th>
+                        <th class="text-center" style="width: 60px">Qty<br/>BS/Tidak<br/>Set</th>
+                        <th class="text-center" style="width: 80px">Periode</th>
+                        <th class="" style="width: 180px; max-width: 1000px">Keterangan</th>
+                        <th class="text-center" style="width: 30px"><input type="checkbox" class="form-control input-sm" id="checkAll"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -280,7 +281,10 @@
                                 <input type="hidden" id="idproduct${i}" class="form-control" name="id_product${i}" value="${data['dataitem'][a]['id_product_wip']}" readonly>
                             </td>
                             <td>
-                                <input type="text" id="e_product_wipname${i}" class="form-control input-sm" name="e_product_wipname${i}" value="${data['dataitem'][a]['e_product_wipname']} - ${data['dataitem'][a]['e_color_name']}" readonly>
+                                <input type="text" id="e_product_wipname${i}" class="form-control input-sm" name="e_product_wipname${i}" value="${data['dataitem'][a]['e_product_wipname']}" readonly>
+                            </td>
+                            <td>
+                                <input type="text" id="e_product_wipname${i}" class="form-control input-sm" name="e_color_name${i}" value="${data['dataitem'][a]['e_color_name']}" readonly>
                             </td>
                             <td>
                                 <input class="form-control input-sm text-right" type="text"  id="nquantitywip${i}" name="nquantitywip${i}" value="${data['dataitem'][a]['n_quantity_wip']}" readonly>

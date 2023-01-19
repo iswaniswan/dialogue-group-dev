@@ -76,6 +76,9 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="3%;">No</th>
+                        <th>WIP</th>
+                        <th>Nama WIP</th>
+                        <th>Warna</th>
                         <th>Kode</th>
                         <th>Nama Material</th>
                         <th>Satuan</th>
@@ -92,6 +95,9 @@
                                 <td class="text-center">
                                     <spanx id="snum<?= $i; ?>"><b><?= $i; ?></b></spanx>
                                 </td>
+                                <td><?= $key->i_product_wip; ?></td>
+                                <td><?= $key->e_product_wipname; ?></td>
+                                <td><?= $key->e_color_name; ?></td>
                                 <td><?= $key->i_material; ?></td>
                                 <td><?= $key->e_material_name; ?></td>
                                 <td><?= $key->e_satuan_name; ?></td>

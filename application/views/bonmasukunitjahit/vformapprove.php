@@ -83,11 +83,13 @@ if ($datadetail) { ?>
                             <th class="text-center">No</th>
                             <th>Kode Barang</th>
                             <th>Nama Barang</th>
+                            <th>Warna</th>
                             <th class="text-right">Qty Kirim</th>
                             <th class="text-right">Qty Terima</th>
                             <th class="text-right">Qty BS/Tidak Set</th>
                             <th class="" width="10%;">Periode</th>
                             <th>Keterangan</th>
+                        </tr>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,8 +104,9 @@ if ($datadetail) { ?>
                                     <?= $key->i_product_wip; ?>
                                 </td>
                                 <td>
-                                    <?= $key->e_product_wipname . ' - ' . $key->e_color_name; ?>
+                                    <?= $key->e_product_wipname ?>
                                 </td>
+                                <td><?= $key->e_color_name ?></td>
                                 <td class="text-right">
                                     <?= $key->n_quantity_wip_cutting; ?>
                                 </td>

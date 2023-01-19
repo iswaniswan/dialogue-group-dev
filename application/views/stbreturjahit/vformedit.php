@@ -160,7 +160,7 @@
                                         </select>
                                     </td>
                                     <td><input value="<?= $row->detail_reject; ?>" type="text" id="detail_reject<?= $i; ?>" class="form-control input-sm" name="detail_reject[]"></td>
-                                    <td><input value="<?= $row->e_remark; ?>" type="text" readonly value="${data['dataitem'][a]['reff']}" id="edesc<?= $i; ?>" class="form-control input-sm" name="edesc[]"></td>
+                                    <td><input value="<?= $row->e_remark; ?>" type="text" readonly id="edesc<?= $i; ?>" class="form-control input-sm" name="edesc[]"></td>
                                     <!-- <td class="text-center">
                                     <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
                                 </td> -->
@@ -266,7 +266,7 @@
                             cols += `<td><input type="text" id="bagian${i}" class="form-control input-sm" name="bagian[]"></td>`;
                             cols += `<td><select type="text" id="id_reject${i}" class="form-control" name="id_reject[]"><option value=""></option></select></td>`;
                             cols += `<td><input type="text" id="detail_reject${i}" class="form-control input-sm" name="detail_reject[]"></td>`;
-                            cols += `<td><input type="text" readonly value="${data['dataitem'][a]['reff']}" id="edesc${i}" class="form-control input-sm" name="edesc[]"></td>`;
+                            cols += `<td><input type="text" readonly value="${data['dataitem'][a]['e_remark']} [${data['dataitem'][a]['reff']}]" id="edesc${i}" class="form-control input-sm" name="edesc[]"></td>`;
                             // cols += `<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>`;
                             newRow.append(cols);
                             $("#tabledatax").append(newRow);

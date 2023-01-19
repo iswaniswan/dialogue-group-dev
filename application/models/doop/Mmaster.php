@@ -70,6 +70,7 @@ class Mmaster extends CI_Model
                 ba.i_referensi,
                 a.id_document_reff,
                 ba.i_document AS document_referensi,
+                ba.e_jenis_spb,
                 a.e_remark,
                 e_status_name,
                 label_color,
@@ -137,6 +138,7 @@ class Mmaster extends CI_Model
                 $folder        = trim($data['folder']);
                 $i_level       = $data['i_level'];
                 $d_document    = $data['d_document'];
+                $e_jenis_spb    = $data['e_jenis_spb'];
                 $data = '';
                 if (check_role($i_menu, 2)) {
                     $data .= "<a href=\"#\" title='Detail' onclick='show(\"$folder/cform/view/$id/$d_document/$dfrom/$dto/$id_customer\",\"#main\"); return false;'><i class='ti-eye text-success fa-lg mr-2'></i></a>";
@@ -148,7 +150,11 @@ class Mmaster extends CI_Model
                 }
                 if (check_role($i_menu, 7) && $i_status == '2') {
                     if ($i_level == $this->i_level || 1 == $this->i_level) {
-                        $data .= "<a href=\"#\" onclick='show(\"$folder/cform/approval/$id/$d_document/$dfrom/$dto/$id_customer\",\"#main\"); return false;'><i class='ti-check-box text-primary fa-lg mr-2'></i></a>";
+                        if($e_jenis_spb == 'Transfer') {
+                            $data .= "<a href=\"#\" onclick='show(\"$folder/cform/approval_transfer/$id/$d_document/$dfrom/$dto/$id_customer\",\"#main\"); return false;'><i class='ti-check-box text-primary fa-lg mr-2'></i></a>";
+                        } else {
+                            $data .= "<a href=\"#\" onclick='show(\"$folder/cform/approval/$id/$d_document/$dfrom/$dto/$id_customer\",\"#main\"); return false;'><i class='ti-check-box text-primary fa-lg mr-2'></i></a>";
+                        }
                     }
                 }
                 if (check_role($i_menu, 5)) {
@@ -365,7 +371,7 @@ class Mmaster extends CI_Model
         $e_type_spb = trim($split[1]);
 
         if($e_type_spb == 'Transfer') {
-            return $this->db->query("SELECT
+            return $this->db->query("SELECT distinct
                 a.i_document,
                 a.id,
                 to_char(a.d_document, 'dd-mm-yyyy') as d_document,
@@ -428,7 +434,7 @@ class Mmaster extends CI_Model
                 AND a.id = '$id'
             ORDER BY
                 a.i_document,
-                cc.e_product_basename ASC
+                cc.i_product_base ASC
             ", FALSE);
         } else {
             return $this->db->query("SELECT
@@ -640,7 +646,8 @@ class Mmaster extends CI_Model
             $dto = date('Y-m-t');
         }
         if($e_jenis_spb == 'Transfer') {
-            return $this->db->query("SELECT
+            return $this->db->query("SELECT * FROM (
+                SELECT
                     DISTINCT ON
                     (a.id_product) b.id,
                     b.id_company,
@@ -653,6 +660,7 @@ class Mmaster extends CI_Model
                     d.n_quantity AS nquantity_permintaan,
                     d.n_quantity_sisa AS nquantity_pemenuhan,
                     a.n_quantity,
+                    aa.n_quantity_total_per_product,
                     a.n_quantity_sisa,
                     d.v_price,
                     d.n_diskon1,
@@ -673,6 +681,15 @@ class Mmaster extends CI_Model
                     b.id = a.id_document
                 JOIN tr_product_base c ON
                     a.id_product = c.id
+                INNER JOIN (
+                    SELECT b.i_product_base,
+                        sum(n_quantity) n_quantity_total_per_product
+                    FROM
+                        tm_sj_item a
+                    INNER JOIN tr_product_base b ON (a.id_product = b.id AND a.id_company = b.id_company)
+                    WHERE id_document_reff = '$id_spb'
+                    GROUP BY 1) aa ON
+                    c.i_product_base = aa.i_product_base
                 JOIN tr_color cc ON (
                     cc.i_color = c.i_color AND c.id_company = cc.id_company
                 )
@@ -691,6 +708,7 @@ class Mmaster extends CI_Model
                     SELECT id_product, sum(n_quantity_sisa) AS n_quantity_sisa_total FROM tm_spb a, tm_spb_item b WHERE a.id = b.id_document AND a.i_status IN ('6') AND a.id_company = '$this->id_company' AND a.id <> '$id_spb' GROUP BY 1) i ON (i.id_product = c.id)
                 WHERE
                     b.id = '$id'
+            ) as x order by x.i_product_base ASC
             ", FALSE);
         } else {
             return $this->db->query("SELECT
@@ -847,7 +865,69 @@ class Mmaster extends CI_Model
                 $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->i_level' and i_document = '$id' ", FALSE);
             } else if ($istatus == '6') {
                 if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
-                    // $this->updatesisa($id);
+                    $this->updatesisa($id);
+                    $data = array(
+                        'i_status'  => $istatus,
+                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                        'e_approve' => $this->username,
+                        'd_approve' => $now,
+                    );
+                } else {
+                    $data = array(
+                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                    );
+                }
+                $this->db->query("
+            		INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
+					 ('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_sj');", FALSE);
+            }
+        } else {
+            $data = array(
+                'i_status'  => $istatus,
+            );
+        }
+        $this->db->where('id', $id);
+        $this->db->update('tm_sj', $data);
+    }
+
+    public function changestatustransfer($id, $istatus)
+    {
+        /* if ($istatus == '6') {
+            $this->updatesisa($id);
+            $data = array(
+                'i_status'  => $istatus,
+                'e_approve' => $this->username,
+                'd_approve' => date('Y-m-d'),
+            );
+        } else {
+            $data = array(
+                'i_status' => $istatus,
+            );
+        }
+        $this->db->where('id', $id);
+        $this->db->update('tm_sj', $data); */
+        $now = date('Y-m-d');
+        if ($istatus == '3' || $istatus == '6') {
+            $awal = $this->db->query("
+            	SELECT b.i_menu , a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut from tm_sj a
+				inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
+				where a.id = '$id'
+				group by 1,2", FALSE)->row();
+
+            if ($istatus == '3') {
+                if ($awal->i_approve_urutan - 1 == 0) {
+                    $data = array(
+                        'i_status'  => $istatus,
+                    );
+                } else {
+                    $data = array(
+                        'i_approve_urutan'  => $awal->i_approve_urutan - 1,
+                    );
+                }
+                $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->i_level' and i_document = '$id' ", FALSE);
+            } else if ($istatus == '6') {
+                if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
+                    $this->updatesisatransfer($id);
                     $data = array(
                         'i_status'  => $istatus,
                         'i_approve_urutan'  => $awal->i_approve_urutan + 1,
@@ -922,6 +1002,136 @@ class Mmaster extends CI_Model
                         WHERE
                             id_document     = '$key->id_document_reff'
                             AND id_product  = '$key->id_product'
+                            AND id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                        ", FALSE);
+                    } else {
+                        die();
+                    }
+                }
+            }
+        /* } else if ($idtypespb == '2') {
+            if ($query->num_rows() > 0) {
+                foreach ($query->result() as $key) {
+                    $nsisa = $this->db->query("
+                        SELECT
+                            n_quantity_sisa
+                        FROM
+                            tm_spb_ds_item
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND id_product  = '$key->id_product'
+                            AND id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                    ", FALSE);
+
+                    if ($nsisa->num_rows() > 0) {
+                        $this->db->query("
+                        UPDATE
+                            tm_spb_ds_item
+                        SET
+                            n_quantity_sisa = n_quantity_sisa - $key->n_quantity
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND id_product  = '$key->id_product'
+                            AND id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                        ", FALSE);
+                    } else {
+                        die();
+                    }
+                }
+            }
+        } else if ($idtypespb == '3') {
+            if ($query->num_rows() > 0) {
+                foreach ($query->result() as $key) {
+                    $nsisa = $this->db->query("
+                        SELECT
+                            n_quantity_sisa
+                        FROM
+                            tm_spb_distributor_item
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND id_product  = '$key->id_product'
+                            AND id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                    ", FALSE);
+
+                    if ($nsisa->num_rows() > 0) {
+                        $this->db->query("
+                        UPDATE
+                            tm_spb_distributor_item
+                        SET
+                            n_quantity_sisa = n_quantity_sisa - $key->n_quantity
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND id_product  = '$key->id_product'
+                            AND id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                        ", FALSE);
+                    } else {
+                        die();
+                    }
+                }
+            }
+        } */
+    }
+
+    public function updatesisatransfer($id)
+    {
+        /* $idtypespb = $this->db->query("
+            SELECT 
+                i_type_spb 
+            FROM 
+                tm_sj
+            WHERE 
+                id = $id
+            ", FALSE)->row()->i_type_spb; */
+        $query = $this->db->query("
+            SELECT 
+                id_document, 
+                b.i_product_base,
+                sum(n_quantity) AS n_quantity,
+                sum(n_quantity_sisa) AS n_quantity_sisa,
+                id_document_reff
+            FROM 
+                tm_sj_item a
+            INNER JOIN tr_product_base b ON 
+                (b.id = a.id_product
+                    AND a.id_company = b.id_company)
+            WHERE 
+                id_document = '$id'
+            group by 1,2,5;
+            ", FALSE);
+        // if ($idtypespb == '1') {
+            if ($query->num_rows() > 0) {
+                foreach ($query->result() as $key) {
+                    $nsisa = $this->db->query("
+                        SELECT
+                            a.id_product,
+                            n_quantity_sisa
+                        FROM
+                            tm_spb_item a
+                        INNER JOIN tr_product_base b ON 
+                            (b.id = a.id_product
+                                AND a.id_company = b.id_company)
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND b.i_product_base  = '$key->i_product_base'
+                            AND a.id_company  = '$this->company'
+                            AND n_quantity_sisa >= '$key->n_quantity'
+                    ", FALSE);
+
+                    if ($nsisa->num_rows() > 0) {
+                        $id_product = $nsisa->row()->id_product;
+                        $this->db->query("
+                        UPDATE
+                            tm_spb_item
+                        SET
+                            n_quantity_sisa = n_quantity_sisa - $key->n_quantity
+                        WHERE
+                            id_document     = '$key->id_document_reff'
+                            AND id_product  = '$id_product'
                             AND id_company  = '$this->company'
                             AND n_quantity_sisa >= '$key->n_quantity'
                         ", FALSE);
@@ -1072,12 +1282,21 @@ class Mmaster extends CI_Model
 
     public function insertspbnew($idbaru, $ibagian, $idocument, $datedocument, $iarea, $icustomer, $ireferensi, $datereferensi, $ndiskontotal, $nkotor, $nbersih, $vdpp, $vppn, $eremark, $idkodeharga, $ejenisspb)
     {
-        $this->db->query(
-        "INSERT INTO produksi.tm_spb
-        (id, id_company, i_document, d_document, i_bagian, id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, d_entry, i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id_spb_turunan)
-        SELECT '$idbaru', '$this->id_company','$idocument','$datedocument','$ibagian',id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, now(), i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id
-        FROM tm_spb WHERE id = '$ireferensi' AND d_document = '$datereferensi';
-        ");
+        if($ejenisspb == 'Transfer') {
+            $this->db->query(
+            "INSERT INTO produksi.tm_spb
+            (id, id_company, i_document, d_document, i_bagian, id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, d_entry, i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id_spb_turunan, i_status, e_approve, d_approve)
+            SELECT '$idbaru', '$this->id_company','$idocument','$datedocument','$ibagian',id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, now(), i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id, '6', '$this->username', CURRENT_DATE 
+            FROM tm_spb WHERE id = '$ireferensi' AND d_document = '$datereferensi';
+            ");
+        } else {
+            $this->db->query(
+            "INSERT INTO produksi.tm_spb
+            (id, id_company, i_document, d_document, i_bagian, id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, d_entry, i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id_spb_turunan)
+            SELECT '$idbaru', '$this->id_company','$idocument','$datedocument','$ibagian',id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, now(), i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id
+            FROM tm_spb WHERE id = '$ireferensi' AND d_document = '$datereferensi';
+            ");
+        }
         /* $query = $this->db->query("SELECT id_area,  id_sales,  i_referensi_op, nppn
                 FROM  tm_spb
                 WHERE  id = '$ireferensi'

@@ -228,7 +228,7 @@ class Mmaster extends CI_Model
                 DISTINCT d.id AS id_product_wip,
                 d.i_product_wip,
                 initcap(d.e_product_wipname) AS e_product_name,
-                a.n_quantity + COALESCE(n_saldo_akhir, 0) /*- a.persen_up + COALESCE(n_saldo_akhir, 0)*/ AS n_quantity,
+                a.n_quantity /*+ COALESCE(n_saldo_akhir, 0) - a.persen_up + COALESCE(n_saldo_akhir, 0)*/ AS n_quantity,
                 a.n_quantity AS n_fc,
                 COALESCE(n_saldo_akhir, 0) AS pengadaan,
 	            COALESCE(n_saldo_akhir, 0) AS n_pengadaan,

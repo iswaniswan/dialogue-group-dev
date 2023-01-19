@@ -106,7 +106,7 @@
                     <thead>
                         <tr>
                             <th class="text-center" width="3%;">No</th>
-                            <th class="text-center" width="6%;">Kode</th>
+                            <th class="text-center" width="8%;">Kode</th>
                             <th class="text-center" width="23%;">Nama Barang</th>
                             <th class="text-center" width="6%;">Warna</th>
                             <th class="text-center" width="5%;">FC</th>
@@ -327,19 +327,21 @@
                     let ii = 0;
                     let group = "";
                     if (data['detail'].length > 0) {
+                        let no = 0;
                         for (let a = 0; a < data['detail'].length; a++) {
+                            no++;
                             ii++;
                             if (group != data['detail'][a]['i_product_base']) {
                                 i++;
                                 let head = ''
-                                head += `<tr class="tr tr_first${i}">
+                                head += `<tr class="tr list-item tr_first${i}">
                                     <td class="text-center">
                                         <spanlistx id="snum${i}"><b>${i}</b></spanlistx>
                                     </td>
                                     <td style="text-align: center"><input hidden readonly id="idproduct${i}" name="idproduct${i}" value="${data['detail'][a]['id_product']}"><input class="form-control input-sm" readonly id="iproduct${i}" name="iproduct${i}" value="${data['detail'][a]['i_product_base']}"></td>';
                                     <td><input type="text" class="form-control input-sm" id="eproduct${i}" name="eproduct${i}" value="${data['detail'][a]['e_product_basename']}" readonly></td>';
                                     <td colspan="5"></td>
-                                    <td><input type="text" class="form-control text-right input-sm" id="nquantityspb${i}" name="nquantityspb${i}" value="${data['detail'][a]['n_quantity']}" readonly></td>
+                                    <td><input type="text" class="form-control text-right input-sm inputitem" id="nquantityspb${i}" name="nquantityspb${i}" value="${data['detail'][a]['n_quantity']}" onkeydown="nexttab2(this, event,\'inputitem\')" readonly></td>
                                     <td colspan="2"></td>
                                     <td><input readonly class="form-control input-sm" id="edescop${i}" placeholder="Isi Keterangan Jika Ada!" name="edescop[]" value="${data['detail'][a]['e_remark']}"></td>
                                 </tr>`
@@ -348,7 +350,7 @@
                             group = data['detail'][a]['i_product_base'];
                             let item = ''
                             item += `
-                            <tr class="td_${i}">
+                            <tr class="list-item td_${i}">
                                 <td class="text-center"><i class="fa fa-check-circle-o fa-lg text-info" aria-hidden="true"></i></td>
                                 <td style="text-align: center"><input hidden readonly id="idproduct${i}_${ii}" name="idproduct[]" value="${data['detail'][a]['id_product']}"><input class="form-control input-sm" readonly id="iproduct${i}_${ii}" name="iproduct${i}_${ii}" value="${data['detail'][a]['i_product_base']}"></td>';
                                 <td><input type="text" class="form-control input-sm" id="eproduct${i}_${ii}" name="eproduct${i}_${ii}" value="${data['detail'][a]['e_product_basename']}" readonly></td>';
@@ -359,7 +361,7 @@
                                 <td><input type="text" class="form-control text-right input-sm" id="nsaldo_outstanding${i}_${ii}" name="nsaldo_outstanding${i}_${ii}" value="${data['detail'][a]['n_stock_outstanding']}" readonly></td>
                                 <td></td>
                                 <td hidden><input class="form-control text-right input-sm" readonly id="sisa${i}_${ii}" name="sisa[]" value="${data['detail'][a]['n_quantity_sisa']}"></td>
-                                <td><input class="form-control text-right input-sm inputitem kode_${data['detail'][a]['i_product_base']}" autocomplete="off" id="nquantity${i}_${ii}" name="nquantity[]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeydown="nexttab(this, event,\'inputitem\')" onkeyup="ceksaldo2(${i}, ${ii}, '${data['detail'][a]['i_product_base']}'); angkahungkul(this);"></td>
+                                <td><input class="form-control text-right input-sm inputitem kode_${data['detail'][a]['i_product_base']}" autocomplete="off" id="nquantity${i}_${ii}" name="nquantity[]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeydown="nexttab2(this, event,\'inputitem\')" onkeypress="return event.charCode >= 48 && event.charCode <= 57;" onkeyup="ceksaldo2(${i}, ${ii}, '${data['detail'][a]['i_product_base']}'); angkahungkul(this);"></td>
                                 <td><input class="form-control input-sm" id="edesc${i}" placeholder="Isi Keterangan Jika Ada!" name="edesc[]" value=""></td>
                                 <input type = "hidden" name="vprice[]" value="${data['detail'][a]['v_price']}">
                                 <input type = "hidden" name="n_quantity[]" id="n_quantity${i}_${ii}" value="${data['detail'][a]['n_quantity']}">
@@ -386,7 +388,7 @@
                         cols += '<td><input type="text" class="form-control text-right input-sm" id="nsaldo_outstanding' + no + '" name="nsaldo_outstanding' + no + '" value="' + data['detail'][a]['n_stock_outstanding'] + '" readonly></td>';
                         cols += '<td><input type="text" class="form-control text-right input-sm" id="nquantityspb' + no + '" name="nquantityspb[]" value="' + data['detail'][a]['n_quantity'] + '" readonly></td>';
                         cols += '<td hidden><input class="form-control text-right input-sm" readonly id="sisa' + no + '" name="sisa[]" value="' + data['detail'][a]['n_quantity_sisa'] + '"></td>';
-                        cols += '<td><input class="form-control text-right input-sm inputitem" autocomplete="off" id="nquantity' + no + '" name="nquantity[]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeydown="nexttab(this, event,\'inputitem\')" onkeyup="ceksaldo(' + no + '); angkahungkul(this);"></td>';
+                        cols += '<td><input class="form-control text-right input-sm inputitem" autocomplete="off" id="nquantity' + no + '" name="nquantity[]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeydown="nexttab(this, event,\'inputitem\')" onkeypress="return event.charCode >= 48 && event.charCode <= 57;" onkeyup="ceksaldo(' + no + '); angkahungkul(this);"></td>';
                         cols += '<td><input class="form-control input-sm" id="edesc' + no + '" placeholder="Isi Keterangan Jika Ada!" name="edesc[]" value=""></td>';
                         cols += '<td><input readonly class="form-control input-sm" id="edescop' + no + '" placeholder="Isi Keterangan Jika Ada!" name="edescop[]" value="' + data['detail'][a]['e_remark'] + '"></td>';
                         cols += '<input type = "hidden" name="vprice[]" value="' + data['detail'][a]['v_price'] + '">';
@@ -431,17 +433,18 @@
             let sum = 0;
             let last = 0;
             $(`.kode_${kode_brg}`).each(function() {
-                last = sum;
                 sum += parseFloat($(this).val());
-                if (sum > parseFloat($('#nquantityspb' + i).val())) {
-                    swal('Maaf :(','Quantity Pemenuhan = '+sum+' tidak boleh lebih dari Quantity Permintaan = '+$('#nquantityspb' + i).val()+'!!!','error');
-                    if(parseFloat($(this).val()) > 0) {
-                        set_qty2(i, ii, sum, last);
-                    } else {
-                        set_qty2(i, ii, sum, 0);
-                    }
-                }
             })
+            let curr = parseFloat($('#nquantity' + i + '_' + ii).val())
+            last = sum - curr;
+            if (sum > parseFloat($('#nquantityspb' + i).val())) {
+                swal('Maaf :(','Quantity Pemenuhan = '+sum+' tidak boleh lebih dari Quantity Permintaan = '+$('#nquantityspb' + i).val()+'!!!','error');
+                // if(parseFloat($(this).val()) > 0) {
+                set_qty2(i, ii, sum, last);
+                // } else {
+                //     set_qty2(i, ii, sum, 0);
+                // }
+            }
         }
     }
 

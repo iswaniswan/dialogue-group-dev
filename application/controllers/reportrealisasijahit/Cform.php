@@ -149,13 +149,14 @@ class Cform extends CI_Controller
             'text'  => 'SEMUA BARANG',
         );
         $search = str_replace("'", "", $this->input->get('search'));
-        $i_kategori = $this->input->get('kategori');
-        $i_sub_kategori = $this->input->get('sub_kategori');
-        $data = $this->mmaster->get_product($i_kategori, $i_sub_kategori, $search);
+        $kategori = $this->input->get('kategori');
+        $sub_kategori = $this->input->get('sub_kategori');
+//        $data = $this->mmaster->get_product($i_kategori, $i_sub_kategori, $search);
+        $data = $this->mmaster->get_list_product_wip($kategori, $sub_kategori, $search);
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id'    => $row->id,
-                'text'  => $row->i_product . ' - ' . $row->e_product_name,
+                'text'  => $row->i_product_wip . ' - ' . $row->e_product_wipname,
             );
         }
         echo json_encode($filter);
@@ -211,9 +212,9 @@ class Cform extends CI_Controller
         $id_company = $this->session->userdata('id_company');
         $ibagian    = $this->uri->segment(4);
         $bagian = ($ibagian == 'null') ? '' : $ibagian;
-        $jnsbarang  = $this->uri->segment(5);
-        $ikelompok  = $this->uri->segment(6);
-        $i_product  = $this->uri->segment(9);
+        $jnsbarang  = $this->uri->segment(5); // subkategori
+        $ikelompok  = $this->uri->segment(6); // kategori
+        $i_product  = $this->uri->segment(9); // barang
 
         $awal = DateTime::createFromFormat('d-m-Y', $this->uri->segment(7));
         $akhir   = DateTime::createFromFormat('d-m-Y', $this->uri->segment(8));
@@ -228,6 +229,18 @@ class Cform extends CI_Controller
             $d_jangka_awal = '9999-01-01';
             $d_jangka_akhir = '9999-01-31';
         }
+
+        /* reportrealisasijahit/cform/cetak/UJ13/SKT0003/KTG0002/01-01-2023/17-01-2023/null */
+
+        $allItem = $this->mmaster->get_all_data([
+            'dfrom' => $dfrom,
+            'dto' => $dto,
+            'bagian' => $bagian,
+            'kategori' => $this->uri->segment(6),
+            'sub_kategori'=> $this->uri->segment(5),
+            'barang' => $this->uri->segment(9)
+        ]);
+
         $data = array(
             'folder'        => $this->global['folder'],
             'title'         => "View " . $this->global['title'],
@@ -238,7 +251,8 @@ class Cform extends CI_Controller
             'dto'           => $this->uri->segment(8),
             'kategori'      => $this->mmaster->kategoribarang($ikelompok, $id_company)->row(),
             'jenis'         => $this->mmaster->jenisbarang($jnsbarang, $id_company)->row(),
-            'data'          => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang, $i_product),
+            'data' => $allItem,
+            // 'data'          => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang, $i_product),
             // 'data2'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang)->result(),
         );
         $this->Logger->write('Membuka Menu Cetak ' . $this->global['title']);

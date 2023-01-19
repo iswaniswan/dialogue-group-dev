@@ -186,34 +186,34 @@
             clear_table();
         });
 
-        for (let i = 1; i <= $('#jml').val(); i++) {
-            $(`#id_material${i}`).select2({
-                placeholder: 'Cari Kode / Nama Material',
-                allowClear: true,
-                width: "100%",
-                type: "POST",
-                ajax: {
-                    url: '<?= base_url($folder . '/cform/product/'); ?>',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        var query = {
-                            q: params.term,
-                            dfrom: $('#dfrom').val(),
-                            dto: $('#dto').val(),
-                            i_bagian: $('#i_bagian').val(),
-                        }
-                        return query;
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data,
-                        };
-                    },
-                    cache: true
-                }
-            });
-        }
+        // for (let i = 1; i <= $('#jml').val(); i++) {
+        //     $(`#id_material${i}`).select2({
+        //         placeholder: 'Cari Kode / Nama Material',
+        //         allowClear: true,
+        //         width: "100%",
+        //         type: "POST",
+        //         ajax: {
+        //             url: '<?= base_url($folder . '/cform/product/'); ?>',
+        //             dataType: 'json',
+        //             delay: 250,
+        //             data: function(params) {
+        //                 var query = {
+        //                     q: params.term,
+        //                     dfrom: $('#dfrom').val(),
+        //                     dto: $('#dto').val(),
+        //                     i_bagian: $('#i_bagian').val(),
+        //                 }
+        //                 return query;
+        //             },
+        //             processResults: function(data) {
+        //                 return {
+        //                     results: data,
+        //                 };
+        //             },
+        //             cache: true
+        //         }
+        //     });
+        // }
 
         /**
          * Tambah Item Khusus Makloon

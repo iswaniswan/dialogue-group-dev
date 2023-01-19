@@ -25,17 +25,19 @@ class Mmaster extends CI_Model
 	public function getkategori($search)
 	{
 		$id_company = $this->session->userdata('id_company');
-		return $this->db->query("SELECT DISTINCT
-				a.i_kode_kelompok,
-				b.e_nama_kelompok
-            FROM 
-                tr_product_base a
-            INNER JOIN 
-				tr_kelompok_barang b ON (a.i_kode_kelompok = b.i_kode_kelompok)
-            WHERE
-				a.id_company = '$id_company'
-				AND b.e_nama_kelompok ILIKE '%$search%'
-			ORDER BY 2");
+
+        $sql = "SELECT DISTINCT a.i_kode_kelompok,
+                    b.e_nama_kelompok
+                FROM 
+                    tr_product_wip a
+                INNER JOIN 
+                    tr_kelompok_barang b ON (a.i_kode_kelompok = b.i_kode_kelompok)
+                WHERE
+                    a.id_company = '$id_company'
+                    AND b.e_nama_kelompok ILIKE '%$search%'
+                ORDER BY 2";
+
+		return $this->db->query($sql);
 	}
 
 	public function getjenis($ikelompok, $search)
@@ -43,13 +45,18 @@ class Mmaster extends CI_Model
 		$id_company = $this->session->userdata('id_company');
 		$where = '';
 		if ($ikelompok == "null" || $ikelompok == "") {
-			$where = " AND a.i_kode_kelompok IN (Select i_kode_kelompok from tr_product_base where id_company = '$id_company')";
+			$where = " AND a.i_kode_kelompok IN (Select i_kode_kelompok from tr_product_wip where id_company = '$id_company')";
 		} else {
 			$where = " AND a.i_kode_kelompok = '$ikelompok' ";
 		}
 
-		$this->db->select("a.i_type_code, a.e_type_name from tr_item_type a where a.id_company = '$id_company' and a.i_kode_group_barang = 'GRB0003' and e_type_name ilike '%$search%' $where ", false);
-		return $this->db->get();
+        $sql = "SELECT a.i_type_code, a.e_type_name 
+                    from tr_item_type a 
+                    where a.id_company = '$id_company' 
+                      and a.i_kode_group_barang = 'GRB0003' 
+                      and e_type_name ilike '%$search%' $where";
+
+		return $this->db->query($sql);
 	}
 
 	public function bacabagian($ibagian)
@@ -157,5 +164,88 @@ class Mmaster extends CI_Model
 				$sub_kategori
 			ORDER BY 2, 3");
 	}
+
+    public function get_list_product_wip($i_kategori, $i_sub_kategori, $cari)
+    {
+        $id_company = $this->session->userdata('id_company');
+
+        $kategori = '';
+        if ($i_kategori !== 'null' && $i_kategori !== '') {
+            $kategori = "AND (a.i_kode_kelompok = '$i_kategori')";
+        }
+
+        $sub_kategori = '';
+        if ($i_sub_kategori !== 'null' && $i_sub_kategori !== '') {
+            $sub_kategori = "AND (a.i_type_code = '$i_sub_kategori')";
+        }
+
+        $sql = "SELECT DISTINCT a.id, i_product_wip, upper(e_product_wipname||' '||e_color_name) AS e_product_wipname
+                    FROM tr_product_wip a
+                    INNER JOIN tr_color b ON (b.i_color = a.i_color AND a.id_company = b.id_company)
+                    INNER JOIN tm_uraianjahit_item c ON (c.id_product_wip = a.id)
+                    WHERE 
+                        a.f_status = 't' AND a.id_company = '$id_company'
+                        and c.n_quantity_sisa > 0
+                        AND (i_product_wip ILIKE '%$cari%' OR e_product_wipname ILIKE '%$cari%')
+                        $kategori $sub_kategori
+                    GROUP BY 1, 2, e_product_wipname, e_color_name
+                    ORDER BY i_product_wip
+                ";
+        return $this->db->query($sql);
+    }
+
+    public function get_all_data($params=[])
+    {
+        $id_company = $this->session->userdata('id_company');
+        $date_start = @$params['dfrom'];
+        $date_end = @$params['dto'];
+
+        $query_schedule_where = "tsj.d_document >= '$date_start' and tsj.d_document <= '$date_end'";
+        if (@$params['bagian'] != null) {
+            $query_schedule_where .= " AND tsj.i_bagian='" . $params['bagian'] . "'";
+        }
+
+        if (@$params['barang'] != null and $params['barang'] != '' and $params['barang'] != 'null') {
+            $query_schedule_where .= " AND tsjin.id_product_wip::TEXT ='" . $params['barang'] . "'";
+        }
+
+        $query_kategori_where = "";
+        if (@$params['kategori'] != null and $params['kategori'] != '' and $params['kategori'] != 'null') {
+            $query_kategori_where .= " AND qb.i_kode_kelompok='" . $params['kategori'] . "'";
+        }
+
+        if (@$params['sub_kategori'] != null and $params['sub_kategori'] != '' and $params['sub_kategori'] != 'null') {
+            $query_kategori_where .= " AND qb.i_type_code='" . $params['sub_kategori'] . "'";
+        }
+
+        $query_barang_where = "tpw.id_company = '$id_company'";
+
+        $query_barang = "SELECT tpw.id, tpw.i_product_wip, tpw.e_product_wipname, tc.e_color_name, tpw.i_kode_kelompok, tpw.i_type_code   
+                            FROM tr_product_wip tpw  
+                            INNER JOIN tr_color tc ON tc.i_color=tpw.i_color  AND tc.id_company = tpw.id_company 
+                            WHERE $query_barang_where";
+
+        $query_schedule = "SELECT tsj.id, tsj.i_document, tsj.d_document, tsj.i_bagian, tsj.e_group_jahit, tsj.id_company,
+                                tsjin.id AS id_item, tsjin.id_product_wip, tsjin.n_quantity, tsjin.e_remark,
+                                qb.i_product_wip AS kode, qb.e_product_wipname, qb.e_color_name
+                            FROM tm_schedule_jahit tsj 
+                            INNER JOIN tm_schedule_jahit_item_new tsjin ON tsjin.id_document = tsj.id
+                            LEFT JOIN ($query_barang) qb ON qb.id::text=tsjin.id_product_wip::text
+                            WHERE $query_schedule_where $query_kategori_where";
+
+        $query_realisasi = "SELECT tsjid.id_document_item AS realisasi_id_document_item, tsjid.id_product_wip AS realisasi_id_product_wip,
+                                tsjid.n_quantity AS realisasi_n_quantity, tsjid.e_remark AS realisasi_e_remark,
+                                qb.i_product_wip AS realisasi_i_product_wip, qb.e_product_wipname AS realisasi_e_product_wipname,
+                                qb.e_color_name AS realisasi_e_color_name
+                            FROM tm_schedule_jahit_item_detail tsjid
+                            LEFT JOIN ($query_barang) qb ON qb.id::text=tsjid.id_product_wip::text";
+
+        $sql = "SELECT * FROM ($query_schedule) qs
+                LEFT JOIN ($query_realisasi) qr ON qr.realisasi_id_document_item=qs.id_item
+                ORDER BY qs.d_document ASC, qs.id ASC";
+
+        return $this->db->query($sql);
+    }
+
 }
 /* End of file Mmaster.php */

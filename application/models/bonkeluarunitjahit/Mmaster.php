@@ -479,7 +479,7 @@ class Mmaster extends CI_Model
             WHERE
                 a.id_company = '$id_company_tujuan'
             AND 
-                a.i_product_base = '$i_product'
+                a.i_product_base = '$i_product' and a.f_status = true
             AND
                 a.id <> '$idproduct'
         ", FALSE);

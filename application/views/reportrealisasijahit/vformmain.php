@@ -41,10 +41,11 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-6">
+                        <div class="col-12">
                             <button type="button" id="submit" class="btn btn-inverse btn-block btn-sm" onclick="print()"> <i class="fa fa-search"></i>&nbsp;&nbsp;View</button>
                         </div>
-                        <div class="col-6">
+
+                        <div class="col-6 d-none">
                             <button type="button" id="download" class="btn btn-block btn-sm btn-success" onclick="downloadExcel()">
                                 <i class="fa fa-file-excel-o mr-3"></i>Download
                             </button>
@@ -145,6 +146,7 @@
             ajax: {
                 url: '<?= base_url($folder . '/cform/get_product'); ?>',
                 dataType: 'json',
+                type: 'get',
                 delay: 250,
                 data: function(params) {
                     var query = {

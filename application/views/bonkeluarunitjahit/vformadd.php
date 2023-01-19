@@ -163,6 +163,7 @@
     });
 
     $("#upload").on("click", function() {
+        tampungProd = [];
         var itujuan = $('#itujuan').val();
         var ibagian = $('#ibagian').val();
         if (itujuan.length > 0) {
@@ -179,14 +180,12 @@
                 cache: false,
                 async: false,
                 success: function(data) {
-                    // console.log(data);
                     var json = JSON.parse(data);
                     var sama = json.sama;
                     var status = json.status;
                     var detail = json.datadetail;
                     if (sama == true) {
                         if (status == 'berhasil') {
-                            // console.log(detail);
                             swal({
                                 title: "Success!",
                                 text: "File Success Diupload :)",
@@ -199,7 +198,7 @@
                                 $('#jml').val(json.detail.length);
                                 var group = '';
                                 var no = 1;
-                                var newRow = $("<tbody>");
+                                // var newRow = $("<tr>");
                                 for (let i = 0; i < json.detail.length; i++) {
                                     var cols = "";
                                     var stock = 0;
@@ -223,10 +222,10 @@
                                             <input type="text" autocomplete="off" class="form-control input-sm text-right inputitem" id="nquantity${no}" value="${json.detail[i].n_quantity}" onkeydown="nexttab(this, event,'inputitem')" onkeypress="return hanyaAngka(event);" onkeyup="validasi(${no})" name="nquantity[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\" >
                                             </td>
                                             <td><input type="text" id="edesc${no}" value="${json.detail[i].keterangan}" class="form-control input-sm" name="edesc[]"></td>
-                                            <td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
+                                            <td class="text-center"><button type="button" data-i="${no}" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
                                         </tr>`;
-                                    newRow.append(cols);
-                                    $("#tabledatax").append(newRow);
+                                    // newRow.append(cols);
+                                    $("#tabledatax tbody").append(cols);
                                     if(parseInt($(`#nquantity${no}`).val()) > parseInt($(`#nstock${no}`).val())) {
                                         swal('Maaf :(',`Quantity Kirim = ${json.detail[i].n_quantity} Tidak Boleh Melebihi Saldo akhir = ${stock}`);
                                         $(`#nquantity${no}`).val(0);
@@ -255,6 +254,9 @@
                                             cache: true
                                         }
                                     });
+                                    if(!tampungProd.includes(parseInt(json.detail[i].id))) {
+                                        tampungProd.push(parseInt(json.detail[i].id));
+                                    }
                                     no++;
                                 }
                             }
@@ -362,7 +364,7 @@
     });
 
     var counter = 0;
-
+    let tampungProd = [];
     $("#addrow").on("click", function() {
         var counter = $('#jml').val();
         var counterx = counter - 1;
@@ -372,7 +374,7 @@
         var idproduct = $('#idproduct' + counterx).val();
         // console.log(counterx);
         count = $('#tabledatax tbody tr').length;
-        if ((idproduct == '' || idproduct == null) /* && idproduct != undefined */ && (count > 1)) {
+        if ((idproduct == '' || idproduct == null) && idproduct != undefined && (count > 1)) {
             swal('Isi dulu yang masih kosong!!');
             counter = counter - 1;
             counterx = counterx - 1;
@@ -394,7 +396,7 @@
         <input autocomplete="off" class="form-control input-sm text-right inputitem" id="nquantity${counter}" onkeydown="nexttab(this, event,'inputitem')" value="0" onkeypress="return hanyaAngka(event);" onkeyup="validasi(${counter})" name="nquantity[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\" >
         </td>`;
         cols += '<td><input type="text" id="edesc' + counter + '" class="form-control input-sm" name="edesc[]"></td>';
-        cols += '<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
+        cols += '<td class="text-center"><button type="button" data-i="' + counter + '" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 
         newRow.append(cols);
         if(count > 0) {
@@ -426,8 +428,16 @@
                 },
                 cache: true
             }
+        }).change(function() {
+            if(!tampungProd.includes(parseInt($(this).val()))) {
+                tampungProd.push(parseInt($(this).val()));
+            }
         });
     });
+
+    function onlyUnique(value, index, self) {
+       return self.indexOf(value) === index;
+    }
 
     function formatSelection(val) {
         return val.name;
@@ -437,56 +447,65 @@
         var eproduct = $('#eproduct' + id).text();
         var idproduct = $('#eproduct' + id).val();
         var x = parseInt($('#jml').val());
-        $.ajax({
-            type: "post",
-            data: {
-                'eproduct': eproduct,
-                'idproduct': idproduct,
-                'itujuan': $('#itujuan').val(),
-            },
-            url: '<?= base_url($folder . '/cform/getproduct3'); ?>',
-            dataType: "json",
-            success: function(data) {
-                for(let i = 0; i<data.length; i++) {
-                    let newRow = `
-                    <tr>
-                        <td class="text-center"><spanx id="snum${x + (i+1)}">${$('#tabledatax tr').length}</spanx></td>
-                        <td>
-                            <input type="hidden" readonly id="idproduct${x + (i+1)}" class="form-control input-sm" value="${data[i].id_product}" name="idproduct[]"><input type="text" readonly id="iproduct${x + (i+1)}" class="form-control input-sm" name="iproduct${x + (i+1)}" value="${data[i].i_product_base}"></td>
-                        <td>
-                            <select type="text" id="eproduct${x + (i+1)}" class="form-control" name="eproduct${x + (i+1)}" onchange="getproduct(${x + (i+1)}); getstok(${x + (i+1)});">
-                                <option value="${data[i].id_product}" selected>${data[i].e_product_basename}</option>
-                            </select><input type="hidden" id="stok${x + (i+1)}" name="stok${x + (i+1)}"></td>
-                        <td>
-                            <input type="hidden" id="idcolorproduct${x + (i+1)}" value="${data[i].id_color}" class="form-control" name="idcolorproduct[]"><input type="text" value="${data[i].e_color_name}" readonly id="ecolorproduct${x + (i+1)}" class="form-control input-sm" name="ecolorproduct${x + (i+1)}">
-                        </td>
-                        <td>
-                            <input type="text" readonly class="form-control input-sm text-right" id="nstock${x + (i+1)}" value="0" onkeypress="return hanyaAngka(event);" name="nstock[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\">
-                        </td>
-                        <td>
-                            <input autocomplete="off" class="form-control input-sm text-right inputitem" id="nquantity${x + (i+1)}" value="0" onkeydown="nexttab(this, event,'inputitem')" onkeypress="return hanyaAngka(event);" onkeyup="validasi(${x + (i+1)})" name="nquantity[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\" >
-                        </td>
-                        <td>
-                            <input type="text" id="edesc${x + (i+1)}" class="form-control input-sm" name="edesc[]">
-                        </td>
-                        <td class="text-center">
-                            <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
-                        </td>
-                    </tr>
-                    `;
-                    $("#tabledatax tbody").append(newRow);
-                    // getproduct(x+i+1);
-                    getstok(x+i+1);
-                    $('#eproduct' + (x+i+1)).select2({
-                        width: '100%'
-                    });
-                    $('#jml').val(x+i+1)
+        if(idproduct != null) {
+            $.ajax({
+                type: "post",
+                data: {
+                    'eproduct': eproduct,
+                    'idproduct': idproduct,
+                    'itujuan': $('#itujuan').val(),
+                },
+                url: '<?= base_url($folder . '/cform/getproduct3'); ?>',
+                dataType: "json",
+                success: function(data) {
+                    for(let i = 0; i<data.length; i++) {
+                        if(!tampungProd.includes(parseInt(data[i].id_product))) {
+                            let newRow = `
+                            <tr>
+                                <td class="text-center"><spanx id="snum${x + (i+1)}">${$('#tabledatax tr').length}</spanx></td>
+                                <td>
+                                    <input type="hidden" readonly id="idproduct${x + (i+1)}" class="form-control input-sm" value="${data[i].id_product}" name="idproduct[]"><input type="text" readonly id="iproduct${x + (i+1)}" class="form-control input-sm" name="iproduct${x + (i+1)}" value="${data[i].i_product_base}"></td>
+                                <td>
+                                    <select type="text" id="eproduct${x + (i+1)}" class="form-control" name="eproduct${x + (i+1)}" onchange="getproduct(${x + (i+1)}); getstok(${x + (i+1)});">
+                                        <option value="${data[i].id_product}" selected>${data[i].e_product_basename}</option>
+                                    </select><input type="hidden" id="stok${x + (i+1)}" name="stok${x + (i+1)}"></td>
+                                <td>
+                                    <input type="hidden" id="idcolorproduct${x + (i+1)}" value="${data[i].id_color}" class="form-control" name="idcolorproduct[]"><input type="text" value="${data[i].e_color_name}" readonly id="ecolorproduct${x + (i+1)}" class="form-control input-sm" name="ecolorproduct${x + (i+1)}">
+                                </td>
+                                <td>
+                                    <input type="text" readonly class="form-control input-sm text-right" id="nstock${x + (i+1)}" value="0" onkeypress="return hanyaAngka(event);" name="nstock[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\">
+                                </td>
+                                <td>
+                                    <input autocomplete="off" class="form-control input-sm text-right inputitem" id="nquantity${x + (i+1)}" value="0" onkeydown="nexttab(this, event,'inputitem')" onkeypress="return hanyaAngka(event);" onkeyup="validasi(${x + (i+1)})" name="nquantity[]" onblur=\"if(this.value==''){this.value='0';}\" onfocus=\"if(this.value=='0'){this.value='';}\" >
+                                </td>
+                                <td>
+                                    <input type="text" id="edesc${x + (i+1)}" class="form-control input-sm" name="edesc[]">
+                                </td>
+                                <td class="text-center">
+                                    <button type="button" title="Delete" data-i="${x+(i+1)}" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
+                                </td>
+                            </tr>
+                            `;
+                            $("#tabledatax tbody").append(newRow);
+                            // getproduct(x+i+1);
+                            getstok(x+i+1);
+                            $('#eproduct' + (x+i+1)).select2({
+                                width: '100%'
+                            });
+                            $('#jml').val(x+i+1)
+                            if(!tampungProd.includes(parseInt(data[i].id_product))) {
+                                tampungProd.push(parseInt(data[i].id_product));
+                            }
+                        }
+                    }
+                },
+                error: function() {
+                    swal('Error :)');
                 }
-            },
-            error: function() {
-                swal('Error :)');
-            }
-        });
+            });
+        } else {
+            swal('Kode tersebut sudah ada di dalam list :)');
+        }
     }
 
     function getproduct(id) {
@@ -547,27 +566,29 @@
         var idproduct = $('#eproduct'+id).val();
         var ibagian = $('#ibagian').val();
         var itujuan = $('#itujuan').val();
-        $.ajax({
-            type: "post",
-            data: {
-                'idproduct'  : idproduct,
-                'ibagian'    : ibagian,
-                'itujuan'    : itujuan,
-            },
-            url: '<?= base_url($folder.'/cform/getstok'); ?>',
-            dataType: "json",
-            success: function (data) {
-                if($('#ijenisbarang').val()=='1'){
-                    $('#nstock'+id).val(data.saldo_akhir);
-                }else{
-                    $('#nstock'+id).val(data.saldo_akhir_repair);
+        if(idproduct != null) {
+            $.ajax({
+                type: "post",
+                data: {
+                    'idproduct'  : idproduct,
+                    'ibagian'    : ibagian,
+                    'itujuan'    : itujuan,
+                },
+                url: '<?= base_url($folder.'/cform/getstok'); ?>',
+                dataType: "json",
+                success: function (data) {
+                    if($('#ijenisbarang').val()=='1'){
+                        $('#nstock'+id).val(data.saldo_akhir);
+                    }else{
+                        $('#nstock'+id).val(data.saldo_akhir_repair);
+                    }
+                    validasi(id);
+                },
+                error: function () {
+                    swal('Error :)');
                 }
-                validasi(id);
-            },
-            error: function () {
-                swal('Error :)');
-            }
-        });
+            });
+        }
     }
 
     function check_stock() {
@@ -577,6 +598,12 @@
     }
 
     $("#tabledatax tbody").on("click", ".ibtnDel", function(event) {
+        let dataI = $(this).attr('data-i');
+        let currProduct = parseInt($(`#eproduct${dataI}`).val());
+        let index = tampungProd.indexOf(currProduct);
+        if (index > -1) { // only splice array when item is found
+            tampungProd.splice(index, 1); // 2nd parameter means remove one item only
+        }
         $(this).closest("tr").remove();
         // let lengthtr = $('#tabledatax tr').length-1;
         // $('#jml').val(lengthtr);

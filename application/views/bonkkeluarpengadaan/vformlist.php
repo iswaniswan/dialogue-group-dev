@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-lg-12">
+<div class="col-lg-12">
         <div class="panel panel-info">
            <div class="panel-heading"> <i ></i> <?= $title; ?>
            <?php  if(check_role($this->i_menu, 1)){ ?><a href="#" onclick="show('<?= $folder; ?>/cform/tambah/<?= $dfrom."/".$dto;?>','#main'); return false;" class="btn btn-info btn-sm pull-right"><i

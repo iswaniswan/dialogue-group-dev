@@ -251,18 +251,10 @@ class Mmaster extends CI_Model
 
     public function getdataheader($idreff, $ipengirim)
     {
-        return $this->db->query(
-            "SELECT
-                to_char(d_keluar_pengadaan, 'dd-mm-yyyy') as d_document
-            FROM 
-                tm_keluar_pengadaan
-            WHERE
-                id = '$idreff'
-                AND i_bagian = '$ipengirim'
-                AND id_company_bagian = '$this->idcompany'
-                              ",
-            false
-        );
+        $sql = "SELECT to_char(d_keluar_pengadaan, 'dd-mm-yyyy') as d_document
+                FROM tm_keluar_pengadaan
+                WHERE id = '$idreff' AND i_bagian = '$ipengirim' AND id_company_bagian = '$this->idcompany'";
+        return $this->db->query($sql, false);
     }
 
     public function getdataitem($idreff, $ipengirim)

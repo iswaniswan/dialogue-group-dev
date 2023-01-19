@@ -75,7 +75,6 @@ class Cform extends CI_Controller
 
     public function changestatus()
     {
-
         $id = $this->input->post('id', true);
         $istatus = $this->input->post('istatus', true);
         $estatus = $this->mmaster->estatus($istatus);
@@ -216,6 +215,11 @@ class Cform extends CI_Controller
 
     public function simpan()
     {
+//        echo '<pre>';
+//        var_dump($this->input->post());
+//        echo '</pre>';
+//        die('here');
+
         $data = check_role($this->i_menu, 1);
         if (!$data) {
             redirect(base_url(), 'refresh');
@@ -234,6 +238,11 @@ class Cform extends CI_Controller
         }
 
         $itujuan      = $this->input->post('itujuan', TRUE);
+        $array_itujuan = explode("|", $itujuan);
+
+        $_itujuan = $array_itujuan[1];
+        $_id_company_tujuan = $array_itujuan[0];
+
         $ijenis       = $this->input->post('ijenis', TRUE);
         $eremark      = $this->input->post('eremark', TRUE);
         $jml          = $this->input->post('jml', TRUE);
@@ -248,7 +257,7 @@ class Cform extends CI_Controller
         $e_desc       = $this->input->post('edesc[]', TRUE);
         $this->db->trans_begin();
         $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Kode : ' . $ibonk);
-        $this->mmaster->insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark);
+        $this->mmaster->insertheader($id, $ibonk, $ibagian, $datebonk, $_itujuan, $ijenis, $eremark, $_id_company_tujuan);
 
         $no = count($i_product)-1;
         $no2 = 1;

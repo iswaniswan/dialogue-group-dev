@@ -554,7 +554,7 @@ class Mmaster extends CI_Model
         $dentry = date("Y-m-d");
 
         $this->db->query("INSERT INTO tr_supplier_materialprice (i_supplier,i_material,v_price,i_satuan_konversi,v_harga_konversi,n_order,i_material_supplier,d_berlaku,f_ppn,id_company,d_entry, i_status) VALUES
-					('$isupplier','$barang','$harga','$isatuansupp','$hargakonversi','$norder','$imaterialsupplier','$dateberlaku','$fppn','$idcompany','$dentry', '1') ON CONFLICT (id_company, i_supplier, i_material, d_berlaku, i_satuan_konversi) DO UPDATE 
+					('$isupplier','$barang','$harga','$isatuansupp','$hargakonversi','$norder','$imaterialsupplier','$dateberlaku','$fppn','$idcompany','$dentry', '6') ON CONFLICT (id_company, i_supplier, i_material, d_berlaku, i_satuan_konversi) DO UPDATE 
                     SET v_price = excluded.v_price, 
                     v_harga_konversi = excluded.v_harga_konversi,
                     n_order = excluded.n_order,

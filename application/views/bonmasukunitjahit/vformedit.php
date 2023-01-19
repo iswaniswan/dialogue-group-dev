@@ -99,14 +99,15 @@ if ($datadetail) { ?>
                     <thead>
                         <tr>
                             <th class="text-center" width="3%">No</th>
-                            <th width="12%">Kode Barang</th>
-                            <th>Nama Barang</th>
-                            <th class="text-right" width="10%;">Qty Kirim</th>
-                            <th class="text-right" width="10%;">Qty Terima</th>
-                            <th class="text-right" width="10%;">Qty BS/Tidak Set</th>
-                            <th class="" width="10%;">Periode</th>
-                            <th>Keterangan</th>
-                            <th class="text-center" width="3%"><input type="checkbox" class="form-control input-sm" id="checkAll"></th>
+                            <th style="width: 120px">Kode Barang</th>
+                            <th style="width: 350px; max-width: 1000px">Nama Barang</th>
+                            <th class="text-center" style="width: 150px">Warna</th>
+                            <th class="text-center" style="width: 50px">Qty<br/>Kirim</th>
+                            <th class="text-center" style="width: 50px">Qty<br/>Terima</th>
+                            <th class="text-center" style="width: 60px">Qty<br/>BS/Tidak<br/>Set</th>
+                            <th class="text-center" style="width: 80px">Periode</th>
+                            <th class="" style="width: 180px; max-width: 1000px">Keterangan</th>
+                            <th class="text-center" style="width: 30px"><input type="checkbox" class="form-control input-sm" id="checkAll"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -120,7 +121,10 @@ if ($datadetail) { ?>
                                     <input type="hidden" name="id_referensi_item<?= $i; ?>" id="id_referensi_item<?= $i; ?>" value="<?= $key->id_referensi_item; ?>">
                                 </td>
                                 <td>
-                                    <input readonly data-ngurut="<?= $i; ?>" id="e_product_wipname<?= $i; ?>" type="text" class="form-control input-sm" name="e_product_wipname<?= $i; ?>" value="<?= $key->e_product_wipname . ' - ' . $key->e_color_name; ?>">
+                                    <input readonly data-ngurut="<?= $i; ?>" id="e_product_wipname<?= $i; ?>" type="text" class="form-control input-sm" name="e_product_wipname<?= $i; ?>" value="<?= $key->e_product_wipname ?>">
+                                </td>
+                                <td>
+                                    <input readonly data-ngurut="<?= $i; ?>" id="e_product_wipname<?= $i; ?>" type="text" class="form-control input-sm" name="e_color_name<?= $i; ?>" value="<?= $key->e_color_name ?>">
                                 </td>
                                 <td>
                                     <input readonly class="form-control qty input-sm text-right" autocomplete="off" type="text" name="nquantitywip<?= $i; ?>" id="nquantitywip<?= $i; ?>" value="<?= $key->n_quantity_wip_cutting; ?>">

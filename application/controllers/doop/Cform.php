@@ -554,6 +554,62 @@ class Cform extends CI_Controller
         }
     }
 
+    /*----------  REDIRECT KE FORM APPROVE TRANSFER ----------*/
+
+    public function approval_transfer()
+    {
+
+        $data = check_role($this->i_menu, 7);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id         = $this->uri->segment(4);
+        $d_document = $this->uri->segment(5);
+        $dfrom      = $this->uri->segment(6);
+        $dto        = $this->uri->segment(7);
+        $id_customer = $this->uri->segment(8);
+        // $idtypespb  = $this->uri->segment(8);
+
+        $dataHeader = $this->mmaster->baca_header($id, $id_customer)->row();
+
+        $data = array(
+            'folder'        => $this->global['folder'],
+            'title'         => "Approve " . $this->global['title'],
+            'title_list'    => 'List ' . $this->global['title'],
+            'dfrom'         => $dfrom,
+            'dto'           => $dto,
+            'id'            => $id,
+            'bagian'        => $this->mmaster->bagian()->result(),
+            'data'          => $dataHeader,
+            'datadetail'    => $this->mmaster->baca_detail($id, $id_customer, $d_document, $dataHeader->e_jenis_spb, $dataHeader->id_spb)->result(),
+        );
+
+        $this->Logger->write('Membuka Menu Approve ' . $this->global['title']);
+
+        $this->load->view($this->global['folder'] . '/vformapprove_transfer', $data);
+    }
+
+    /*----------  UPDATE STATUS DOKUMEN  ----------*/
+
+    public function changestatustransfer()
+    {
+
+        $id = $this->input->post('id', true);
+        $istatus = $this->input->post('istatus', true);
+        $estatus = $this->mmaster->estatus($istatus);
+        $this->db->trans_begin();
+        $this->mmaster->changestatustransfer($id, $istatus);
+        if ($this->db->trans_status() === false) {
+            $this->db->trans_rollback();
+            echo json_encode(false);
+        } else {
+            $this->db->trans_commit();
+            $this->Logger->write('Update Status ' . $this->global['folder'] . ' Menjadi : ' . $estatus . ' Id : ' . $id);
+            echo json_encode(true);
+        }
+    }
+
     /*----------  SIMPAN SPB TURUNAN  ----------*/
 
     public function insertspbnew()
@@ -658,6 +714,128 @@ class Cform extends CI_Controller
             $no++;
         }
 
+        if ($this->db->trans_status() === false) {
+            $this->db->trans_rollback();
+            $data = array(
+                'sukses' => false,
+            );
+        } else {
+            $this->db->trans_commit();
+            $this->Logger->write('Insert SPB Turunan Baru' . $ireferensi);
+            $data = array(
+                'sukses' => true,
+            );
+        }
+        echo json_encode($data);
+    }
+
+
+    public function insertspbnewtransfer()
+    {
+
+        $data = check_role($this->i_menu, 7);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id             = $this->input->post('id', TRUE);
+        $ibagian        = $this->input->post('ibagianreff', TRUE);
+        $ddocument      = $this->input->post('ddocument', TRUE);
+        if ($ddocument) {
+            $datedocument = formatYmd($ddocument);
+        }
+        $iarea          = $this->input->post('iarea', TRUE);
+        $icustomer      = $this->input->post('icustomer', TRUE);
+        $ireferensi     = $this->input->post('ireferensi', TRUE);
+        $dreferensi     = $this->input->post('dreferensi', TRUE);
+        if ($dreferensi) {
+            $datereferensi = formatYmd($dreferensi);
+        }
+        $ndiskontotal   = $this->input->post('ndiskontotal', TRUE);
+        $nkotor         = $this->input->post('nkotor', TRUE);
+        $nbersih        = $this->input->post('nbersih', TRUE);
+        $vdpp           = $this->input->post('vdpp', TRUE);
+        $vppn           = $this->input->post('vppn', TRUE);
+
+        $nkotorold      = $this->input->post('nkotorold', TRUE);
+        $nbersihold     = $this->input->post('nbersihold', TRUE);
+        $vdppold        = $this->input->post('vdppold', TRUE);
+        $vppnold        = $this->input->post('vppnold', TRUE);
+        $eremark        = $this->input->post('eremark', TRUE);
+        $idkodeharga    = $this->input->post('idkodeharga', TRUE);
+        $ejenisspb      = $this->input->post('ejenisspb', TRUE);
+        $jml            = $this->input->post('jml', TRUE);
+
+        $i_product      = $this->input->post('idproduct[]', TRUE);
+        $n_sisa         = str_replace(',', '', $this->input->post('sisa[]', TRUE));
+        $n_sisab        = str_replace(',', '', $this->input->post('sisab[]', TRUE));
+        $n_quantity     = str_replace(',', '', $this->input->post('nquantity[]', TRUE));
+        $n_quantity_total     = str_replace(',', '', $this->input->post('nquantitytotal[]', TRUE));
+        $v_price        = $this->input->post('vprice[]', TRUE);
+        $_1_ndiskon     = $this->input->post('1ndiskon[]', TRUE);
+        $_2_ndiskon     = $this->input->post('2ndiskon[]', TRUE);
+        $_3_ndiskon     = $this->input->post('3ndiskon[]', TRUE);
+        $_1_vdiskon     = $this->input->post('1vdiskon[]', TRUE);
+        $_2_vdiskon     = $this->input->post('2vdiskon[]', TRUE);
+        $_3_vdiskon     = $this->input->post('3vdiskon[]', TRUE);
+        $v_diskonadd    = $this->input->post('vdiskonadd[]', TRUE);
+        $vt_diskon      = $this->input->post('vtdiskon[]', TRUE);
+        $v_total        = $this->input->post('vtotal[]', TRUE);
+        $v_totalbersih  = $this->input->post('vtotalbersih[]', TRUE);
+
+        $v_totalold        = $this->input->post('vtotalold[]', TRUE);
+        $v_totalbersihold  = $this->input->post('vtotalbersihold[]', TRUE);
+        $e_desc            = $this->input->post('edesc[]', TRUE);
+
+        $this->db->trans_begin();
+        $idbaru     = $this->mmaster->runningidspb();
+        $idocument  = $this->mmaster->runningnumberspb(date('ym', strtotime($ddocument)), date('Y', strtotime($ddocument)), $ibagian, $icustomer);
+
+        $this->mmaster->insertspbnew($idbaru, $ibagian, $idocument, $datedocument, $iarea, $icustomer, $ireferensi, $datereferensi, $ndiskontotal, $nkotor, $nbersih, $vdpp, $vppn, $eremark, $idkodeharga, $ejenisspb);
+        $this->mmaster->updatesj($id);
+        $this->mmaster->changestatustransfer($id, '6');
+
+        /* var_dump($_POST);
+        die; */
+
+        /* $this->mmaster->updateheaderspbold($ireferensi, $datereferensi, $nkotorold, $nbersihold, $vdppold, $vppnold, $ijenis);
+        $this->mmaster->updatestatus($id); */
+
+        $no = 0;
+        foreach ($i_product as $iproduct) {
+            $iproduct           = $iproduct;
+            $nsisa              = $n_sisa[$no];
+            $nsisab             = $n_sisab[$no];
+            $nquantity          = $n_quantity[$no];
+            $nquantity_total    = $n_quantity_total[$no];
+            $vprice             = $v_price[$no];
+            $_1ndiskon          = $_1_ndiskon[$no];
+            $_2ndiskon          = $_2_ndiskon[$no];
+            $_3ndiskon          = $_3_ndiskon[$no];
+            $_1vdiskon          = $_1_vdiskon[$no];
+            $_2vdiskon          = $_2_vdiskon[$no];
+            $_3vdiskon          = $_3_vdiskon[$no];
+            $vdiskonadd         = $v_diskonadd[$no];
+            $vtdiskon           = $vt_diskon[$no];
+            $vtotal             = $v_total[$no];
+            $vtotalbersih       = $v_totalbersih[$no];
+
+            $vtotalold          = $v_totalold[$no];
+            $vtotalbersihold    = $v_totalbersihold[$no];
+            $edesc              = $e_desc[$no];
+
+            $id_product_reff = $this->db->query("SELECT id_product FROM tm_spb_item WHERE id_document = '$ireferensi' AND id_product='$iproduct'");
+
+            if ($nsisab > 0 && $id_product_reff->num_rows() > 0) {
+                $this->mmaster->insertdetailspb($ireferensi, $idbaru, $iproduct, $nsisa, $vprice, $_1ndiskon, $_2ndiskon, $_3ndiskon, $_1vdiskon, $_2vdiskon, $_3vdiskon, $vdiskonadd, $vtdiskon, $vtotal, $vtotalbersih, $edesc, $nsisab);
+            }
+            $this->mmaster->updatedetailspbold($ireferensi, $iproduct, $nquantity_total, $vtotalold, $vtotalbersihold);
+            /* $this->mmaster->update_spb_new_word($idbaru);
+            $this->mmaster->update_spb_new_word($ireferensi); */
+            // $this->mmaster->update_spb_lama($ireferensi);
+            $no++;
+        }
+        
         if ($this->db->trans_status() === false) {
             $this->db->trans_rollback();
             $data = array(
@@ -860,20 +1038,37 @@ class Cform extends CI_Controller
         $stock = false;
         $turunan = false;
         if ($query->num_rows() > 0) {
-            foreach ($query->result() as $key) {
-                if ($key->n_quantity > $key->nquantity_pemenuhan) {
-                    $sudah = true;
-                    break;
+            if ($e_jenis_spb == 'Transfer') {
+                foreach ($query->result() as $key) {
+                    if ($key->n_quantity_total_per_product > $key->nquantity_pemenuhan) {
+                        $sudah = true;
+                        break;
+                    }
+    
+                    if ($key->n_quantity > $key->saldo_akhir) {
+                        $stock = true;
+                        break;
+                    }
+                    if (($key->nquantity_permintaan - $key->n_quantity_total_per_product) > 0) {
+                        $turunan = true;
+                        break;
+                    }
                 }
-
-                if ($key->n_quantity > $key->saldo_akhir) {
-                    $stock = true;
-                    break;
-                }
-
-                if (($key->nquantity_permintaan - $key->n_quantity) > 0) {
-                    $turunan = true;
-                    break;
+            } else {
+                foreach ($query->result() as $key) {
+                    if ($key->n_quantity > $key->nquantity_pemenuhan) {
+                        $sudah = true;
+                        break;
+                    }
+    
+                    if ($key->n_quantity > $key->saldo_akhir) {
+                        $stock = true;
+                        break;
+                    }
+                    if (($key->nquantity_permintaan - $key->n_quantity) > 0) {
+                        $turunan = true;
+                        break;
+                    }
                 }
             }
         }

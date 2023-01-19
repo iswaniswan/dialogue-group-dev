@@ -561,6 +561,7 @@ class Mmaster extends CI_Model
         return $this->db->query("SELECT
                 a.id_document,
                 'No Reff. '||i_document||', Tgl. '||to_char(d_document,'DD FMMonth, YYYY') reff,
+                b.e_remark||' - '||a.e_remark e_remark,
                 e.id id_product_wip,
                 e.i_product_base i_product_wip,
                 e.e_product_basename e_product_wipname,

@@ -37,6 +37,7 @@
                             <th>Customer</th>
                             <th>No. Ref Customer</th>
                             <th>No. Referensi</th>
+                            <th>Jenis Order</th>
                             <th>Keterangan</th>
                             <th>Status Dokumen</th>
                             <th>Print</th>

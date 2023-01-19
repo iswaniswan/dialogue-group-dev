@@ -40,17 +40,24 @@
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<? echo date("d-m-Y"); ?>">
+                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?php echo date("d-m-Y"); ?>">
                         </div>
                         <div class="col-sm-3">
                             <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">
                                 <?php if ($tujuan) {
-                                    foreach ($tujuan as $row) : ?>
-                                        <option value="<?= $row->i_bagian; ?>">
-                                            <?= $row->e_bagian_name; ?>
-                                        </option>
-                                <?php endforeach;
-                                } ?>
+                                $group = "";
+                                foreach ($tujuan as $row) : ?>
+                                <?php if ($group!=$row->name) {?>
+                                </optgroup>
+                                <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>
+                                    <option value="<?= "$row->id_company|$row->i_bagian"; ?>">
+                                        <?= $row->e_bagian_name; ?>
+                                    </option>
+                                    <?php endforeach;
+                                    } ?>
                             </select>
                         </div>
                     </div>
@@ -60,13 +67,6 @@
                         <div class="col-sm-3">
                             <select name="ijenis" id="ijenis" class="form-control select2" data-placeholder="Select Jenis Barang">
                                 <option value=""></option>
-                                <!-- <?php if ($jenisbarang) {
-                                            foreach ($jenisbarang as $row) : ?>
-                                        <option value="<?= $row->id; ?>">
-                                            <?= $row->e_jenis_name; ?>
-                                        </option>
-                                    <?php endforeach;
-                                        } ?> -->
                             </select>
                         </div>
                         <div class="col-sm-9">

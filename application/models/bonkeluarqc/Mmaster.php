@@ -19,25 +19,25 @@ class Mmaster extends CI_Model
         }
         $datatables = new Datatables(new CodeigniterAdapter);
 
-        $cek = $this->db->query("
-                                    SELECT
-                                        i_bagian
-                                    FROM
-                                        tm_keluar_qc
-                                    WHERE
-                                        i_status <> '5'
-                                        AND id_company = '" . $this->session->userdata('id_company') . "'
-                                        $where
-                                        AND i_bagian IN (
-                                            SELECT
-                                                i_bagian
-                                            FROM
-                                                tr_departement_cover
-                                            WHERE
-                                                i_departement = '" . $this->session->userdata('i_departement') . "'
-                                                AND id_company = '" . $this->session->userdata('id_company') . "'
-                                                AND username = '" . $this->session->userdata('username') . "')
-                                ", FALSE);
+        $sql = "SELECT
+                    i_bagian
+                FROM
+                    tm_keluar_qc
+                WHERE
+                    i_status <> '5'
+                    AND id_company = '" . $this->session->userdata('id_company') . "'
+                    $where
+                    AND i_bagian IN (
+                        SELECT
+                            i_bagian
+                        FROM
+                            tr_departement_cover
+                        WHERE
+                            i_departement = '" . $this->session->userdata('i_departement') . "'
+                            AND id_company = '" . $this->session->userdata('id_company') . "'
+                            AND username = '" . $this->session->userdata('username') . "')";
+        $cek = $this->db->query($sql, FALSE);
+
         if ($this->session->userdata('i_departement') == '1') {
             $bagian = "";
         } else {
@@ -56,54 +56,54 @@ class Mmaster extends CI_Model
             }
         }
 
-        $datatables->query("SELECT DISTINCT
-                             0 as no,
-                             a.id,
-                             a.i_keluar_qc,
-                             to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
-                             a.i_tujuan,
-                             ab.e_bagian_name,
-                             b.e_bagian_name e_bagian_tujuan,
-                             cc.e_jenis_name,
-                             a.e_remark,
-                             a.id_company,
-                             a.i_status,
-                             c.e_status_name,
-                             a.i_bagian,
-                             c.label_color,
-                                f.i_level,
-                                l.e_level_name,
-                             '$dfrom' AS dfrom,
-                             '$dto' AS dto,
-                             '$i_menu' as i_menu,
-                             '$folder' AS folder
-                          FROM
-                             tm_keluar_qc a 
-                             JOIN
-                                tr_bagian b 
-                                ON (a.i_tujuan = b.i_bagian AND a.id_company = b.id_company) 
-                             JOIN
-                                tr_bagian ab 
-                                ON (ab.i_bagian = a.i_bagian AND a.id_company = b.id_company AND ab.i_type = '23') 
-                             JOIN
-                                tr_status_document c 
-                                ON (a.i_status = c.i_status)   
-                             JOIN
-                             tr_jenis_barang_keluar cc 
-                                ON (cc.id = a.id_jenis_barang_keluar)                        
-                            LEFT JOIN tr_menu_approve f ON
-                                (a.i_approve_urutan = f.n_urut
-                                AND f.i_menu = '$i_menu')
-                            LEFT JOIN public.tr_level l ON
-                                (f.i_level = l.i_level)
-                             WHERE 
-                                a.id_company = '$idcompany'
-                             AND
-                                a.i_status <> '5'
-                          $where
-                          $bagian
-                          ORDER BY
-                             a.i_keluar_qc asc", false);
+        $sql = "SELECT DISTINCT
+                         0 as no,
+                         a.id,
+                         a.i_keluar_qc,
+                         to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
+                         a.i_tujuan,
+                         ab.e_bagian_name,
+                         concat(b.e_bagian_name, ' - ', c2.name) e_bagian_tujuan,
+                         cc.e_jenis_name,
+                         a.e_remark,
+                         a.id_company,
+                         a.i_status,
+                         c.e_status_name,
+                         a.i_bagian,
+                         c.label_color,
+                            f.i_level,
+                            l.e_level_name,
+                         '$dfrom' AS dfrom,
+                         '$dto' AS dto,
+                         '$i_menu' as i_menu,
+                         '$folder' AS folder
+                      FROM tm_keluar_qc a 
+                         JOIN tr_bagian b ON (
+                                a.i_tujuan = b.i_bagian /*AND a.id_company = b.id_company*/
+                             ) 
+                         JOIN tr_bagian ab ON (
+                                ab.i_bagian = a.i_bagian /*AND a.id_company = b.id_company*/ AND ab.i_type = '23'
+                             ) 
+                         JOIN tr_status_document c ON (
+                                a.i_status = c.i_status
+                             )   
+                         JOIN tr_jenis_barang_keluar cc ON (
+                                cc.id = a.id_jenis_barang_keluar
+                             )                        
+                        LEFT JOIN tr_menu_approve f ON (
+                                a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
+                             )
+                        LEFT JOIN public.tr_level l ON (
+                                f.i_level = l.i_level
+                             )
+                        LEFT JOIN public.company c2 ON (
+                                c2.id = a.id_company_tujuan
+                             )
+                        WHERE a.id_company = '$idcompany'
+                        AND a.i_status <> '5' $where $bagian
+                        ORDER BY a.i_keluar_qc asc";
+
+        $datatables->query($sql, false);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -272,20 +272,53 @@ class Mmaster extends CI_Model
 
     public function tujuan($i_menu, $idcompany)
     {
-        return $this->db->query(
-            "SELECT 
-                a.*,
-                b.e_bagian_name 
-            FROM 
-                tr_tujuan_menu a
-            JOIN tr_bagian b 
-            ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
-            WHERE
-                a.i_menu = '$i_menu'
-                AND a.id_company = '$idcompany'
-            ORDER BY b.e_bagian_name
-        "
-        );
+        /** cek
+         *
+        $sql = "SELECT b.name, a.id, a.i_bagian, a.id_company, a.e_bagian_name
+        FROM tr_bagian a
+        INNER JOIN public.company b ON (b.id = a.id_company)
+        WHERE a.f_status = 't' AND a.i_type = '12' AND b.f_status = 't' AND b.i_apps = '2'
+        AND (
+        SELECT array_agg(id) FROM tr_type_makloon
+        WHERE e_type_makloon_name ILIKE '%makloon packing%'
+        ) && a.id_type_makloon
+        ORDER BY 1,5";
+         *
+         */
+
+        /** query tujuan menu current company semua bagian */
+        $sql_company_internal = "SELECT 
+                        c.name,
+                        a.*,
+                        b.e_bagian_name 
+                    FROM 
+                        tr_tujuan_menu a
+                    JOIN tr_bagian b ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+                    JOIN public.company c ON c.id = a.id_company
+                    WHERE
+                        a.i_menu = '$i_menu'
+                        AND a.id_company = '$idcompany'
+                ";
+
+        /** query tujuan menu external company bagian packing only */
+        $PACKING = 12;
+        $sql_company_external = "SELECT 
+                        c.name,
+                        a.*,
+                        b.e_bagian_name 
+                    FROM 
+                        tr_tujuan_menu a
+                    JOIN tr_bagian b ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+                    JOIN public.company c ON c.id = a.id_company
+                    WHERE
+                        a.i_menu = '$i_menu'
+                        AND NOT a.id_company = '$idcompany'
+                        AND b.i_type = '$PACKING'
+                ";
+
+        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY e_bagian_name ASC";
+
+        return $this->db->query($sql);
     }
 
     public function dataproduct($cari)
@@ -431,7 +464,7 @@ class Mmaster extends CI_Model
                                 ", FALSE);
     }
 
-    public function insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark)
+    public function insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark, $id_company_tujuan)
     {
         $idcompany  = $this->session->userdata('id_company');
         $data = array(
@@ -444,6 +477,7 @@ class Mmaster extends CI_Model
             'e_remark'          => $eremark,
             'd_entry'           => current_datetime(),
             'id_jenis_barang_keluar' => $ijenis,
+            'id_company_tujuan' => $id_company_tujuan
         );
         $this->db->insert('tm_keluar_qc', $data);
     }
@@ -809,16 +843,20 @@ class Mmaster extends CI_Model
         }else{
             return $this->db->query("SELECT * FROM tr_jenis_barang_keluar WHERE id = '1' ");
         } */
-        return $this->db->query(
-            "SELECT * FROM tr_jenis_barang_keluar WHERE id IN (
+        $tujuan = explode('|', $itujuan);
+        $tujuan_company = $tujuan[0];
+        $tujuan_bagian = $tujuan[1];
+
+        $sql = "SELECT * FROM tr_jenis_barang_keluar 
+            WHERE id IN (
                 SELECT UNNEST(id_jenis_barang_keluar) 
                 FROM tr_tujuan_menu 
                 WHERE i_menu = '$this->i_menu' 
-                AND id_company = '$this->id_company' 
-                AND i_bagian = '$itujuan'
-            ) ORDER BY id
-            "
-        );
+                AND id_company = '$tujuan_company' 
+                AND i_bagian = '$tujuan_bagian'
+            ) ORDER BY id";
+
+        return $this->db->query($sql);
     }
 
     public function estatus($istatus)
@@ -1006,7 +1044,7 @@ class Mmaster extends CI_Model
 
     public function generate_memo($id = null)
     {
-        $this->db->select("i_tujuan, i_bagian, id");
+        $this->db->select("i_tujuan, i_bagian, id, id_company, id_company_tujuan");
         $this->db->where("id", $id);
         $head = $this->db->get("tm_keluar_qc")->row();
         $i_bagian = $head->i_tujuan;
@@ -1015,9 +1053,15 @@ class Mmaster extends CI_Model
         $this->db->from('tm_memo_permintaan');
         $id = $this->db->get()->row()->id + 1;
         $i_document = $this->runningnumber_memo($i_bagian);
+
+        $default_company_tujuan = $head->id_company;
+        if (@$head->id_company_tujuan != null) {
+            $default_company_tujuan = $head->id_company_tujuan;
+        }
+
         $data_header = array(
             'id' => $id,
-            'id_company' => $this->id_company,
+            'id_company' => $default_company_tujuan,
             'i_document' => $i_document,
             'd_document' => date('Y-m-d'),
             'i_bagian' => $i_bagian,
@@ -1026,6 +1070,7 @@ class Mmaster extends CI_Model
             'e_approve' => "SYSTEM",
             'd_approve' => date('Y-m-d'),
             'e_remark' => "Memo Dari STB WIP",
+            'id_company_penerima' => $head->id_company
         );
         $this->db->insert("tm_memo_permintaan", $data_header);
 
