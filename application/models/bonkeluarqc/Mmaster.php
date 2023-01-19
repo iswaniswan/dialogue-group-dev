@@ -523,7 +523,8 @@ class Mmaster extends CI_Model
                                         a.i_status,
                                         a.e_remark,
                                         a.id_jenis_barang_keluar,
-                                        e_jenis_name
+                                        e_jenis_name,
+                                        a.id_company_tujuan
                                     FROM
                                        tm_keluar_qc a
                                     INNER JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
@@ -794,7 +795,7 @@ class Mmaster extends CI_Model
         ORDER BY j.id_product", FALSE);
     }
 
-    public function updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark)
+    public function updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $id_company_tujuan, $ijenis, $eremark)
     {
         $idcompany  = $this->session->userdata('id_company');
         $data = array(
@@ -802,6 +803,7 @@ class Mmaster extends CI_Model
             'd_keluar_qc'       => $datebonk,
             'i_bagian'          => $ibagian,
             'i_tujuan'          => $itujuan,
+            'id_company_tujuan' => $id_company_tujuan,
             'e_remark'          => $eremark,
             'd_update'          => current_datetime(),
             'id_jenis_barang_keluar' => $ijenis,
@@ -1054,6 +1056,11 @@ class Mmaster extends CI_Model
         $id = $this->db->get()->row()->id + 1;
         $i_document = $this->runningnumber_memo($i_bagian);
 
+        // table tr_bagian
+        $this->db->select('id')
+            ->where(['i_bagian' => $i_bagian, 'id_company' => $head->id_company_tujuan]);
+        $query_bagian = $this->db->get("tr_bagian")->row();
+
         $default_company_tujuan = $head->id_company;
         if (@$head->id_company_tujuan != null) {
             $default_company_tujuan = $head->id_company_tujuan;
@@ -1070,8 +1077,10 @@ class Mmaster extends CI_Model
             'e_approve' => "SYSTEM",
             'd_approve' => date('Y-m-d'),
             'e_remark' => "Memo Dari STB WIP",
+            'i_tujuan' => $query_bagian->id,
             'id_company_penerima' => $head->id_company
         );
+
         $this->db->insert("tm_memo_permintaan", $data_header);
 
         $query = $this->get_data_detail($head->id, $bagian);

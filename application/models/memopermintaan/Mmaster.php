@@ -18,25 +18,21 @@ class Mmaster extends CI_Model
             $and   = "";
         }
 
-        $cek = $this->db->query("SELECT
-                i_bagian
-            FROM
-                tm_memo_permintaan a
-            WHERE
-                i_status <> '5'
-                AND id_company = '$this->id_company'
-                $and
-                AND i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '$this->i_departement'
-                        AND id_company = '$this->id_company'
-                        AND username = '$this->username')
+        $sql = "SELECT i_bagian
+                FROM tm_memo_permintaan a
+                WHERE i_status <> '5' 
+                    AND id_company = '$this->id_company'
+                    $and 
+                    AND i_bagian IN (
+                                    SELECT i_bagian
+                                    FROM tr_departement_cover
+                                    WHERE i_departement = '$this->i_departement'
+                                        AND id_company = '$this->id_company'
+                                        AND username = '$this->username'
+                                    )";
 
-        ", FALSE);
+        $cek = $this->db->query($sql, FALSE);
+
         if ($this->i_departement == '1') {
             $bagian = "";
         } else {
@@ -55,48 +51,35 @@ class Mmaster extends CI_Model
             }
         }
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query(
-            "SELECT
-                DISTINCT 0 AS NO,
-                a.id AS id,
-                a.i_document,
-                to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                a.i_bagian,
-                e.e_bagian_name,
-                d.e_type_name,
-                g.i_bagian as i_tujuan,
-                h.name as company_tujuan,
-                e_status_name,
-                label_color,
-                a.i_status,
-                l.i_level,
-                l.e_level_name,
-                '$i_menu' AS i_menu,
-                '$folder' AS folder,
-                '$dfrom' AS dfrom,
-                '$dto' AS dto
-            FROM
-                tm_memo_permintaan a
-            INNER JOIN tr_status_document b ON
-                (b.i_status = a.i_status)
-            INNER JOIN tr_type d ON
-                (d.id = a.id_type_penerima)
-            INNER JOIN tr_bagian e ON
-                (e.i_bagian = a.i_bagian AND a.id_company = e.id_company)
-            LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
-            LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
-            LEFT JOIN tr_bagian g ON (g.id = a.i_tujuan)
-            left join public.company h ON (h.id = g.id_company)
-            WHERE
-                a.i_status <> '5'
-                AND a.id_company = '$this->id_company'
-                $and
-                $bagian
-            ORDER BY
-                a.id ASC
-            ",
-            FALSE
-        );
+
+        $sql = "SELECT DISTINCT 0 AS NO,
+                    a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                    a.i_bagian, a.i_status,
+                    e.e_bagian_name,
+                    d.e_type_name,
+                    g.i_bagian as i_tujuan,
+                    h.name as company_tujuan,
+                    label_color,
+                    e_status_name,
+                    l.i_level, l.e_level_name,
+                    '$i_menu' AS i_menu,
+                    '$folder' AS folder,
+                    '$dfrom' AS dfrom,
+                    '$dto' AS dto
+                FROM tm_memo_permintaan a
+                INNER JOIN tr_status_document b ON (b.i_status = a.i_status)
+                INNER JOIN tr_type d ON (d.id = a.id_type_penerima)
+                INNER JOIN tr_bagian e ON (e.i_bagian = a.i_bagian AND a.id_company = e.id_company)
+                LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
+                LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
+                LEFT JOIN tr_bagian g ON (g.id = a.i_tujuan)
+                left join public.company h ON (h.id = g.id_company)
+                WHERE a.i_status <> '5'
+                    AND a.id_company = '$this->id_company' OR a.id_company_penerima = '$this->id_company'
+                    $and $bagian
+                ORDER BY a.id ASC";
+
+        $datatables->query($sql, FALSE);
         $datatables->edit('company_tujuan', function ($data) {
             $i_tujuan = $data['i_tujuan'];
             $company_tujuan = $data['company_tujuan'];

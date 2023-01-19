@@ -48,7 +48,6 @@
                                 $group = "";
                                 foreach ($tujuan as $row) : ?>
                                 <?php if ($group!=$row->name) {?>
-                                </optgroup>
                                 <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
                                     <?php }
                                     $group = $row->name;
@@ -58,6 +57,7 @@
                                     </option>
                                     <?php endforeach;
                                     } ?>
+                                </optgroup>
                             </select>
                         </div>
                     </div>

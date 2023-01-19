@@ -354,6 +354,10 @@ class Cform extends CI_Controller
         }
 
         $itujuan      = $this->input->post('itujuan', TRUE);
+        $array_tujuan = explode('|', $itujuan);
+        $_itujuan = $array_tujuan[1];
+        $_id_company_tujuan = $array_tujuan[0];
+
         $ijenis       = $this->input->post('ijenis', TRUE);
         $eremark      = $this->input->post('eremark', TRUE);
         $jml          = $this->input->post('jml', TRUE);
@@ -368,7 +372,7 @@ class Cform extends CI_Controller
 
         $this->db->trans_begin();
         $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Kode : ' . $ibonk);
-        $this->mmaster->updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark);
+        $this->mmaster->updateheader($id, $ibonk, $ibagian, $datebonk, $_itujuan, $_id_company_tujuan, $ijenis, $eremark);
         $this->mmaster->deletebundling($id);
         $this->mmaster->deletedetail($id);
 

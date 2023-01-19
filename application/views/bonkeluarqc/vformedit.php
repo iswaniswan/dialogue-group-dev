@@ -45,6 +45,7 @@
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?= $data->d_keluar_qc; ?>">
                         </div>
+                        <?php /*
                         <div class="col-sm-3">
                             <select name="itujuan" id="itujuan" class="form-control select2">
                                 <?php if ($tujuan) {
@@ -54,6 +55,30 @@
                                         </option>
                                 <?php endforeach;
                                 } ?>
+                            </select>
+                        </div>
+                        */?>
+                        <div class="col-sm-3">
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">
+                                <?php if ($tujuan) {
+                                $group = "";
+                                foreach ($tujuan as $row) : ?>
+                                <?php if ($group!=$row->name) {?>
+                                <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>
+                                    <?php $selected = '';
+                                        if (($row->i_bagian == $data->i_tujuan) and ($row->id_company == $data->id_company_tujuan)) {
+                                            $selected = 'selected';
+                                        }
+                                    ?>
+                                    <option value="<?= "$row->id_company|$row->i_bagian"; ?>" <?= $selected ?>>
+                                        <?= $row->e_bagian_name; ?>
+                                    </option>
+                                    <?php endforeach;
+                                    } ?>
+                                </optgroup>
                             </select>
                         </div>
                     </div>
