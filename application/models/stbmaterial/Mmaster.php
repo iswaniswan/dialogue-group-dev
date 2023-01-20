@@ -97,18 +97,35 @@ class Mmaster extends CI_Model
 
     public function bagian($i_type = null)
     {
-        return $this->db->query("SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement FROM tr_bagian a 
-			INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
-			LEFT JOIN tr_type c on (a.i_type = c.i_type)
-			LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
-			WHERE a.f_status = 't' AND b.i_departement = '$this->i_departement' AND username = '$this->username' AND a.id_company = '$this->id_company' AND c.i_type = '$i_type'
-			ORDER BY 4, 3 ASC NULLS LAST
-        ", false);
+        $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement, cc.name
+                    FROM tr_bagian a 
+                    INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
+                    LEFT JOIN tr_type c on (a.i_type = c.i_type)
+                    LEFT JOIN public.tm_menu d on (
+                                d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement
+                            )
+                    LEFT JOIN public.company cc ON cc.id = a.id_company
+                    WHERE a.f_status = 't' 
+                        AND b.i_departement = '$this->i_departement' 
+                        AND username = '$this->username' 
+                        AND a.id_company = '$this->id_company' 
+                        AND c.i_type = '$i_type'
+                    ORDER BY 4, 3 ASC NULLS LAST";
+
+        return $this->db->query($sql, false);
     }
 
-    public function bagian_receive($i_bagian)
+    public function bagian_receive($i_bagian, $id_company_tujuan='4')
     {
-        return $this->db->query("SELECT id, i_bagian, e_bagian_name FROM tr_bagian WHERE id_company = '$this->id_company' AND i_bagian IN ('$i_bagian')");
+        $sql = "SELECT tb.id, tb.i_bagian, tb.e_bagian_name, cc.id AS id_company, cc.name 
+                    FROM tr_bagian tb
+                    LEFT JOIN public.company cc ON cc.id = tb.id_company
+                    WHERE i_bagian IN ('$i_bagian') 
+                        AND id_company = '$id_company_tujuan'";
+
+        $query = $this->db->query($sql);
+        // var_dump($this->db->last_query());
+        return $query;
     }
 
     public function product($cari, $dfrom, $dto, $i_bagian)
@@ -289,7 +306,7 @@ class Mmaster extends CI_Model
         return $this->db->get()->row()->id + 1;
     }
 
-    public function simpan($id, $i_document, $d_document, $i_bagian, $i_bagian_receive, $e_remark, $for_caset)
+    public function simpan($id, $i_document, $d_document, $i_bagian, $i_bagian_receive, $e_remark, $for_caset, $id_company_receive)
     {
         // var_dump($i_bagian_receive);
         $for_caset = "{" . $for_caset . "}";
@@ -301,6 +318,7 @@ class Mmaster extends CI_Model
             'i_bagian' => $i_bagian,
             'i_bagian_receive' => $i_bagian_receive,
             'e_remark' => $e_remark,
+            'id_company_receive' => $id_company_receive
             /* 'id_referensi' => $for_caset */
         );
         $this->db->insert('tm_stb_material', $data);
@@ -323,11 +341,14 @@ class Mmaster extends CI_Model
 
     public function dataedit($id)
     {
-        return $this->db->query("SELECT a.*, b.e_bagian_name, c.e_bagian_name e_bagian_receive_name, to_char(a.d_document, 'dd-mm-yyyy') AS date_document
-            FROM tm_stb_material a
-            LEFT JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
-            LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company = c.id_company)
-            WHERE a.id = '$id'");
+        $sql = "SELECT a.*, b.e_bagian_name, c.e_bagian_name e_bagian_receive_name, cc.name AS company_receive_name, to_char(a.d_document, 'dd-mm-yyyy') AS date_document
+                    FROM tm_stb_material a
+                    LEFT JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
+                    LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company = c.id_company)
+                    LEFT JOIN public.company cc ON cc.id = a.id_company_receive
+                    WHERE a.id = '$id'";
+
+        return $this->db->query($sql);
     }
 
     /*----------  GET DATA DETAIL EDIT, VIEW DAN APPROVE  ----------*/
@@ -589,7 +610,9 @@ class Mmaster extends CI_Model
         }
 
         // $datatables = new Datatables(new CodeigniterAdapter);
-        return $this->db->query("WITH CTE AS (
+        /** original query */
+        /*
+        $sql = "WITH CTE AS (
             SELECT DISTINCT 0 as no, a.id, ab.i_bagian, c.i_product_wip, c.e_product_wipname, d.e_color_name, 
                 e.i_material, e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, 
                 ab.d_document, g.e_bagian_name, ROW_NUMBER() OVER (ORDER BY a.id) AS i, h.i_type, ab.i_tujuan, ab.d_kirim, i.e_bagian_name as tujuan_name, j.name as company_name
@@ -626,7 +649,48 @@ class Mmaster extends CI_Model
             -- g.e_bagian_name, c.i_product_wip, d.e_color_name, e.i_material
             ab.d_document)
             SELECT no, id, i_bagian, i, i_product_wip, e_product_wipname, e_color_name, i_material, e_material_name, e_satuan_name, n_quantity_sisa, i_type,
-            i_document, d_document, e_bagian_name, i_tujuan, tujuan_name, company_name, d_kirim, (select count(i) as jml from CTE) As jml from CTE");
+            i_document, d_document, e_bagian_name, i_tujuan, tujuan_name, company_name, d_kirim, (select count(i) as jml from CTE) As jml from CTE";
+        */
+
+        $sql ="WITH CTE AS ( 
+                            SELECT DISTINCT 0 as no, 
+                                a.id, ab.i_bagian, c.i_product_wip, c.e_product_wipname, d.e_color_name, e.i_material, 
+                                e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, ab.d_document, 
+                                g.e_bagian_name, j2.name AS company_pembuat, ROW_NUMBER() OVER (ORDER BY a.id) AS i, 
+                                h.i_type, ab.i_tujuan, ab.d_kirim, i.e_bagian_name as tujuan_name, i.id_company AS id_company_tujuan,
+                                j.name as company_name 
+                            FROM tm_memo_permintaan_item a 
+                            INNER JOIN tm_memo_permintaan ab ON (ab.id = a.id_document) 
+                            INNER JOIN tr_product_wip c ON (c.id = a.id_product) 
+                            INNER JOIN tr_color d ON ( d.i_color = c.i_color AND c.id_company = d.id_company ) 
+                            INNER JOIN tr_material e ON (e.id = a.id_material) 
+                            INNER JOIN tr_satuan f ON ( f.i_satuan_code = e.i_satuan_code AND e.id_company = f.id_company ) 
+                            INNER JOIN tr_bagian g ON ( g.i_bagian = ab.i_bagian AND ab.id_company = g.id_company ) 
+                            INNER JOIN tr_type h ON ( h.id = ab.id_type_penerima ) 
+                            LEFT JOIN tr_bagian i ON ( i.id = ab.i_tujuan ) 
+                            LEFT JOIN public.company j ON ( j.id = i.id_company ) 
+                            LEFT JOIN public.company j2 ON ( j2.id = ab.id_company ) 
+                            WHERE ab.i_status = '6' 
+                                AND a.n_quantity_sisa > 0 
+                                $and $or $like
+                                AND g.i_type IN ( 
+                                                    SELECT i_type 
+                                                        FROM tr_bagian 
+                                                        WHERE i_bagian IN ( 
+                                                                                SELECT i_bagian 
+                                                                                FROM tr_departement_cover 
+                                                                                WHERE username = '$this->username' 
+                                                                            )                                                             
+                                                ) 
+                                AND (ab.id_company = '$this->id_company' OR ab.id_company_penerima = '$this->id_company')
+                            ORDER BY ab.d_document
+                        ) 
+                    SELECT no, id, i_bagian, i, i_product_wip, e_product_wipname, e_color_name, i_material,
+                            e_material_name, e_satuan_name, n_quantity_sisa, i_type, i_document, d_document, 
+                            e_bagian_name, company_pembuat, i_tujuan, tujuan_name, id_company_tujuan,
+                            company_name, d_kirim, (select count(i) as jml FROM CTE) As jml 
+                    FROM CTE";
+        return $this->db->query($sql);
     }
 
     public function data_schedule_material($dfrom, $dto)

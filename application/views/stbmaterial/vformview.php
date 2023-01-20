@@ -36,7 +36,7 @@
                                 <input type="text" name="d_document" required="" id="d_document" class="form-control input-sm date" value="<?= $data->date_document; ?>" readonly>
                             </div>
                             <div class="col-sm-3">
-                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?>">
+                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?> - <?= $data->company_receive_name ?>">
                             </div>
                         </div>
                         <div class="form-group row">

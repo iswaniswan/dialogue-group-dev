@@ -316,6 +316,7 @@
 <script>
     $(document).ready(function() {
         $('#dokumenbon').mask('SSS-0000-0000S');
+        $('#itujuan').select2();
         $('.select2_product').select2({
             width: '70%',
         });

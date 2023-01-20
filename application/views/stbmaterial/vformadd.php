@@ -45,7 +45,7 @@
                                 <select name="i_bagian_receive" required="" id="i_bagian_receive" class="form-control select2">
                                     <?php if ($bagian_receive->num_rows()>0) {
                                         foreach ($bagian_receive->result() as $key) { ?>
-                                            <option value="<?= trim($key->i_bagian); ?>"><?= $key->e_bagian_name; ?></option>
+                                            <option value="<?= $key->id_company ?>|<?= trim($key->i_bagian); ?>"><?= $key->e_bagian_name; ?> - <?= $key->name ?></option>
                                     <?php }
                                     } ?>
                                 </select>

@@ -180,7 +180,7 @@ class Cform extends CI_Controller
     } */
 
     public function proses_kirim()
-    {
+    {        
         $data = check_role($this->i_menu, 1);
         if (!$data) {
             redirect(base_url(), 'refresh');
@@ -190,6 +190,7 @@ class Cform extends CI_Controller
         $dto      = $this->input->post('dto', true);
 
         $bagian  = [];
+        $array_company_tujuan = [];
         $penerima  = [];
         $memo = [];
         if ($this->input->post('jml', true) > 0) {
@@ -198,17 +199,21 @@ class Cform extends CI_Controller
                 $id_memo = $this->input->post('id' . $i, true);
                 $i_bagian = $this->input->post('i_bagian' . $i, true);
                 $i_type = $this->input->post('i_type' . $i, true);
+                $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
                 if ($check == 'on') {
                     array_push($bagian, $i_bagian);
+                    array_push($array_company_tujuan, $id_company_tujuan);
                     array_push($penerima, $i_type);
                     array_push($memo, $id_memo);
                 }
             }
         }
         $bagian   = array_unique($bagian);
+        $company_tujuan = array_unique($array_company_tujuan);
         $penerima   = array_unique($penerima);
         $memo     = array_unique($memo);
         $i_bagian = implode(",", $bagian);
+        $id_company_tujuan = implode(",", $company_tujuan);
         $i_type = implode(",", $penerima);
         $id_memo  = "'" . implode("', '", $memo) . "'";
         if (count($bagian) == 1) {
@@ -219,7 +224,7 @@ class Cform extends CI_Controller
                 'dfrom'         => $dfrom,
                 'dto'           => $dto,
                 'bagian'        => $this->mmaster->bagian($i_type),
-                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian),
+                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian, $id_company_tujuan),
                 'data_detail'   => $this->mmaster->data_detail($id_memo),
             );
             $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
@@ -314,6 +319,10 @@ class Cform extends CI_Controller
         }
         $i_bagian = $this->input->post('i_bagian', TRUE);
         $i_bagian_receive = $this->input->post('i_bagian_receive', TRUE);
+        $array_bagian_receive = explode('|', $i_bagian_receive);
+        $_i_bagian_receive = $array_bagian_receive[1];
+        $_id_company_recieve = $array_bagian_receive[0];
+
         $e_remark = $this->input->post('e_remark', TRUE);
         $jml = $this->input->post('jml', TRUE);
         $id = $this->mmaster->runningid();
@@ -328,7 +337,7 @@ class Cform extends CI_Controller
             }
             $forc   = array_unique($forecast);
             $for_caset = implode(",", $forc);
-            $this->mmaster->simpan($id, $i_document, $d_document, $i_bagian, $i_bagian_receive, $e_remark, $for_caset);
+            $this->mmaster->simpan($id, $i_document, $d_document, $i_bagian, $_i_bagian_receive, $e_remark, $for_caset, $_id_company_recieve);
             $forecash = [];
             for ($i = 1; $i <= $jml; $i++) {
                 $id_memo_item   = $this->input->post('id_memo_item' . $i, TRUE);

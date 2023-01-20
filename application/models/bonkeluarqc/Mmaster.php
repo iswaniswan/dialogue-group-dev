@@ -9,36 +9,35 @@ class Mmaster extends CI_Model
 
     function data($i_menu, $folder, $dfrom, $dto)
     {
-        $idcompany  = $this->session->userdata('id_company');
+        $id_company  = $this->session->userdata('id_company');
+        $i_departement = $this->session->userdata('i_departement');
+        $username = $this->session->userdata('username');
+        
+        $where = "";
         if ($dfrom != '' && $dto != '') {
             $dfrom = date('Y-m-d', strtotime($dfrom));
             $dto   = date('Y-m-d', strtotime($dto));
-            $where = "AND d_keluar_qc BETWEEN '$dfrom' AND '$dto'";
-        } else {
-            $where = "";
-        }
+            $where = "AND d_keluar_qc BETWEEN '$dfrom' AND '$dto' ";
+        } 
+
         $datatables = new Datatables(new CodeigniterAdapter);
 
-        $sql = "SELECT
-                    i_bagian
-                FROM
-                    tm_keluar_qc
-                WHERE
-                    i_status <> '5'
-                    AND id_company = '" . $this->session->userdata('id_company') . "'
+        $sql = "SELECT i_bagian
+                FROM tm_keluar_qc
+                WHERE i_status <> '5'
+                    AND id_company = '$id_company' 
                     $where
                     AND i_bagian IN (
-                        SELECT
-                            i_bagian
-                        FROM
-                            tr_departement_cover
-                        WHERE
-                            i_departement = '" . $this->session->userdata('i_departement') . "'
-                            AND id_company = '" . $this->session->userdata('id_company') . "'
-                            AND username = '" . $this->session->userdata('username') . "')";
+                                        SELECT i_bagian
+                                        FROM tr_departement_cover
+                                        WHERE i_departement = '$i_departement'
+                                            AND id_company = '$id_company'
+                                            AND username = '$username'
+                                    )";
+
         $cek = $this->db->query($sql, FALSE);
 
-        if ($this->session->userdata('i_departement') == '1') {
+        if ($i_departement == '1') {
             $bagian = "";
         } else {
             if ($cek->num_rows() > 0) {
@@ -56,52 +55,51 @@ class Mmaster extends CI_Model
             }
         }
 
-        $sql = "SELECT DISTINCT
-                         0 as no,
-                         a.id,
-                         a.i_keluar_qc,
-                         to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
-                         a.i_tujuan,
-                         ab.e_bagian_name,
-                         concat(b.e_bagian_name, ' - ', c2.name) e_bagian_tujuan,
-                         cc.e_jenis_name,
-                         a.e_remark,
-                         a.id_company,
-                         a.i_status,
-                         c.e_status_name,
-                         a.i_bagian,
-                         c.label_color,
-                            f.i_level,
-                            l.e_level_name,
-                         '$dfrom' AS dfrom,
-                         '$dto' AS dto,
-                         '$i_menu' as i_menu,
-                         '$folder' AS folder
-                      FROM tm_keluar_qc a 
-                         JOIN tr_bagian b ON (
-                                a.i_tujuan = b.i_bagian /*AND a.id_company = b.id_company*/
-                             ) 
-                         JOIN tr_bagian ab ON (
-                                ab.i_bagian = a.i_bagian /*AND a.id_company = b.id_company*/ AND ab.i_type = '23'
-                             ) 
-                         JOIN tr_status_document c ON (
-                                a.i_status = c.i_status
-                             )   
-                         JOIN tr_jenis_barang_keluar cc ON (
-                                cc.id = a.id_jenis_barang_keluar
-                             )                        
-                        LEFT JOIN tr_menu_approve f ON (
-                                a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
-                             )
-                        LEFT JOIN public.tr_level l ON (
-                                f.i_level = l.i_level
-                             )
-                        LEFT JOIN public.company c2 ON (
-                                c2.id = a.id_company_tujuan
-                             )
-                        WHERE a.id_company = '$idcompany'
+        $sql = "SELECT DISTINCT 0 as no,
+                                a.id,
+                                a.i_keluar_qc,
+                                to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
+                                a.i_tujuan,
+                                ab.e_bagian_name,
+                                concat(b.e_bagian_name, ' - ', c2.name) e_bagian_tujuan,
+                                cc.e_jenis_name,
+                                a.e_remark,
+                                a.id_company,
+                                a.i_status,
+                                c.e_status_name,
+                                a.i_bagian,
+                                c.label_color,
+                                f.i_level,
+                                l.e_level_name,
+                                '$dfrom' AS dfrom,
+                                '$dto' AS dto,
+                                '$i_menu' as i_menu,
+                                '$folder' AS folder
+                    FROM tm_keluar_qc a 
+                    JOIN tr_bagian b ON (
+                            a.i_tujuan = b.i_bagian /*AND a.id_company = b.id_company*/
+                        ) 
+                    JOIN tr_bagian ab ON (
+                            ab.i_bagian = a.i_bagian /*AND a.id_company = b.id_company*/ AND ab.i_type = '23'
+                        ) 
+                    JOIN tr_status_document c ON (
+                            a.i_status = c.i_status
+                        )   
+                    JOIN tr_jenis_barang_keluar cc ON (
+                            cc.id = a.id_jenis_barang_keluar
+                        )                        
+                    LEFT JOIN tr_menu_approve f ON (
+                            a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
+                        )
+                    LEFT JOIN public.tr_level l ON (
+                            f.i_level = l.i_level
+                        )
+                    LEFT JOIN public.company c2 ON (
+                            c2.id = a.id_company_tujuan
+                        )
+                    WHERE a.id_company = '$id_company'
                         AND a.i_status <> '5' $where $bagian
-                        ORDER BY a.i_keluar_qc asc";
+                    ORDER BY a.i_keluar_qc asc";
 
         $datatables->query($sql, false);
 
@@ -194,6 +192,36 @@ class Mmaster extends CI_Model
     public function jeniskeluar()
     {
         return $this->db->get("tr_jenis_barang_keluar");
+    }
+
+    public function generate_nomor_dokumen($bagian, $tujuan) {
+        $id_company = $this->id_company;
+
+        $array_tujuan = explode('|', $tujuan);
+        $id_company_tujuan = $array_tujuan[0];
+        $i_bagian_tujuan = $array_tujuan[1];        
+
+        $kode = 'STB';
+        $where = "AND id_company_tujuan = '$id_company_tujuan'";
+
+        if ($id_company_tujuan != $id_company) {
+            $kode = 'SJ';
+            $where = "AND NOT id_company_tujuan = '$id_company'";
+        }
+
+        $sql = "SELECT count(*) FROM tm_keluar_qc tkq
+                    WHERE i_bagian = '$bagian'
+                    AND id_company = '$id_company'
+                    $where 
+                    AND to_char(d_keluar_qc, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
+
+        $query = $this->db->query($sql);
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
+
+        return $generated;
     }
 
     public function runningnumber($thbl, $tahun, $ibagian, $itujuan)
@@ -513,26 +541,21 @@ class Mmaster extends CI_Model
 
     public function cek_data($id, $idcompany)
     {
-        return $this->db->query(" 
-                                    SELECT
-                                        a.id,
-                                        a.i_keluar_qc,
-                                        to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
-                                        a.i_bagian,
-                                        a.i_tujuan,
-                                        a.i_status,
-                                        a.e_remark,
-                                        a.id_jenis_barang_keluar,
-                                        e_jenis_name,
-                                        a.id_company_tujuan
-                                    FROM
-                                       tm_keluar_qc a
-                                    INNER JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
-                                    WHERE                                        
-                                        a.id = '$id'
-                                    AND
-                                        a.id_company = '$idcompany' 
-                                ", FALSE);
+        $sql = "SELECT a.id,
+                    a.i_keluar_qc,
+                    to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
+                    a.i_bagian,
+                    a.i_tujuan,
+                    a.i_status,
+                    a.e_remark,
+                    a.id_jenis_barang_keluar,
+                    e_jenis_name,
+                    a.id_company_tujuan
+                FROM tm_keluar_qc a
+                INNER JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
+                WHERE a.id = '$id' AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_datadetail($id, $idcompany, $ibagian)
@@ -1078,7 +1101,6 @@ class Mmaster extends CI_Model
             'd_approve' => date('Y-m-d'),
             'e_remark' => "Memo Dari STB WIP",
             'i_tujuan' => $query_bagian->id,
-            'id_company_penerima' => $head->id_company
         );
 
         $this->db->insert("tm_memo_permintaan", $data_header);

@@ -110,6 +110,7 @@
                                             <input id='d_kirim<?= $i ?>' name='d_kirim<?= $i ?>' value='<?= $key->d_kirim ?>' type='hidden'>
                                             <input id='tujuan_name<?= $i ?>' name='tujuan_name<?= $i ?>' value='<?= $key->tujuan_name ?>' type='hidden'>
                                             <input id='company_name<?= $i ?>' name='company_name<?= $i ?>' value='<?=$key->company_name ?>' type='hidden'>
+                                            <input id='id_company_tujuan<?= $i ?>' name='id_company_tujuan<?= $i ?>' value='<?=$key->id_company_tujuan ?>' type='hidden'>
                                             <input id='jml' name='jml' value='<?= $key->jml ?>' type='hidden'>
                                         </td>
                                         <td class="text-center"><?= $i; ?></td>
@@ -122,7 +123,7 @@
                                         <td class="text-right"><?= $key->n_quantity_sisa; ?></td>
                                         <td><?= $key->i_document; ?></td>
                                         <td><?= trim($key->d_document); ?></td>
-                                        <td><?= $key->e_bagian_name; ?></td>
+                                        <td><?= $key->e_bagian_name ?> - <?= $key->company_pembuat ?></td>
                                         <td><?= $key->tujuan_name ?> - <?= $key->company_name; ?></td>
                                         <td><?= trim($key->d_kirim); ?></td>
                                     </tr>

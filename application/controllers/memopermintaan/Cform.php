@@ -99,7 +99,8 @@ class Cform extends CI_Controller
             'folder'        => $this->global['folder'],
             'title'         => "Tambah " . $this->global['title'],
             'title_list'    => 'List ' . $this->global['title'],
-            'type'          => $this->mmaster->type(),
+            // 'type'          => $this->mmaster->type(),
+            'type'          => $this->mmaster->get_type_multi_company(),
             'bagian'        => $this->mmaster->bagian(),
             'tujuan'        => $this->mmaster->tujuan()->result(),
             'dfrom'         => $this->uri->segment(4),
@@ -249,8 +250,15 @@ class Cform extends CI_Controller
     public function get_material_onchange_detail()
     {
         header("Content-Type: application/json", true);
+
+        $id_marker = $this->input->post('id_marker');
+        $id_product_wip = $this->input->post('id_product_wip');
+        $type = $this->input->post('id_type');
+        $array_type = explode('|', $type);
+        $_id_type = $array_type[1];
+
         $query  = array(
-            'detail' => $this->mmaster->detail_material_onchange($this->input->post('id_marker', TRUE), $this->input->post('id_product_wip', TRUE), $this->input->post('id_type', TRUE))->result_array(),
+            'detail' => $this->mmaster->detail_material_onchange($id_marker, $id_product_wip, $_id_type)->result_array(),
         );
         echo json_encode($query);
     }
@@ -270,19 +278,29 @@ class Cform extends CI_Controller
         if ($d_document != '') {
             $d_document = formatYmd($d_document);
         }
+
         if($d_kirim != '') {
             $d_kirim = formatYmd($d_kirim);
         }
+
         $i_bagian       = $this->input->post('ibagian', TRUE);
         $i_tujuan       = $this->input->post('itujuan_kirim', TRUE);
         $id_type        = $this->input->post('id_type', TRUE);
+        $array_type = explode('|', $id_type);
+        $_id_company_penerima = $array_type[0];
+        $_id_type_penerima = $array_type[1];
+        
         $e_remark       = $this->input->post('eremark', TRUE);
         $id             = $this->mmaster->runningid();
-        if ($i_bagian != '' && $id_type != '' && $d_document != '') {
+
+        if ($i_bagian != '' && $id_type != '' && $d_document != '') {            
+            
             $this->db->trans_begin();
             $i_document = $this->mmaster->runningnumber(format_ym($d_document), format_Y($d_document), $i_bagian);
-            $this->mmaster->simpan_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type);
+            
+            $this->mmaster->simpan_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $_id_type_penerima, $_id_company_penerima);
             $material = $this->input->post('id_material');
+            
             $i = 0;
             foreach ($material as $id_material) {
                 $id_product = $this->input->post('id_product[]')[$i];
@@ -339,7 +357,8 @@ class Cform extends CI_Controller
             'id'         => $this->uri->segment(4),
             'dfrom'      => $this->uri->segment(5),
             'dto'        => $this->uri->segment(6),
-            'type'       => $this->mmaster->type(),
+            // 'type'       => $this->mmaster->type(),
+            'type'       => $this->mmaster->get_type_multi_company(),
             'bagian'     => $this->mmaster->bagian(),
             'tujuan'     => $this->mmaster->tujuan()->result(),
             'data'       => $this->mmaster->data_header($this->uri->segment(4))->row(),
@@ -372,11 +391,15 @@ class Cform extends CI_Controller
         $i_bagian       = $this->input->post('ibagian', TRUE);
         $i_tujuan       = $this->input->post('itujuan_kirim', TRUE);
         $id_type        = $this->input->post('id_type', TRUE);
+        $array_type = explode('|', $id_type);
+        $_id_company_penerima = $array_type[0];
+        $_id_type_penerima = $array_type[1];
+
         $e_remark       = $this->input->post('eremark', TRUE);
         $id             = $this->input->post('id', TRUE);
         if ($id != '' && $i_bagian != '' && $id_type != '' && $d_document != '') {
             $this->db->trans_begin();
-            $this->mmaster->update_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type);
+            $this->mmaster->update_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $_id_type_penerima, $_id_company_penerima);
             $this->mmaster->delete_detail($id);
             $material = $this->input->post('id_material');
             $i = 0;

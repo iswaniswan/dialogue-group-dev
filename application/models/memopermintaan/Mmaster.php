@@ -21,7 +21,7 @@ class Mmaster extends CI_Model
         $sql = "SELECT i_bagian
                 FROM tm_memo_permintaan a
                 WHERE i_status <> '5' 
-                    AND id_company = '$this->id_company'
+                    AND id_company = '$this->id_company' 
                     $and 
                     AND i_bagian IN (
                                     SELECT i_bagian
@@ -56,7 +56,8 @@ class Mmaster extends CI_Model
                     a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
                     a.i_bagian, a.i_status,
                     e.e_bagian_name,
-                    d.e_type_name,
+                    concat(d.e_type_name, ' - ', h2.name),
+                    a.e_remark,
                     g.i_bagian as i_tujuan,
                     h.name as company_tujuan,
                     label_color,
@@ -73,11 +74,12 @@ class Mmaster extends CI_Model
                 LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
                 LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
                 LEFT JOIN tr_bagian g ON (g.id = a.i_tujuan)
-                left join public.company h ON (h.id = g.id_company)
+                LEFT join public.company h ON (h.id = g.id_company)
+                LEFT join public.company h2 ON (h2.id = a.id_company_penerima)
                 WHERE a.i_status <> '5'
-                    AND a.id_company = '$this->id_company' OR a.id_company_penerima = '$this->id_company'
+                    AND (a.id_company = '$this->id_company' OR a.id_company_penerima = '$this->id_company') 
                     $and $bagian
-                ORDER BY a.id ASC";
+                ORDER BY a.id ASC";                    
 
         $datatables->query($sql, FALSE);
         $datatables->edit('company_tujuan', function ($data) {
@@ -138,6 +140,7 @@ class Mmaster extends CI_Model
         $datatables->hide('dto');
         $datatables->hide('i_bagian');
         $datatables->hide('i_tujuan');
+        $datatables->hide('company_tujuan');
         return $datatables->generate();
     }
 
@@ -193,6 +196,20 @@ class Mmaster extends CI_Model
     public function type()
     {
         return $this->db->query("SELECT * FROM tr_type WHERE i_kode_group_barang NOTNULL AND f_status = 't'", false);
+    }
+
+    public function get_type_multi_company()
+    {
+        $sql = "SELECT tt.*, cc.id AS id_company, cc.name FROM tr_type tt
+                CROSS JOIN public.company cc  
+                WHERE tt.i_kode_group_barang NOTNULL 
+                    AND tt.f_status = 't' 
+                    AND tt.e_type_name ILIKE '%gudang%'
+                    AND cc.i_apps = '2'
+                    AND NOT cc.id = '0'
+                ORDER BY id_company ASC, tt.e_type_name ASC";
+
+        return $this->db->query($sql, FALSE)->result();
     }
 
     public function product_wip($cari)
@@ -438,7 +455,7 @@ class Mmaster extends CI_Model
         return $this->db->get()->row()->id + 1;
     }
 
-    public function simpan_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type)
+    public function simpan_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type_penerima, $id_company_penerima)
     {
         $data_header = array(
             'id' => $id,
@@ -448,8 +465,9 @@ class Mmaster extends CI_Model
             'd_kirim' => $d_kirim,
             'i_bagian' => $i_bagian,
             'i_tujuan' => $i_tujuan,
-            'id_type_penerima' => $id_type,
+            'id_type_penerima' => $id_type_penerima,
             'e_remark' => $e_remark,
+            'id_company_penerima' => $id_company_penerima
         );
         $this->db->insert("tm_memo_permintaan", $data_header);
     }
@@ -471,12 +489,13 @@ class Mmaster extends CI_Model
 
     public function data_header($id)
     {
-        $this->db->select("a.*, b.e_bagian_name, c.e_type_name, d.e_bagian_name as e_tujuan_name, e.name as company_tujuan");
+        $this->db->select("a.*, b.e_bagian_name, c.e_type_name, d.e_bagian_name as e_tujuan_name, e.name as company_tujuan, e2.name as company_penerima");
         $this->db->from("tm_memo_permintaan a");
         $this->db->join("tr_bagian b", "b.i_bagian = a.i_bagian AND a.id_company = b.id_company");
         $this->db->join("tr_type c", "c.id = a.id_type_penerima");
         $this->db->join("tr_bagian d", "d.id = a.i_tujuan", 'left');
         $this->db->join("public.company e", "e.id = d.id_company", 'left');
+        $this->db->join("public.company e2", "e2.id = a.id_company_penerima", 'left');
         $this->db->where("a.id", $id);
         return $this->db->get();
     }
@@ -561,15 +580,16 @@ class Mmaster extends CI_Model
         ");
     }
 
-    public function update_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type)
+    public function update_header($id, $i_document, $d_document, $d_kirim, $i_bagian, $i_tujuan, $e_remark, $id_type_penerima, $id_company_penerima)
     {
         $data_header = array(
             'd_document' => $d_document,
             'd_kirim' => $d_kirim,
             'i_bagian' => $i_bagian,
             'i_tujuan' => $i_tujuan,
-            'id_type_penerima' => $id_type,
+            'id_type_penerima' => $id_type_penerima,
             'e_remark' => $e_remark,
+            'id_company_penerima' => $id_company_penerima
         );
         $this->db->where("id", $id);
         $this->db->update("tm_memo_permintaan", $data_header);

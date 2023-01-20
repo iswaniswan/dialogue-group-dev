@@ -130,11 +130,7 @@ class Cform extends CI_Controller
     {
         $number = "";
         if ($this->input->post('tgl', TRUE) != '') {
-            // $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))), date('Y', strtotime($this->input->post('tgl', TRUE))), $this->input->post('ibagian', TRUE), $this->input->post('itujuan', TRUE));
-
-            $bagian = $this->input->post('ibagian');
-            $tujuan = $this->input->post('itujuan');
-            $number = $this->mmaster->generate_nomor_dokumen($bagian, $tujuan);
+            $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))), date('Y', strtotime($this->input->post('tgl', TRUE))), $this->input->post('ibagian', TRUE), $this->input->post('itujuan', TRUE));
         }
         echo json_encode($number);
     }
@@ -463,7 +459,7 @@ class Cform extends CI_Controller
             'doc'           => $this->mmaster->doc($this->i_menu)->row()->doc_qe,
         );
 
-        $this->Logger->write('Membuka Menu View ' . $this->global['title']);
+        $this->Logger->write('Membuka Menu Edit ' . $this->global['title']);
         $this->load->view($this->global['folder'] . '/vformview', $data);
     }
 

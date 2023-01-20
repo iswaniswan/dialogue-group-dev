@@ -39,11 +39,34 @@
                                 <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= formatdmY($data->d_document); ?>" readonly>
                             </div>
                             <div class="col-sm-3">
+                                <?php /*
                                 <select name="id_type" id="id_type" required="" class="form-control select2" onchange="clear_table();">
                                     <?php if ($type) {
                                         foreach ($type->result() as $key) { ?>
                                             <option value="<?= trim($key->id); ?>" <?php if ($key->id == $data->id_type_penerima) { ?> selected <?php } ?>><?= $key->e_type_name; ?></option>
                                     <?php }
+                                    } ?>
+                                </select>
+                                */ ?>
+                                <select name="id_type" id="id_type" required="" class="form-control select2" onchange="clear_table();">
+                                    <?php if ($type) {
+                                        $group = "";
+                                        foreach ($type as $row) : ?>
+                                        <?php if ($group!=$row->name) {?>
+                                            </optgroup>
+                                            <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                        <?php }
+                                        $group = $row->name;
+                                        ?>
+                                        <?php $selected = '';
+                                            if (($row->i_bagian == $data->i_tujuan) and ($row->id_company == $data->id_company_tujuan)) {
+                                                $selected = 'selected';
+                                            }
+                                        ?>
+                                            <option value="<?= $row->id_company . '|' . trim($row->id) ?>" <?= $selected?>> 
+                                                <?= $row->e_type_name; ?> - <?= $row->name ?>
+                                            </option>
+                                    <?php endforeach;
                                     } ?>
                                 </select>
                             </div>
