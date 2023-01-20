@@ -100,18 +100,18 @@
                                     <tr>
                                         <td class="text-center">
                                             <label class='custom-control custom-checkbox'> 
-                                            <input type='checkbox' id='chk<?= $i ?>' name='chk<?= $i ?>' class='custom-control-input'>
+                                            <input type='checkbox' id='chk<?= $i ?>' name='detail[<?= $i ?>][chk]' class='custom-control-input item-checkbox' data-index="<?= $i ?>">
                                             <span class='custom-control-indicator'></span>
                                             <span class='custom-control-description'></span>
-                                            <input id='id<?= $i ?>' name='id<?= $i ?>' value='<?= $key->id ?>' type='hidden'>
-                                            <input id='i_bagian<?= $i ?>' name='i_bagian<?= $i ?>' value='<?= $key->i_bagian ?>' type='hidden'>
-                                            <input id='i_type<?= $i ?>' name='i_type<?= $i ?>' value='<?= $key->i_type ?>' type='hidden'>
-                                            <input id='i_tujuan<?= $i ?>' name='i_tujuan<?= $i ?>' value='<?= $key->i_tujuan ?>' type='hidden'>
-                                            <input id='d_kirim<?= $i ?>' name='d_kirim<?= $i ?>' value='<?= $key->d_kirim ?>' type='hidden'>
-                                            <input id='tujuan_name<?= $i ?>' name='tujuan_name<?= $i ?>' value='<?= $key->tujuan_name ?>' type='hidden'>
-                                            <input id='company_name<?= $i ?>' name='company_name<?= $i ?>' value='<?=$key->company_name ?>' type='hidden'>
-                                            <input id='id_company_tujuan<?= $i ?>' name='id_company_tujuan<?= $i ?>' value='<?=$key->id_company_tujuan ?>' type='hidden'>
-                                            <input id='jml' name='jml' value='<?= $key->jml ?>' type='hidden'>
+                                            <input id='id<?= $i ?>' name='detail[<?= $i ?>][id]' value='<?= $key->id ?>' type='hidden'>
+                                            <input id='i_bagian<?= $i ?>' name='detail[<?= $i ?>][i_bagian]' value='<?= $key->i_bagian ?>' type='hidden' class="item-bagian">
+                                            <input id='i_type<?= $i ?>' name='detail[<?= $i ?>][i_type]' value='<?= $key->i_type ?>' type='hidden'>
+                                            <input id='i_tujuan<?= $i ?>' name='detail[<?= $i ?>][i_tujuan]' value='<?= $key->i_tujuan ?>' type='hidden'>
+                                            <input id='d_kirim<?= $i ?>' name='detail[<?= $i ?>][d_kirim]' value='<?= $key->d_kirim ?>' type='hidden'>
+                                            <input id='tujuan_name<?= $i ?>' name='detail[<?= $i ?>][tujuan_name]' value='<?= $key->tujuan_name ?>' type='hidden'>
+                                            <input id='company_name<?= $i ?>' name='detail[<?= $i ?>][company_name]' value='<?=$key->company_name ?>' type='hidden'>
+                                            <input id='id_company_tujuan<?= $i ?>' name='detail[<?= $i ?>][id_company_tujuan]' value='<?=$key->id_company_tujuan ?>' type='hidden'>
+                                            <input id='jml' name='detail[<?= $i ?>][jml]' value='<?= $key->jml ?>' type='hidden'>
                                         </td>
                                         <td class="text-center"><?= $i; ?></td>
                                         <td><?= $key->i_product_wip; ?></td>
@@ -135,7 +135,8 @@
                 </div>
                 <div class="form-group row mt-5">
                     <div class="col-sm-12" style="text-align: center;">
-                        <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Proses</button>
+<!--                        <button type="submit" class="d-none"></button>-->
+                        <button type="button" id="btn-process" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Proses</button>
                         &nbsp;&nbsp;
                         <label class="custom-control custom-checkbox">
                             <input type="checkbox" id="checkAll" name="checkAll" class="custom-control-input">
@@ -231,9 +232,17 @@
             $('input:checkbox').not(this).prop('checked', this.checked);
         });
 
-        $(".submit").click(function(event) {
-            if ($("#formclose input:checkbox:checked").length > 0) {
-                return true;
+        $("#btn-process").click(function(event) {
+            const allCheckboxChecked = $("#proses_kirim input.item-checkbox:checked");
+            if (allCheckboxChecked.length > 0) {
+                const allCheckbox = $("#proses_kirim input.item-checkbox");
+                allCheckbox.each(function() {
+                    if ($(this).is(':checked') == false) {
+                        $(this).siblings('input:hidden').prop('disabled', true);
+                    }
+                })
+
+                $('#proses_kirim').submit();
             } else {
                 swal('Maaf :(', 'Pilih data minimal satu!', 'error');
                 return false;
@@ -252,4 +261,5 @@
             return true;
         }
     }
+
 </script>
