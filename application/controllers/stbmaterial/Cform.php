@@ -179,72 +179,8 @@ class Cform extends CI_Controller
         $this->load->view($this->global['folder'] . '/vformadd_schedule', $data);
     } */
 
-//    public function proses_kirim()
-//    {
-//        $data = check_role($this->i_menu, 1);
-//        if (!$data) {
-//            redirect(base_url(), 'refresh');
-//        }
-//
-//        $dfrom    = $this->input->post('dfrom', true);
-//        $dto      = $this->input->post('dto', true);
-//
-//        $bagian  = [];
-//        $array_company_tujuan = [];
-//        $penerima  = [];
-//        $memo = [];
-//        if ($this->input->post('jml', true) > 0) {
-//            for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
-//                $check       = $this->input->post('chk' . $i, true);
-//                $id_memo = $this->input->post('id' . $i, true);
-//                $i_bagian = $this->input->post('i_bagian' . $i, true);
-//                $i_type = $this->input->post('i_type' . $i, true);
-//                $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
-//                if ($check == 'on') {
-//                    array_push($bagian, $i_bagian);
-//                    array_push($array_company_tujuan, $id_company_tujuan);
-//                    array_push($penerima, $i_type);
-//                    array_push($memo, $id_memo);
-//                }
-//            }
-//        }
-//        $bagian   = array_unique($bagian);
-//        $company_tujuan = array_unique($array_company_tujuan);
-//        $penerima   = array_unique($penerima);
-//        $memo     = array_unique($memo);
-//        $i_bagian = implode(",", $bagian);
-//        $id_company_tujuan = implode(",", $company_tujuan);
-//        $i_type = implode(",", $penerima);
-//        $id_memo  = "'" . implode("', '", $memo) . "'";
-//        if (count($bagian) == 1) {
-//            $data = array(
-//                'folder'        => $this->global['folder'],
-//                'title'         => "Tambah " . $this->global['title'],
-//                'title_list'    => 'List ' . $this->global['title'],
-//                'dfrom'         => $dfrom,
-//                'dto'           => $dto,
-//                'bagian'        => $this->mmaster->bagian($i_type),
-//                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian, $id_company_tujuan),
-//                'data_detail'   => $this->mmaster->data_detail($id_memo),
-//            );
-//            $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
-//            $this->load->view($this->global['folder'] . '/vformadd', $data);
-//        } else {
-//            echo '<script>
-//            swal({
-//                title: "Maaf :(",
-//                text: "Pembuat Memo Tidak Boleh Beda!",
-//                showConfirmButton: true,
-//                type: "error",
-//                },function(){
-//                    show("' . $this->global['folder'] . '/cform/tambah_kirim/' . $dfrom . '/' . $dto . '","#main");
-//                    });
-//            </script>';
-//        }
-//    }
-
     public function proses_kirim()
-    {
+    {        
         $data = check_role($this->i_menu, 1);
         if (!$data) {
             redirect(base_url(), 'refresh');
@@ -253,11 +189,15 @@ class Cform extends CI_Controller
         $dfrom    = $this->input->post('dfrom', true);
         $dto      = $this->input->post('dto', true);
 
+        $bagian  = [];
+        $array_company_tujuan = [];
+        $penerima  = [];
+        $memo = [];
         if ($this->input->post('jml', true) > 0) {
             for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
                 $check       = $this->input->post('chk' . $i, true);
                 $id_memo = $this->input->post('id' . $i, true);
-                $i_bagian = $this->input->post('i_bagian' . $i, true);
+                $i_bagian = $this->input->post('tujuan_bagian' . $i, true);
                 $i_type = $this->input->post('i_type' . $i, true);
                 $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
                 if ($check == 'on') {
@@ -549,7 +489,7 @@ class Cform extends CI_Controller
             'data'       => $this->mmaster->dataedit($this->uri->segment(4))->row(),
             'datadetail' => $this->mmaster->dataeditdetail($this->uri->segment(4),$this->uri->segment(7))->result(),
         );
-
+        
         $this->Logger->write('Membuka Menu Detail ' . $this->global['title']);
 
         $this->load->view($this->global['folder'] . '/vformview', $data);

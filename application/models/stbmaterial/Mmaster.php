@@ -31,18 +31,23 @@ class Mmaster extends CI_Model
             }
         }
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("SELECT DISTINCT 0 AS NO, a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                g.e_bagian_name, a.i_bagian, e.e_bagian_name e_bagian_name_receive, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
-                '$i_menu' AS i_menu, '$folder' AS folder, '$dfrom' AS dfrom,'$dto' AS dto
-            FROM
-                tm_stb_material a
-            INNER JOIN tr_status_document b ON (b.i_status = a.i_status)
-            INNER JOIN tr_bagian g ON (g.i_bagian = a.i_bagian AND a.id_company = g.id_company)
-            INNER JOIN tr_bagian e ON (e.i_bagian = a.i_bagian_receive AND a.id_company = e.id_company)
-            LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
-            LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
-            WHERE a.i_status <> '5' AND a.id_company = '$this->id_company' $and $bagian
-            ORDER BY a.id ASC");
+
+        $sql = "SELECT DISTINCT 0 AS NO, a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                        g.e_bagian_name, a.i_bagian, e.e_bagian_name e_bagian_name_receive, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
+                        '$i_menu' AS i_menu, '$folder' AS folder, '$dfrom' AS dfrom,'$dto' AS dto
+                    FROM
+                        tm_stb_material a
+                    INNER JOIN tr_status_document b ON (b.i_status = a.i_status)
+                    INNER JOIN tr_bagian g ON (g.i_bagian = a.i_bagian AND a.id_company = g.id_company)
+                    INNER JOIN tr_bagian e ON (e.i_bagian = a.i_bagian_receive AND a.id_company_receive = e.id_company)
+                    LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
+                    LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
+                    WHERE a.i_status <> '5' AND (a.id_company = '$this->id_company' OR a.id_company_receive = '$this->id_company') $and $bagian
+                    ORDER BY a.id ASC";
+        
+        $datatables->query($sql);
+
+        // var_dump($sql);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -344,9 +349,11 @@ class Mmaster extends CI_Model
         $sql = "SELECT a.*, b.e_bagian_name, c.e_bagian_name e_bagian_receive_name, cc.name AS company_receive_name, to_char(a.d_document, 'dd-mm-yyyy') AS date_document
                     FROM tm_stb_material a
                     LEFT JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
-                    LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company = c.id_company)
+                    LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company_receive = c.id_company)
                     LEFT JOIN public.company cc ON cc.id = a.id_company_receive
                     WHERE a.id = '$id'";
+
+        // var_dump($sql);
 
         return $this->db->query($sql);
     }
@@ -657,7 +664,7 @@ class Mmaster extends CI_Model
                                 a.id, ab.i_bagian, c.i_product_wip, c.e_product_wipname, d.e_color_name, e.i_material, 
                                 e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, ab.d_document, 
                                 g.e_bagian_name, j2.name AS company_pembuat, ROW_NUMBER() OVER (ORDER BY a.id) AS i, 
-                                h.i_type, ab.i_tujuan, ab.d_kirim, i.e_bagian_name as tujuan_name, i.id_company AS id_company_tujuan,
+                                h.i_type, ab.i_tujuan, ab.d_kirim, i.i_bagian as tujuan_bagian, i.e_bagian_name as tujuan_name, i.id_company AS id_company_tujuan,
                                 j.name as company_name 
                             FROM tm_memo_permintaan_item a 
                             INNER JOIN tm_memo_permintaan ab ON (ab.id = a.id_document) 
@@ -687,7 +694,7 @@ class Mmaster extends CI_Model
                         ) 
                     SELECT no, id, i_bagian, i, i_product_wip, e_product_wipname, e_color_name, i_material,
                             e_material_name, e_satuan_name, n_quantity_sisa, i_type, i_document, d_document, 
-                            e_bagian_name, company_pembuat, i_tujuan, tujuan_name, id_company_tujuan,
+                            e_bagian_name, company_pembuat, i_tujuan, tujuan_bagian, tujuan_name, id_company_tujuan,
                             company_name, d_kirim, (select count(i) as jml FROM CTE) As jml 
                     FROM CTE";
         return $this->db->query($sql);

@@ -29,26 +29,26 @@ class Mmaster extends CI_Model
                 $bagian = "AND a.i_bagian IN (SELECT i_bagian FROM tr_departement_cover WHERE i_departement = '$this->i_departement' AND id_company = '$this->id_company' AND username = '$this->username')";
             }
         }
+
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("SELECT
-                DISTINCT 0 AS NO,
-                a.id AS id,
-                a.i_document,
-                to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                d.e_bagian_name,
-                e.i_document document_referensi,
-                a.e_remark,
-                e_status_name,
-                label_color,
-                g.i_level,
-                l.e_level_name,
-                a.i_status,
-                '$i_menu' AS i_menu,
-                '$folder' AS folder,
-                '$dfrom' AS dfrom,
-                '$dto' AS dto
-            FROM
-                tm_masuk_material a
+
+        $sql = "SELECT DISTINCT 0 AS NO,
+                    a.id AS id,
+                    a.i_document,
+                    to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                    d.e_bagian_name,
+                    e.i_document document_referensi,
+                    a.e_remark,
+                    e_status_name,
+                    label_color,
+                    g.i_level,
+                    l.e_level_name,
+                    a.i_status,
+                    '$i_menu' AS i_menu,
+                    '$folder' AS folder,
+                    '$dfrom' AS dfrom,
+                    '$dto' AS dto
+                FROM tm_masuk_material a
                 INNER JOIN tr_status_document b ON (b.i_status = a.i_status)
                 INNER JOIN tr_bagian d ON (d.i_bagian = a.i_bagian AND a.id_company = d.id_company)
                 LEFT JOIN tm_stb_material e ON (e.id = a.id_document_referensi)
@@ -57,11 +57,11 @@ class Mmaster extends CI_Model
                     AND g.i_menu = '$i_menu'
                 )
                 LEFT JOIN public.tr_level l ON (g.i_level = l.i_level)
-            WHERE
-                a.i_status <> '5'
-                AND a.id_company = '$this->company' $and $bagian
-            ORDER BY
-            a.id");
+                WHERE a.i_status <> '5'
+                    AND a.id_company = '$this->company' $and $bagian
+                ORDER BY a.id";
+
+        $datatables->query($sql);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -114,13 +114,21 @@ class Mmaster extends CI_Model
 
     public function bagian()
     {
-        return $this->db->query("SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement FROM tr_bagian a 
-			INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
-			LEFT JOIN tr_type c on (a.i_type = c.i_type)
-			LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
-			WHERE a.f_status = 't' AND b.i_departement = '$this->i_departement' AND username = '$this->username' AND a.id_company = '$this->id_company' 
-			ORDER BY 4, 3 ASC NULLS LAST
-        ", false);
+        $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement, a.id_company, cc.name
+                    FROM tr_bagian a 
+                    INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
+                    LEFT JOIN tr_type c on (a.i_type = c.i_type)
+                    LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
+                    LEFT JOIN public.company cc ON cc.id=a.id_company
+                    WHERE a.f_status = 't' 
+                        AND b.i_departement = '$this->i_departement' 
+                        AND username = '$this->username' 
+                        AND a.id_company = '$this->id_company'
+                    ORDER BY 5, 3 ASC NULLS LAST";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql, false);        
     }
 
     /*----------  RUNNING NO DOKUMEN  ----------*/
@@ -185,13 +193,26 @@ class Mmaster extends CI_Model
 
     /*----------  CARI DATA REFERENSI  ----------*/
 
-    public function data_referensi($cari, $i_bagian)
+    public function data_referensi($cari, $i_bagian, $id_company=null)
     {
-        return $this->db->query("SELECT DISTINCT a.id, i_document||' - '||to_char(d_document, 'dd FMMonth yyyy') i_document
-                FROM tm_stb_material a, tm_stb_material_item b
-                WHERE a.id = b.id_document AND id_company = '$this->id_company' AND i_bagian_receive = '$i_bagian' AND i_document ILIKE '%$cari%' AND a.i_status = '6' AND n_quantity_sisa > 0
-            ORDER BY 1
-        ");
+        if ($id_company == null) {
+            $id_company = $this->id_company;
+        }
+
+        $sql = "SELECT tsm.id, tsm.i_document||' - '||to_char(tsm.d_document, 'dd FMMonth yyyy') i_document, c.name
+                        FROM tm_stb_material tsm
+                        INNER JOIN tm_stb_material_item tsmi ON tsmi.id_document = tsm.id
+                        INNER JOIN public.company c ON c.id = tsm.id_company
+                        WHERE id_company = '$id_company'
+                            AND i_bagian_receive = '$i_bagian' 
+                            AND i_document ILIKE '%$cari%' 
+                            AND tsm.i_status = '6' 
+                            AND n_quantity_sisa > 0
+                        ORDER BY 1";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql);
     }
 
     /*----------  DETAIL DATA REFERENSI  ----------*/
@@ -217,11 +238,15 @@ class Mmaster extends CI_Model
         return $this->db->get()->row()->id + 1;
     }
 
-    public function simpan($id, $i_document, $d_document, $i_bagian, $i_referensi, $e_remark)
+    public function simpan($id, $i_document, $d_document, $i_bagian, $i_referensi, $e_remark, $id_company=null)
     {
+        if ($id_company == null) {
+            $id_company = $this->id_company;
+        }
+
         $data = array(
             'id' => $id,
-            'id_company' => $this->id_company,
+            'id_company' => $id_company,
             'i_bagian' => $i_bagian,
             'i_document' => $i_document,
             'd_document' => $d_document,

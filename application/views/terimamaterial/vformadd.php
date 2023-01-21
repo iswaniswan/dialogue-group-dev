@@ -13,6 +13,7 @@
                             <label class="col-md-3">Nomor Dokumen</label>
                             <label class="col-md-3">Tanggal Dokumen</label>
                             <label class="col-md-3">Referensi</label>
+                            
                             <div class="col-sm-3">
                                 <select name="i_bagian" id="i_bagian" required="" class="form-control select2">
                                     <?php if ($bagian) {
@@ -22,6 +23,28 @@
                                     } ?>
                                 </select>
                             </div>
+                            
+                            <?php /*
+                            <div class="col-sm-3">
+                                <select name="i_bagian" id="i_bagian" class="form-control select2" required>
+                                    <?php if ($bagian) {
+                                        $group = "";
+                                        foreach ($bagian as $row) : ?>
+                                        <?php if ($group!=$row->name) {?>
+                                        <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                            <?php }
+                                            $group = $row->name;
+                                            ?>
+                                            <option value="<?= "$row->id_company|$row->i_bagian"; ?>">
+                                                <?= $row->e_bagian_name; ?>
+                                            </option>
+                                        <?php endforeach;
+                                    } ?>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            */ ?>
+
                             <div class="col-sm-3">
                                 <div class="input-group">
                                     <input type="hidden" name="id" id="id" value="">

@@ -24,13 +24,8 @@
                             <label class="col-md-3">Tanggal Dokumen</label>
                             <label class="col-md-3">Bagian Penerima</label>
                             <div class="col-sm-3">
-                                <select name="i_bagian" id="i_bagian" required="" class="form-control select2">
-                                    <?php if ($bagian) {
-                                        foreach ($bagian->result() as $key) { ?>
-                                            <option value="<?= trim($key->i_bagian); ?>" <?php if ($key->i_bagian == $data->i_bagian) { ?> selected <?php } ?>><?= $key->e_bagian_name; ?></option>
-                                    <?php }
-                                    } ?>
-                                </select>
+                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_name; ?>">
+                                <input type="hidden" name="i_bagian" value="<?= trim($data->i_bagian); ?>">
                             </div>
                             <div class="col-sm-3">
                                 <div class="input-group">

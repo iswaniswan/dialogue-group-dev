@@ -137,13 +137,17 @@ class Cform extends CI_Controller
 
     public function referensi()
     {
-        $filter = [];
-        $data = $this->mmaster->data_referensi(str_replace("'", "", $this->input->get('q')), $this->input->get('i_bagian'));
+        $q = $this->input->get('q');
+        $bagian = $this->input->get('i_bagian');
+
+        $filter = [];        
+        $data = $this->mmaster->data_referensi($q, $bagian);
         if ($data->num_rows() > 0) {
             foreach ($data->result() as $key) {
                 $filter[] = array(
                     'id'   => $key->id,
-                    'text' => $key->i_document
+                    'text' => $key->i_document,
+                    'company' => $key->name
                 );
             }
         } else {
@@ -152,6 +156,30 @@ class Cform extends CI_Controller
                 'text' => "Tidak Ada Data."
             );
         }
+
+        // $results = [];
+        // foreach ($filter as $item) {
+        //     $children = [
+        //         'id' => $item['id'],
+        //         'text' => $item['text']
+        //     ];
+        //     $company = $item['name'];
+            
+        // }
+
+        $test_child = [
+            ['id' => 'ca', 
+            'text' => 'california'],
+            ['id' => 'co', 
+            'text' => 'colorado'],
+        ];
+        $result =  [
+            'text' => 'group1',
+            'children' => $test_child
+        ];
+        echo json_encode($result);
+        return;
+
         echo json_encode($filter);
     }
 
@@ -181,13 +209,17 @@ class Cform extends CI_Controller
             $d_document = formatYmd($d_document);
         }
         $i_bagian      = $this->input->post('i_bagian', TRUE);
+        $array_bagian = explode('|', $i_bagian);
+        $_i_bagian = $array_bagian[1];
+        $_id_company = $array_bagian[0];
+
         $i_referensi   = $this->input->post('i_referensi', TRUE);
         $e_remark      = $this->input->post('e_remark', TRUE);
         $jml           = $this->input->post('jml', TRUE);
         $id            = $this->mmaster->runningid();
         if ($id != '' && $i_document != '' && $d_document != '' && $i_referensi != '' && $jml > 0) {
             $this->db->trans_begin();
-            $this->mmaster->simpan($id, $i_document, $d_document, $i_bagian, $i_referensi, $e_remark);
+            $this->mmaster->simpan($id, $i_document, $d_document, $_i_bagian, $i_referensi, $e_remark, $_id_company);
             for ($i = 0; $i < $jml; $i++) {
                 $id_material = $this->input->post('id_material' . $i, TRUE);
                 $n_quantity = str_replace(",", "", $this->input->post('n_quantity' . $i, TRUE));
