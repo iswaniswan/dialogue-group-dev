@@ -157,30 +157,32 @@ class Cform extends CI_Controller
             );
         }
 
-        // $results = [];
-        // foreach ($filter as $item) {
-        //     $children = [
-        //         'id' => $item['id'],
-        //         'text' => $item['text']
-        //     ];
-        //     $company = $item['name'];
-            
-        // }
+        $results = [];
 
-        $test_child = [
-            ['id' => 'ca', 
-            'text' => 'california'],
-            ['id' => 'co', 
-            'text' => 'colorado'],
-        ];
-        $result =  [
-            'text' => 'group1',
-            'children' => $test_child
-        ];
-        echo json_encode($result);
-        return;
+        foreach ($filter as $item) {
+            $children[] = [
+                'id' => $item['id'], 'text' => $item['text']
+            ];
 
-        echo json_encode($filter);
+            $group = [
+                'text' => trim($item['company']), 'children' => $children
+            ];
+
+            if (count($results) == 0) {
+                $results[] = $group;
+                continue;
+            }
+
+            foreach ($results as $result) {
+                if ($result['text'] == $group['text']) {
+                    $result['children'][] = $children;
+                    continue;
+                }
+                $results[] = $group;
+            }
+        }
+
+        echo json_encode($results);
     }
 
     /*----------  DETAIL ITEM REFERENSI  ----------*/
