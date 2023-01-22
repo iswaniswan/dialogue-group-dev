@@ -190,7 +190,6 @@ class Cform extends CI_Controller
 //        $dto      = $this->input->post('dto', true);
 //
 //        $bagian  = [];
-//        $array_company_tujuan = [];
 //        $penerima  = [];
 //        $memo = [];
 //        if ($this->input->post('jml', true) > 0) {
@@ -199,21 +198,17 @@ class Cform extends CI_Controller
 //                $id_memo = $this->input->post('id' . $i, true);
 //                $i_bagian = $this->input->post('i_bagian' . $i, true);
 //                $i_type = $this->input->post('i_type' . $i, true);
-//                $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
 //                if ($check == 'on') {
 //                    array_push($bagian, $i_bagian);
-//                    array_push($array_company_tujuan, $id_company_tujuan);
 //                    array_push($penerima, $i_type);
 //                    array_push($memo, $id_memo);
 //                }
 //            }
 //        }
 //        $bagian   = array_unique($bagian);
-//        $company_tujuan = array_unique($array_company_tujuan);
 //        $penerima   = array_unique($penerima);
 //        $memo     = array_unique($memo);
 //        $i_bagian = implode(",", $bagian);
-//        $id_company_tujuan = implode(",", $company_tujuan);
 //        $i_type = implode(",", $penerima);
 //        $id_memo  = "'" . implode("', '", $memo) . "'";
 //        if (count($bagian) == 1) {
@@ -224,7 +219,7 @@ class Cform extends CI_Controller
 //                'dfrom'         => $dfrom,
 //                'dto'           => $dto,
 //                'bagian'        => $this->mmaster->bagian($i_type),
-//                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian, $id_company_tujuan),
+//                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian),
 //                'data_detail'   => $this->mmaster->data_detail($id_memo),
 //            );
 //            $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
@@ -245,51 +240,36 @@ class Cform extends CI_Controller
 
     public function proses_kirim()
     {
-        $data = check_role($this->i_menu, 1);
-        if (!$data) {
+        $granted = check_role($this->i_menu, 1);
+        if (!$granted) {
             redirect(base_url(), 'refresh');
         }
 
         $dfrom    = $this->input->post('dfrom', true);
         $dto      = $this->input->post('dto', true);
+        $array_detail = $this->input->post('detail');
 
-        if ($this->input->post('jml', true) > 0) {
-            for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
-                $check       = $this->input->post('chk' . $i, true);
-                $id_memo = $this->input->post('id' . $i, true);
-                $i_bagian = $this->input->post('i_bagian' . $i, true);
-                $i_type = $this->input->post('i_type' . $i, true);
-                $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
-                if ($check == 'on') {
-                    array_push($bagian, $i_bagian);
-                    array_push($array_company_tujuan, $id_company_tujuan);
-                    array_push($penerima, $i_type);
-                    array_push($memo, $id_memo);
-                }
-            }
+        $array_id_memo = [];
+        $array_bagian = [];
+        $array_type = [];
+        $array_tujuan = [];
+
+        foreach ($array_detail as $item) {
+            $array_id_memo[] = $item['id'];
+            $array_bagian[] = $item['i_bagian'];
+            $array_type[] = $item['i_type'];
+            $array_tujuan[] = $item['i_tujuan'];
         }
-        $bagian   = array_unique($bagian);
-        $company_tujuan = array_unique($array_company_tujuan);
-        $penerima   = array_unique($penerima);
-        $memo     = array_unique($memo);
-        $i_bagian = implode(",", $bagian);
-        $id_company_tujuan = implode(",", $company_tujuan);
-        $i_type = implode(",", $penerima);
-        $id_memo  = "'" . implode("', '", $memo) . "'";
-        if (count($bagian) == 1) {
-            $data = array(
-                'folder'        => $this->global['folder'],
-                'title'         => "Tambah " . $this->global['title'],
-                'title_list'    => 'List ' . $this->global['title'],
-                'dfrom'         => $dfrom,
-                'dto'           => $dto,
-                'bagian'        => $this->mmaster->bagian($i_type),
-                'bagian_receive'=> $this->mmaster->bagian_receive($i_bagian, $id_company_tujuan),
-                'data_detail'   => $this->mmaster->data_detail($id_memo),
-            );
-            $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
-            $this->load->view($this->global['folder'] . '/vformadd', $data);
-        } else {
+
+        $unique_bagian = array_unique($array_bagian);
+        $unique_tujuan = array_unique($array_tujuan);
+        $unique_type = array_unique($array_type);
+        $unique_id_memo = array_unique($array_id_memo);
+
+        if (count($unique_bagian) > 1 or
+            count($unique_tujuan) > 1 or
+            count($unique_type) > 1
+        ) {
             echo '<script>
             swal({
                 title: "Maaf :(",
@@ -300,7 +280,24 @@ class Cform extends CI_Controller
                     show("' . $this->global['folder'] . '/cform/tambah_kirim/' . $dfrom . '/' . $dto . '","#main");
                     });
             </script>';
+            return;
         }
+
+        $join_id_memo  = "'" . join("', '", $unique_id_memo) . "'";
+
+        $data = array(
+            'folder'        => $this->global['folder'],
+            'title'         => "Tambah " . $this->global['title'],
+            'title_list'    => 'List ' . $this->global['title'],
+            'dfrom'         => $dfrom,
+            'dto'           => $dto,
+            'bagian'        => $this->mmaster->bagian($unique_type[0]),
+//            'bagian_receive'=> $this->mmaster->bagian_receive($unique_bagian[0], $unique_id_company_tujuan[0]),
+            'bagian_receive' => $this->mmaster->query_table_bagian($unique_tujuan[0]),
+            'data_detail'   => $this->mmaster->data_detail($join_id_memo),
+        );
+        $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
+        $this->load->view($this->global['folder'] . '/vformadd', $data);
     }
 
     /*----------  DAFTAR DATA MASUK INTERNAL  ----------*/
