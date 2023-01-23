@@ -12,10 +12,10 @@
     <title>Dialogue Group Apps Portal</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="<?= base_url(); ?>assets/bootstrap/dist/css/bootstrap.min.css?version=<?= v_js(); ?>" rel="stylesheet">
-    <link href="<?= base_url(); ?>assets/plugins/bower_components/bootstrap-extension/css/bootstrap-extension.css?version=<?= v_js(); ?>" rel="stylesheet">
+    <link href="<?= base_url(); ?>assets/bootstrap/dist/css/bootstrap.min.css?v=2" rel="stylesheet">
+    <link href="<?= base_url(); ?>assets/plugins/bower_components/bootstrap-extension/css/bootstrap-extension.css?v=2" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="<?= base_url(); ?>assets/css/style.css?version=<?= v_js(); ?>" rel="stylesheet">
+    <link href="<?= base_url(); ?>assets/css/style.css?v=2" rel="stylesheet">
     <link href="<?= base_url(); ?>assets/css/global.css?v=100" rel="stylesheet">
     <!-- color CSS -->
     <!-- <link href="<?= base_url(); ?>assets/css/colors/green.css" id="theme" rel="stylesheet"> -->
@@ -28,7 +28,7 @@
     <link href="<?= base_url(); ?>assets/plugins/bower_components/sweetalert/sweetalert.css" rel="stylesheet" type="text/css">
     <link href="<?= base_url(); ?>assets/plugins/bower_components/tablesaw-master/dist/tablesaw.css" rel="stylesheet">
     <!-- File Upload -->
-    <link rel="stylesheet" href="<?= base_url(); ?>assets/plugins/bower_components/dropify/dist/css/dropify.min.css?version=<?= v_js(); ?>">
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/plugins/bower_components/dropify/dist/css/dropify.min.css?v=2">
 
     <!-- FIXED COLUMN CSS BOOSTRAP -->
     <link href="<?= base_url() . 'assets/css/bootstrap-table.min.css'; ?>" rel="stylesheet">
@@ -321,20 +321,20 @@
     <!-- /#wrapper -->
 
     <!-- jQuery -->
-    <script src="<?= base_url(); ?>assets/plugins/bower_components/jquery/dist/jquery.min.js?version=<?= v_js(); ?>"></script>
-    <script src="<?= base_url(); ?>assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/plugins/bower_components/jquery/dist/jquery.min.js?v=2"></script>
+    <script src="<?= base_url(); ?>assets/js/jquery-ui/js/jquery-ui-1.10.3.minimal.min.js?v=2"></script>
     <!--Wave Effects -->
-    <script src="<?= base_url(); ?>assets/js/waves.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/js/waves.js?v=2"></script>
     <!-- Bootstrap Core JavaScript -->
-    <script src="<?= base_url(); ?>assets/bootstrap/dist/js/tether.min.js?version=<?= v_js(); ?>"></script>
-    <script src="<?= base_url(); ?>assets/bootstrap/dist/js/bootstrap.min.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/bootstrap/dist/js/tether.min.js?v=2"></script>
+    <script src="<?= base_url(); ?>assets/bootstrap/dist/js/bootstrap.min.js?v=2"></script>
     <!-- Menu Plugin JavaScript -->
-    <script src="<?= base_url(); ?>assets/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/plugins/bower_components/sidebar-nav/dist/sidebar-nav.min.js?v=2"></script>
     <!--slimscroll JavaScript -->
-    <script src="<?= base_url(); ?>assets/js/jquery.slimscroll.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/js/jquery.slimscroll.js?v=2"></script>
 
 
-    <script src="<?= base_url(); ?>assets/plugins/bower_components/datatables/jquery.dataTables.min.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/plugins/bower_components/datatables/jquery.dataTables.min.js?v=2"></script>
     <!-- start - This is for export functionality only -->
     <script src="<?= base_url(); ?>assets/plugins/bower_components/datatables/dataTables.buttons.min.js"></script>
     <script src="<?= base_url(); ?>assets/plugins/bower_components/datatables/dataTables.rowGroup.min.js"></script>
@@ -352,13 +352,13 @@
     <script src="<?= base_url(); ?>assets/plugins/bower_components/tablesaw-master/dist/tablesaw.js"></script>
     <script src="<?= base_url(); ?>assets/plugins/bower_components/blockUI/jquery.blockUI.js"></script>
     <!-- File Upload -->
-    <script src="<?= base_url(); ?>assets/plugins/bower_components/dropify/dist/js/dropify.min.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/plugins/bower_components/dropify/dist/js/dropify.min.js?v=2"></script>
 
     <!--numberformat JavaScript -->
-    <script src="<?= base_url(); ?>assets/js/jquery.number.min.js?version=<?= v_js(); ?>"></script>
-    <script src="<?= base_url(); ?>assets/js/jquery.floatThead.min.js?version=<?= v_js(); ?>"></script>
-    <script src="<?= base_url(); ?>assets/js/freeze-table.js?version=<?= v_js(); ?>"></script>
-    <script src="<?= base_url(); ?>assets/bootstrap/js/tooltip.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/js/jquery.number.min.js?v=2"></script>
+    <script src="<?= base_url(); ?>assets/js/jquery.floatThead.min.js?v=2"></script>
+    <script src="<?= base_url(); ?>assets/js/freeze-table.js?v=2"></script>
+    <script src="<?= base_url(); ?>assets/bootstrap/js/tooltip.js?v=2"></script>
 
     <!-- TABLE BOOSTRAP FIXED COLUMN -->
     <script src="<?= base_url() . 'assets/js/bootstrap-table.min.js'; ?>"></script>
@@ -415,7 +415,7 @@
             location.href = `${base_url}auth/logout/${departement}/${level}`;
         }
     </script>
-    <script src="<?= base_url(); ?>assets/js/sweetalert.js?version=<?= v_js(); ?>"></script>
+    <script src="<?= base_url(); ?>assets/js/sweetalert.js?v=2"></script>
     <script src="<?= base_url(); ?>assets/js/custom.min.js?v=5"></script>
     <!--</body>
         </html>-->

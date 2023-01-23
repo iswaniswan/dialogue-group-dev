@@ -140,28 +140,30 @@ class Cform extends CI_Controller
         $q = $this->input->get('q');
         $bagian = $this->input->get('i_bagian');
 
-        $filter = [];        
+        $filters = [];
         $data = $this->mmaster->data_referensi($q, $bagian);
-        if ($data->num_rows() > 0) {
-            foreach ($data->result() as $key) {
-                $filter[] = [
-                    'text' => $key->name,
-                    'children' => [
-                        [
-                            'id'   => $key->id,
-                            'text' => $key->i_document,
-                        ]                        
-                    ]
-                ];
-            }
-        } else {
-            $filter[] = array(
+        if ($data->num_rows() == 0) {
+            $filter = [
                 'id'   => null,
                 'text' => "Tidak Ada Data."
-            );
+            ];
+            $filters[] = $filter;
+
+            echo json_encode($filters);
+            return;
         }
 
-        echo json_encode($filter);
+        foreach ($data->result() as $result) {
+            $group = [
+                'id'   => $result->id,
+                'text' => $result->i_document,
+                'name' => $result->name
+            ];
+
+            $filters[] = $group;
+        }
+
+        echo json_encode($filters);
     }
 
     /*----------  DETAIL ITEM REFERENSI  ----------*/

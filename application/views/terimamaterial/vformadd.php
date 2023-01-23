@@ -130,6 +130,16 @@
             number();
         });
 
+        const mergeLabel = (array) => {
+            let indexes = [];
+            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+                if (indexes.includes(id) == false) {
+                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+                }
+                indexes.push(id);
+                return obj;
+            }, {}));
+        }
         /*Tidak boleh lebih dari hari ini*/
         showCalendar('.date', null, 0);
         $('#i_referensi').select2({
@@ -146,7 +156,8 @@
                     }
                     return query;
                 },
-                processResults: function(data) {
+                processResults: function(result) {
+                    const data = mergeLabel(result);
                     return {
                         results: data
                     };
