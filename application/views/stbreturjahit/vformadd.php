@@ -101,13 +101,13 @@
                     <thead>
                         <tr>
                             <th class="text-center" style="width: 3%;">No</th>
-                            <th class="text-center" style="width: 8%;">Kode</th>
+                            <th class="text-center" style="width: 6%;">Kode</th>
                             <th class="text-center" style="width: 25%;">Nama Barang Jadi</th>
                             <th class="text-center" style="width: 7%;">Warna</th>
-                            <th class="text-center" style="width: 7%;">QTY Kirim</th>
-                            <th class="text-center" style="width: 10%;">Bagian (Optional)</th>
+                            <th class="text-center" style="width: 7%;">QTY<br>Kirim</th>
+                            <th class="text-center" style="width: 10%;">Bagian<br>(Optional)</th>
                             <th class="text-center" style="width: 10%;">Penyebab Retur</th>
-                            <th class="text-center" style="width: 15%;">Detail Retur</th>
+                            <th class="text-center" style="width: 10%;">Detail<br>Retur</th>
                             <th class="text-center" style="width: 30%;">Referensi</th>
                         </tr>
                     </thead>
@@ -162,7 +162,7 @@
                             cols += `<td><input type="text" id="bagian${i}" class="form-control input-sm" name="bagian[]"></td>`;
                             cols += `<td><select type="text" id="id_reject${i}" class="form-control select2" name="id_reject[]"><option value=""></option></select></td>`;
                             cols += `<td><input type="text" id="detail_reject${i}" class="form-control input-sm" name="detail_reject[]"></td>`;
-                            cols += `<td><input type="text" readonly value="${data['dataitem'][a]['e_remark']} [${data['dataitem'][a]['reff']}]" id="edesc${i}" class="form-control input-sm" name="edesc[]"></td>`;
+                            cols += `<td><input type="text" readonly value="${data['dataitem'][a]['e_remark']} [${data['dataitem'][a]['reff']}]" id="edesc${i}" class="form-control input-sm" name="edesc[]" title="${data['dataitem'][a]['e_remark']} [${data['dataitem'][a]['reff']}]"></td>`;
                             // cols += `<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>`;
                             newRow.append(cols);
                             $("#tabledatax").append(newRow);

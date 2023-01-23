@@ -84,11 +84,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                <?php
-                        if($datadetail){
+                <?php if ($datadetail) {
                         $i = 0;
                         $lastproduct = ''; 
-                        foreach($datadetail as $row){
+                        foreach ($datadetail as $row) {
                             $i++;                             
                     ?>
                     <tr>   
@@ -118,12 +117,12 @@
                         </td>                                                      
                     </tr>                       
                     <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                    <?}
-                    }else{
+                    <?php }
+                    } else {
                         $i=0;
                         $read = "disabled";
                         echo "<table class=\"table table-striped bottom\" style=\"width:100%;\"><tr><td colspan=\"16\" style=\"text-align:center;\">Maaf Tidak Ada  Bon Masuk!</td></tr></table>"; 
-                    }?>        
+                    } ?>        
                 </tbody>         
             </table>
         </div>

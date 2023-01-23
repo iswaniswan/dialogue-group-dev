@@ -141,22 +141,36 @@ foreach($data->result() as $row){?>
                <hr class="hrna">
                <div class="row">
                   <div class="col-sm-12">
-                     <div class="pull-left">
+                     <!-- <div class="pull-left"> -->
                         <address style="padding:0px">
-                           <table cellpadding="0" cellspacing="0" >
-                              <tr>
-                                 <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor Surat Jalan</b></td> 
-                                 <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                 <td width="300px" class="text-muted m-l-3 huruf12"><b><?= $row->i_document;?></b></td> 
-                              </tr>
-                              <tr>
-                                 <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor SPB</b></td> 
-                                 <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                 <td width="300px" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi; ?></b></td> 
-                              </tr>
-                           </table>
+                           <div class="d-flex justify-content-between p-0">
+                              <table cellpadding="0" cellspacing="0">
+                                 <tr>
+                                    <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor Surat Jalan</b></td> 
+                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                    <td width="150px" class="text-muted m-l-3 huruf12"><b><?= $row->i_document;?></b></td> 
+                                 </tr>
+                                 <tr>
+                                    <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor SPB</b></td> 
+                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                    <td width="150px" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi; ?></b></td> 
+                                 </tr>
+                              </table>
+                              <table cellpadding="0" cellspacing="0">
+                                 <tr>
+                                    <td width="135px" class="text-muted m-l-3 huruf12"><b>Nomor OP Distributor</b></td> 
+                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                    <td width="0" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi_op; ?></b></td> 
+                                 </tr>
+                                 <tr>
+                                    <td width="135px" class="text-muted m-l-3 huruf12"><b>Area</b></td> 
+                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                    <td width="0" class="text-muted m-l-3 huruf12"><b><?= $row->e_area; ?></b></td> 
+                                 </tr>
+                              </table>
+                           </div>
                         </address>
-                     </div>
+                     <!-- </div> -->
                   </div>
                   <div class="col-sm-12">
                      <p class="text-muted pna"> Harap diterima barang-barang berikut ini : </p>
@@ -200,7 +214,7 @@ foreach($data->result() as $row){?>
                                        <td class="text-right">
                                           <?= $rowi->n_quantity;?>
                                        </td>
-                                       <td class="text-left"><?= $rowi->e_satuan_name;?></td>
+                                       <td class="text-left"><?= $rowi->i_satuan_code;?></td>
                                        <td><?= $rowi->e_remark;?></td>
                                     </tr>
                                  <?php } ?>
@@ -211,19 +225,25 @@ foreach($data->result() as $row){?>
                   </div>
                   <div class="col-sm-12">
                      <div class="row">
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Penerima,</p>
                               <h3 class="huruf12">(...................................)</h3>
                            </div>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
+                           <div class="pull-center m-t-30 text-center">
+                              <p class="p">Pengirim,</p>
+                              <h3 class="huruf12">(...................................)</h3>
+                           </div>
+                        </div>
+                        <div class="col-sm-3">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Mengetahui,</p>
                               <h3 class="huruf12">(...................................)</h3>
                            </div>
                         </div>
-                        <div class="col-sm-4">
+                        <div class="col-sm-3">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Hormat Kami,</p>
                               <h3 class="huruf12">(...................................)</h3>

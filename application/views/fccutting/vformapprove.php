@@ -113,6 +113,9 @@
                                 $kondisi_stock = ($stok_pengadaan + $stok_pengesetan + $sisa_permintaan) - $sisa_schedule;
                                 $schedule_jahit = $key->n_schedule_jahit;
                                 $total_sisa = $schedule_jahit - ($kondisi_stock);
+
+                                if($total_sisa < 0) { $total_sisa = 0;};
+
                                 $up_qty = $key->n_up_cutting;
                                 $fc_cutting = $total_sisa + $up_qty;
                                 $v_set = $key->v_set;

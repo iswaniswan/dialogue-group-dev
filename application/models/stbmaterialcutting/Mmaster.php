@@ -32,7 +32,7 @@ class Mmaster extends CI_Model
         }
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query("SELECT DISTINCT 0 AS NO, a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                g.e_bagian_name, a.i_bagian, e.e_bagian_name||' - '||k.name e_bagian_name_receive, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
+                g.e_bagian_name, a.i_bagian, e.e_bagian_name||' - '||k.name e_bagian_name_receive, a.e_remark, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
                 '$i_menu' AS i_menu, '$folder' AS folder, '$dfrom' AS dfrom,'$dto' AS dto
             FROM
                 tm_stb_material_cutting a
@@ -885,12 +885,11 @@ class Mmaster extends CI_Model
                 WHERE b.id = a.id_document AND i_status IN ('1','2','3','6')  group by 1,2,3
             ) h ON ( h.id_product_wip = a.id_product_wip AND a.id_material = h.id_material AND a.id_forecast = ANY(h.id_referensi))
             WHERE ab.i_status = '6' AND ab.id_company = '4' AND (round(a.n_quantity * a.n_fc_cutting, 2) - COALESCE (h.n_quantity,0)) > 0 
-            AND a.id_material IN ($id_material)
-            AND a.id_product_wip IN ($id_product_wip)
+            /*AND a.id_material IN ($id_material) AND a.id_product_wip IN ($id_product_wip)*/
             AND ARRAY[a.id_type_makloon] && (SELECT id_type_makloon FROM tr_bagian WHERE id = '$ibagian')
             AND a.i_periode IN ($i_periode)
             AND d.i_kode_group_barang = 'GRB0001'
-            AND a.id_product_wip||'|'||a.id_material IN ($id)
+            AND a.id_product_wip||'|'||a.id_material||'|'||a.id IN ($id)
             ORDER BY i_product_wip, i_material
         ");
     }

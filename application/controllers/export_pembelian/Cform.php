@@ -599,7 +599,7 @@ class Cform extends CI_Controller
                 ->setCellValue("A3", "Periode : $date_from s/d $date_to");
             $spreadsheet->getActiveSheet()->setTitle('Laporan OP vs BTB');
             $header = [
-                '#', 'TGL. OP', 'NO. OP', 'KODE SUPPLIER', 'NAMA SUPPLIER', 'KODE MATERIAL', 'NAMA MATERIAL', 'SATUAN', 'QTY OP', 'QTY BTB/SJ', 'SISA OP'
+                '#', 'TGL. OP', 'NO. OP', 'KODE SUPPLIER', 'NAMA SUPPLIER', 'KODE MATERIAL', 'NAMA MATERIAL', 'SATUAN', 'QTY OP', 'QTY BTB/SJ', 'SISA OP', 'TOLERANSI'
             ];
             $h = 5;
             for ($i = 0; $i < count($header); $i++) {
@@ -621,9 +621,11 @@ class Cform extends CI_Controller
             $total = 0;
             $total_sj = 0;
             $total_sisa = 0;
+            $total_toleransi = 0;
             $total_n_quantity = 0;
             $total_n_quantity_sj = 0;
             $total_n_quantity_sisa = 0;
+            $total_n_toleransi = 0;
             $query5 = $this->mmaster->get_op_vs_btb($date_from, $date_to, $i_supplier);
             if ($query5->num_rows() > 0) {
                 foreach ($query5->result() as $row) {
@@ -631,6 +633,7 @@ class Cform extends CI_Controller
                     $total_n_quantity += $row->n_quantity;
                     $total_n_quantity_sj += $row->n_quantity_sj;
                     $total_n_quantity_sisa += $row->n_quantity_sisa;
+                    $total_n_toleransi += $row->n_toleransi;
                     if ($supplier != '') {
                         if ($supplier != $row->e_supplier_name) {
                             $no = 1;
@@ -641,18 +644,20 @@ class Cform extends CI_Controller
                                 ->setCellValue($abjad[count($header) - 4] . $j, "TOTAL")
                                 ->setCellValue($abjad[count($header) - 3] . $j, $total)
                                 ->setCellValue($abjad[count($header) - 2] . $j, $total_sj)
-                                ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa);
+                                ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa)
+                                ->setCellValue($abjad[count($header) - 1] . $j, $total_toleransi);
                             $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
                             $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
                             $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
                             $total = 0;
                             $total_sj = 0;
                             $total_sisa = 0;
+                            $total_toleransi = 0;
                             $j = $j + 1;
                         }
                     }
                     $isi = [
-                        $no, Date::PHPToExcel($row->d_op), $row->i_op, $row->i_supplier, $row->e_supplier_name, $row->i_material, $row->e_material_name, $row->e_satuan_name, $row->n_quantity, $row->n_quantity_sj, $row->n_quantity_sisa
+                        $no, Date::PHPToExcel($row->d_op), $row->i_op, $row->i_supplier, $row->e_supplier_name, $row->i_material, $row->e_material_name, $row->e_satuan_name, $row->n_quantity, $row->n_quantity_sj, $row->n_quantity_sisa, $row->n_toleransi
                     ];
                     for ($i = 0; $i < count($isi); $i++) {
                         $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $j, $isi[$i]);
@@ -663,6 +668,7 @@ class Cform extends CI_Controller
                     $total += $row->n_quantity;
                     $total_sj += $row->n_quantity_sj;
                     $total_sisa += $row->n_quantity_sisa;
+                    $total_toleransi += $row->n_toleransi;
 
                     $j++;
                 }
@@ -685,7 +691,8 @@ class Cform extends CI_Controller
                 ->setCellValue($abjad[0] . $j, "TOTAL KESELURUHAN")
                 ->setCellValue($abjad[count($header) - 3] . $j, $total_n_quantity)
                 ->setCellValue($abjad[count($header) - 2] . $j, $total_n_quantity_sj)
-                ->setCellValue($abjad[count($header) - 1] . $j, $total_n_quantity_sisa);
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_n_quantity_sisa)
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_n_toleransi);
             $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
             $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
             $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
@@ -1183,6 +1190,218 @@ class Cform extends CI_Controller
             $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
             /** End Sheet PP */
             $nama_file = "Laporan_PP_belum_OP_" . $date_from . "_" . $date_to . ".xls";
+        } elseif ($laporan == 'exp_obpp') {
+            /* start over budget */
+            $spreadsheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(12);
+            $spreadsheet->setActiveSheetIndex(0)->setCellValue("A1", strtoupper($this->session->e_company_name))
+                ->setCellValue("A2", "LAPORAN OB / PP (OVER BUDGET)")
+                ->setCellValue("A3", "Periode : $date_from s/d $date_to");
+            $spreadsheet->getActiveSheet()->setTitle('OVER BUDGET');
+            $header = [
+                '#', 'TGL. PP', 'NO. PP', 'GROUP BARANG', 'KODE MATERIAL', 'NAMA MATERIAL', 'SATUAN', 'KODE SUPPLIER', 'NAMA SUPPLIER', 'QTY PP', 'QTY OP', 'SISA PP'
+            ];
+            $h = 5;
+            for ($i = 0; $i < count($header); $i++) {
+                $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $h, $header[$i]);
+            }
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle1, $abjad[0] . $satu . ":" . $abjad[count($header) - 1] . $lima);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $satu . ":" . $abjad[count($header) - 1] . $satu);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $dua . ":" . $abjad[count($header) - 1] . $dua);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $tiga . ":" . $abjad[count($header) - 1] . $tiga);
+            $spreadsheet->getActiveSheet()->freezePane($abjad[0] . ($h + 1));
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h)->getAlignment()->setWrapText(true);
+
+            $supplier = '';
+            $j = 6;
+            $x = 6;
+            $no = 0;
+            $total = 0;
+            $total_sj = 0;
+            $total_sisa = 0;
+            $total_toleransi = 0;
+            $total_n_quantity = 0;
+            $total_n_quantity_sj = 0;
+            $total_n_quantity_sisa = 0;
+            $query_pp_ob = $this->mmaster->get_pp_ob($date_from, $date_to, $i_supplier, 'ob');
+            if ($query_pp_ob->num_rows() > 0) {
+                foreach ($query_pp_ob->result() as $row) {
+                    $no++;
+                    $total_n_quantity += $row->n_quantity;
+                    $total_n_quantity_sj += $row->n_quantity_sj;
+                    $total_n_quantity_sisa += $row->n_quantity_sisa;
+                    // if ($supplier != '') {
+                    //     if ($supplier != $row->e_supplier_name) {
+                    //         $no = 1;
+
+                    //         $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 5] . $j);
+                    //         $spreadsheet->setActiveSheetIndex(0)
+                    //             ->setCellValue($abjad[0] . $j, $supplier)
+                    //             ->setCellValue($abjad[count($header) - 4] . $j, "TOTAL")
+                    //             ->setCellValue($abjad[count($header) - 3] . $j, $total)
+                    //             ->setCellValue($abjad[count($header) - 2] . $j, $total_sj)
+                    //             ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa)
+                    //             ->setCellValue($abjad[count($header) - 1] . $j, $total_toleransi);
+                    //         $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+                    //         $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+                    //         $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+                    //         $total = 0;
+                    //         $total_sj = 0;
+                    //         $total_sisa = 0;
+                    //         $total_toleransi = 0;
+                    //         $j = $j + 1;
+                    //     }
+                    // }
+                    $isi = [
+                        $no, Date::PHPToExcel($row->d_pp), $row->i_pp, $row->e_nama_group_barang, $row->i_material, $row->e_material_name, $row->e_satuan_name, $row->i_supplier, $row->e_supplier_name, $row->n_quantity, $row->n_quantity_sj, $row->n_quantity_sisa
+                    ];
+                    for ($i = 0; $i < count($isi); $i++) {
+                        $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $j, $isi[$i]);
+                        $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle2, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+                        $spreadsheet->getActiveSheet()->getStyle($abjad[1] . $j . ":" . $abjad[1] . $j)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_DD_MMMM_YYYY);
+                    }
+                    $supplier = $row->e_supplier_name;
+                    $total += $row->n_quantity;
+                    $total_sj += $row->n_quantity_sj;
+                    $total_sisa += $row->n_quantity_sisa;
+
+                    $j++;
+                }
+            } else {
+                $ada_data = false;
+            }
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 5] . $j);
+            $spreadsheet->setActiveSheetIndex(0)
+                ->setCellValue($abjad[0] . $j, $supplier)
+                ->setCellValue($abjad[count($header) - 4] . $j, "TOTAL")
+                ->setCellValue($abjad[count($header) - 3] . $j, $total)
+                ->setCellValue($abjad[count($header) - 2] . $j, $total_sj)
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa);
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+            $j = $j + 1;
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 4] . $j);
+            $spreadsheet->setActiveSheetIndex(0)
+                ->setCellValue($abjad[0] . $j, "TOTAL KESELURUHAN")
+                ->setCellValue($abjad[count($header) - 3] . $j, $total_n_quantity)
+                ->setCellValue($abjad[count($header) - 2] . $j, $total_n_quantity_sj)
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_n_quantity_sisa);
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+            $y = $j - 1;
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getBorders()->getTop()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            /* end over budget */
+
+            /* start bukan over budget */
+            $spreadsheet->createSheet();
+            $spreadsheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(12);
+            $spreadsheet->setActiveSheetIndex(1)->setCellValue("A1", strtoupper($this->session->e_company_name))
+                ->setCellValue("A2", "LAPORAN OB / PP (BUKAN OVER BUDGET)")
+                ->setCellValue("A3", "Periode : $date_from s/d $date_to");
+            $spreadsheet->getActiveSheet()->setTitle('BUKAN OVER BUDGET');
+            $header = [
+                '#', 'TGL. PP', 'NO. PP', 'GROUP BARANG', 'KODE MATERIAL', 'NAMA MATERIAL', 'SATUAN', 'KODE SUPPLIER', 'NAMA SUPPLIER', 'QTY PP', 'QTY OP', 'SISA PP'
+            ];
+            $h = 5;
+            for ($i = 0; $i < count($header); $i++) {
+                $spreadsheet->setActiveSheetIndex(1)->setCellValue($abjad[$i] . $h, $header[$i]);
+            }
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle1, $abjad[0] . $satu . ":" . $abjad[count($header) - 1] . $lima);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $satu . ":" . $abjad[count($header) - 1] . $satu);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $dua . ":" . $abjad[count($header) - 1] . $dua);
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $tiga . ":" . $abjad[count($header) - 1] . $tiga);
+            $spreadsheet->getActiveSheet()->freezePane($abjad[0] . ($h + 1));
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $h . ":" . $abjad[count($header) - 1] . $h)->getAlignment()->setWrapText(true);
+
+            $supplier = '';
+            $j = 6;
+            $x = 6;
+            $no = 0;
+            $total = 0;
+            $total_sj = 0;
+            $total_sisa = 0;
+            $total_toleransi = 0;
+            $total_n_quantity = 0;
+            $total_n_quantity_sj = 0;
+            $total_n_quantity_sisa = 0;
+            $query_pp_ob = $this->mmaster->get_pp_ob($date_from, $date_to, $i_supplier, 'notob');
+            if ($query_pp_ob->num_rows() > 0) {
+                foreach ($query_pp_ob->result() as $row) {
+                    $no++;
+                    $total_n_quantity += $row->n_quantity;
+                    $total_n_quantity_sj += $row->n_quantity_sj;
+                    $total_n_quantity_sisa += $row->n_quantity_sisa;
+                    // if ($supplier != '') {
+                    //     if ($supplier != $row->e_supplier_name) {
+                    //         $no = 1;
+
+                    //         $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 5] . $j);
+                    //         $spreadsheet->setActiveSheetIndex(1)
+                    //             ->setCellValue($abjad[0] . $j, $supplier)
+                    //             ->setCellValue($abjad[count($header) - 4] . $j, "TOTAL")
+                    //             ->setCellValue($abjad[count($header) - 3] . $j, $total)
+                    //             ->setCellValue($abjad[count($header) - 2] . $j, $total_sj)
+                    //             ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa)
+                    //             ->setCellValue($abjad[count($header) - 1] . $j, $total_toleransi);
+                    //         $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+                    //         $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+                    //         $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+                    //         $total = 0;
+                    //         $total_sj = 0;
+                    //         $total_sisa = 0;
+                    //         $total_toleransi = 0;
+                    //         $j = $j + 1;
+                    //     }
+                    // }
+                    $isi = [
+                        $no, Date::PHPToExcel($row->d_pp), $row->i_pp, $row->e_nama_group_barang, $row->i_material, $row->e_material_name, $row->e_satuan_name, $row->i_supplier, $row->e_supplier_name, $row->n_quantity, $row->n_quantity_sj, $row->n_quantity_sisa
+                    ];
+                    for ($i = 0; $i < count($isi); $i++) {
+                        $spreadsheet->setActiveSheetIndex(1)->setCellValue($abjad[$i] . $j, $isi[$i]);
+                        $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle2, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+                        $spreadsheet->getActiveSheet()->getStyle($abjad[1] . $j . ":" . $abjad[1] . $j)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_DATE_DD_MMMM_YYYY);
+                    }
+                    $supplier = $row->e_supplier_name;
+                    $total += $row->n_quantity;
+                    $total_sj += $row->n_quantity_sj;
+                    $total_sisa += $row->n_quantity_sisa;
+
+                    $j++;
+                }
+            } else {
+                $ada_data = false;
+            }
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 5] . $j);
+            $spreadsheet->setActiveSheetIndex(1)
+                ->setCellValue($abjad[0] . $j, $supplier)
+                ->setCellValue($abjad[count($header) - 4] . $j, "TOTAL")
+                ->setCellValue($abjad[count($header) - 3] . $j, $total)
+                ->setCellValue($abjad[count($header) - 2] . $j, $total_sj)
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_sisa);
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+            $j = $j + 1;
+            $spreadsheet->getActiveSheet()->mergeCells($abjad[0] . $j . ":" . $abjad[count($header) - 4] . $j);
+            $spreadsheet->setActiveSheetIndex(1)
+                ->setCellValue($abjad[0] . $j, "TOTAL KESELURUHAN")
+                ->setCellValue($abjad[count($header) - 3] . $j, $total_n_quantity)
+                ->setCellValue($abjad[count($header) - 2] . $j, $total_n_quantity_sj)
+                ->setCellValue($abjad[count($header) - 1] . $j, $total_n_quantity_sisa);
+            $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle3, $abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j);
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setRGB('CEE7FF');
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getAlignment()->setWrapText(true);
+            $y = $j - 1;
+            $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getBorders()->getTop()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+            /* end bukan over budget */
+
+            /** End Sheet */
+            $nama_file = "Laporan_OB_PP_" . $date_from . "_" . $date_to . ".xls";
         }
         $writer = new Xls($spreadsheet);
         header('Content-Type: application/vnd.ms-excel');
@@ -1415,6 +1634,7 @@ class Cform extends CI_Controller
                 $total = 0;
                 $total_sj = 0;
                 $total_sisa = 0;
+                $total_toleransi = 0;
                 foreach ($query->result() as $key) {
                     $no++;
                     if ($supplier != $key->e_supplier_name && $supplier != '') {
@@ -1431,15 +1651,18 @@ class Cform extends CI_Controller
                             'n_quantity' => '<b>' . number_format($total) . '</b>',
                             'n_quantity_sj' => '<b>' . number_format($total_sj) . '</b>',
                             'n_quantity_sisa' => '<b>' . number_format($total_sisa) . '</b>',
+                            'n_toleransi' => '<b>' . number_format($total_toleransi) . '</b>',
                         );
                         $total = 0;
                         $total_sj = 0;
                         $total_sisa = 0;
+                        $total_toleransi = 0;
                     }
                     $supplier = $key->e_supplier_name;
                     $total += $key->n_quantity;
                     $total_sj += $key->n_quantity_sj;
                     $total_sisa += $key->n_quantity_sisa;
+                    $total_toleransi += $key->n_toleransi;
                     $detail[] = array(
                         'id' => $no,
                         'd_op' => $key->d_op,
@@ -1452,6 +1675,7 @@ class Cform extends CI_Controller
                         'n_quantity' => $key->n_quantity,
                         'n_quantity_sj' => $key->n_quantity_sj,
                         'n_quantity_sisa' => $key->n_quantity_sisa,
+                        'n_toleransi' => $key->n_toleransi,
                     );
                 }
                 $detail[] = array(
@@ -1466,6 +1690,7 @@ class Cform extends CI_Controller
                     'n_quantity' => '<b>' . number_format($total) . '</b>',
                     'n_quantity_sj' => '<b>' . number_format($total_sj) . '</b>',
                     'n_quantity_sisa' => '<b>' . number_format($total_sisa) . '</b>',
+                    'n_toleransi' => '<b>' . number_format($total_toleransi) . '</b>',
                 );
             } elseif ($laporan == 'exp_btb_faktur') {
                 $supplier = '';
@@ -1651,6 +1876,65 @@ class Cform extends CI_Controller
                         'n_sisa' => $key->n_sisa,
                     );
                 }
+            } elseif ($laporan == 'exp_obpp') {
+                $supplier = '';
+                $total = 0;
+                $total_sj = 0;
+                $total_sisa = 0;
+                foreach ($query->result() as $key) {
+                    $no++;
+                    // if ($supplier != $key->e_supplier_name && $supplier != '') {
+                    //     $no = 1;
+                    //     $detail[] = array(
+                    //         'id' => '',
+                    //         'd_pp' => '',
+                    //         'i_pp' => '',
+                    //         'i_material' => '',
+                    //         'e_material_name' => "<b>$supplier</b>",
+                    //         'e_satuan_name' => '<b>TOTAL</b>',
+                    //         'n_quantity' => '<b>' . number_format($total) . '</b>',
+                    //         'n_quantity_sj' => '<b>' . number_format($total_sj) . '</b>',
+                    //         'n_quantity_sisa' => '<b>' . number_format($total_sisa) . '</b>',
+                    //         'i_supplier' => '',
+                    //         'e_supplier_name' => '',
+                    //     );
+                    //     $total = 0;
+                    //     $total_sj = 0;
+                    //     $total_sisa = 0;
+                    // }
+                    $supplier = $key->e_supplier_name;
+                    $total += $key->n_quantity;
+                    $total_sj += $key->n_quantity_sj;
+                    $total_sisa += $key->n_quantity_sisa;
+                    $detail[] = array(
+                        'id' => $no,
+                        'd_pp' => $key->d_pp,
+                        'i_pp' => $key->i_pp,
+                        'e_nama_group_barang' => $key->e_nama_group_barang,
+                        'i_material' => $key->i_material,
+                        'e_material_name' => $key->e_material_name,
+                        'e_satuan_name' => $key->e_satuan_name,
+                        'n_quantity' => $key->n_quantity,
+                        'n_quantity_sj' => $key->n_quantity_sj,
+                        'n_quantity_sisa' => $key->n_quantity_sisa,
+                        'i_supplier' => $key->i_supplier,
+                        'e_supplier_name' => $key->e_supplier_name,
+                        'f_budgeting' => $key->f_budgeting,
+                    );
+                }
+                // $detail[] = array(
+                //     'id' => '',
+                //     'd_pp' => '',
+                //     'i_pp' => '',
+                //     'i_material' => '',
+                //     'e_material_name' => "<b>$supplier</b>",
+                //     'e_satuan_name' => '<b>TOTAL</b>',
+                //     'n_quantity' => '<b>' . number_format($total) . '</b>',
+                //     'n_quantity_sj' => '<b>' . number_format($total_sj) . '</b>',
+                //     'n_quantity_sisa' => '<b>' . number_format($total_sisa) . '</b>',
+                //     'i_supplier' => '',
+                //     'e_supplier_name' => '',
+                // );
             }
         }
         $data = array(

@@ -44,7 +44,6 @@ class Mmaster extends CI_Model
                     LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
                     WHERE a.i_status <> '5' AND (a.id_company = '$this->id_company' OR a.id_company_receive = '$this->id_company') $and $bagian
                     ORDER BY a.id ASC";
-//        var_dump($sql);
         
         $datatables->query($sql);
 
@@ -698,7 +697,6 @@ class Mmaster extends CI_Model
                             e_bagian_name, company_pembuat, i_tujuan, tujuan_bagian, tujuan_name, id_company_tujuan,
                             company_name, d_kirim, (select count(i) as jml FROM CTE) As jml 
                     FROM CTE";
-
         return $this->db->query($sql);
     }
 

@@ -42,6 +42,7 @@
                     <th>Tgl. Dokumen</th>
                     <th>Bagian Pembuat</th>
                     <th>Bagian Penerima</th>
+                    <th>Keterangan</th>
                     <th>Status Dokumen</th>
                     <th width="5%">Action</th>
                 </tr>

@@ -469,7 +469,8 @@ class Mmaster extends CI_Model
             "SELECT 
                 a.d_op, a.i_op, a.i_supplier, c.e_supplier_name, 
                 d.i_material, trim(upper(d.e_material_name)) e_material_name, upper(trim(e.e_satuan_name)) e_satuan_name,
-                b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa
+                b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa,
+                coalesce(f.n_toleransi, 0) n_toleransi
             FROM tm_opbb a
             INNER JOIN tm_opbb_item b ON (b.id_op = a.id)
             INNER JOIN tr_supplier c ON (
@@ -482,7 +483,7 @@ class Mmaster extends CI_Model
                 e.i_satuan_code = d.i_satuan_code AND d.id_company = e.id_company
             )
             LEFT JOIN (
-                SELECT id_op, i_material, b.i_supplier, sum(n_quantity) n_quantity
+                SELECT id_op, i_material, b.i_supplier, sum(n_quantity) n_quantity, sum(n_toleransi) n_toleransi
                 FROM tm_btb_item a
                 INNER JOIN tm_btb b ON (b.id = a.id_btb)
                 WHERE b.id_company = '$this->id_company' AND b.i_status = '6'
@@ -492,6 +493,49 @@ class Mmaster extends CI_Model
             AND a.id_company = '$this->id_company' 
             $and
             ORDER BY c.e_supplier_name, a.d_op, a.i_op;"
+        );
+    }
+
+    public function get_pp_ob($date_from, $date_to, $i_supplier, $ob)
+    {
+        $and = '';
+        if ($i_supplier != '0') {
+            $and = "AND a.i_supplier = '$i_supplier' ";
+        }
+        $budget = '';
+        if($ob == 'ob') {
+            $budget = "AND a.f_budgeting = 'f'";
+        } else {
+            $budget = "AND a.f_budgeting = 't'";
+        }
+        return $this->db->query(
+            "SELECT 
+                a.d_pp, a.i_pp, f.i_supplier, f.e_supplier_name, 
+                d.i_material, trim(upper(d.e_material_name)) e_material_name, upper(trim(e.e_satuan_name)) e_satuan_name,
+                b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa, g.e_nama_group_barang
+            FROM tm_pp a
+            INNER JOIN tm_pp_item b ON (b.id_pp = a.id)
+            INNER JOIN tr_material d ON (
+                d.i_material = b.i_material AND b.id_company = d.id_company
+            )
+            INNER JOIN tr_satuan e ON (
+                e.i_satuan_code = b.i_satuan_code AND b.id_company = e.id_company
+            )
+            inner join (
+                select a.i_kode_kelompok, a.id_company, b.e_nama_group_barang FROM tr_kelompok_barang a inner join tr_group_barang b ON (a.i_kode_group_barang = b.i_kode_group_barang and a.id_company = b.id_company) WHERE a.f_status = 't'
+            ) g ON (g.i_kode_kelompok = b.i_kode_kelompok and b.id_company = g.id_company)
+            LEFT JOIN (
+                SELECT id_op, id_pp, i_material, b.i_supplier, c.e_supplier_name, sum(n_quantity) n_quantity
+                FROM tm_opbb_item a
+                INNER JOIN tm_opbb b ON (b.id = a.id_op)
+                INNER JOIN tr_supplier c ON (c.i_supplier = b.i_supplier AND b.id_company = c.id_company)
+                WHERE b.id_company = '$this->id_company' AND b.i_status = '6'
+                GROUP BY 1,2,3,4,5
+            ) f ON (f.id_pp = b.id_pp AND b.i_material = f.i_material)
+            WHERE a.i_status = '6'
+            AND a.id_company = '$this->id_company' $budget
+            AND a.d_pp BETWEEN '$date_from' AND '$date_to' $and
+            ORDER BY f.e_supplier_name, a.d_pp, a.i_pp"
         );
     }
 
@@ -974,7 +1018,8 @@ class Mmaster extends CI_Model
                 "SELECT 
                     a.d_op, a.i_op, a.i_supplier, c.e_supplier_name, 
                     d.i_material, trim(upper(d.e_material_name)) e_material_name, upper(trim(e.e_satuan_name)) e_satuan_name,
-                    b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa
+                    b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa,
+                    coalesce(f.n_toleransi,0) n_toleransi
                 FROM tm_opbb a
                 INNER JOIN tm_opbb_item b ON (b.id_op = a.id)
                 INNER JOIN tr_supplier c ON (
@@ -987,7 +1032,7 @@ class Mmaster extends CI_Model
                     e.i_satuan_code = d.i_satuan_code AND d.id_company = e.id_company
                 )
                 LEFT JOIN (
-                    SELECT id_op, i_material, b.i_supplier, sum(n_quantity) n_quantity
+                    SELECT id_op, i_material, b.i_supplier, sum(n_quantity) n_quantity, sum(n_toleransi) n_toleransi
                     FROM tm_btb_item a
                     INNER JOIN tm_btb b ON (b.id = a.id_btb)
                     WHERE b.id_company = '$this->id_company' AND b.i_status = '6'
@@ -1206,6 +1251,55 @@ class Mmaster extends CI_Model
                     AND a.i_status = '6'
                     $like
                 ORDER BY 1,2,4,5 $paginate;"
+            );
+        } elseif ($laporan == 'exp_obpp') {
+            if ($i_supplier != '0') {
+                $where = " AND f.i_supplier = '$i_supplier' ";
+            }
+            $budget = '';
+            if ($type == 'overbudget') {
+                $budget = " AND a.f_budgeting = 'f'";
+            } else {
+                $budget = " AND a.f_budgeting = 't'";
+            }
+
+            if (strlen($search) > 0) {
+                $like = "AND (
+                    f.e_supplier_name ILIKE '%$search%' OR
+                    f.i_supplier ILIKE '%$search%' OR
+                    d.i_material ILIKE '%$search%' OR
+                    d.e_material_name ILIKE '%$search%'
+                ) ";
+            }
+            return $this->db->query(
+                "SELECT 
+                    a.d_pp, a.i_pp, f.i_supplier, f.e_supplier_name, 
+                    d.i_material, trim(upper(d.e_material_name)) e_material_name, upper(trim(e.e_satuan_name)) e_satuan_name,
+                    b.n_quantity, COALESCE (f.n_quantity,0) n_quantity_sj, b.n_quantity - COALESCE (f.n_quantity,0) n_quantity_sisa,
+                    CASE WHEN a.f_budgeting = 't' THEN 'BUKAN OB' ELSE 'OB' END AS f_budgeting, g.e_nama_group_barang
+                FROM tm_pp a
+                INNER JOIN tm_pp_item b ON (b.id_pp = a.id)
+                INNER JOIN tr_material d ON (
+                    d.i_material = b.i_material AND b.id_company = d.id_company
+                )
+                INNER JOIN tr_satuan e ON (
+                    e.i_satuan_code = b.i_satuan_code AND b.id_company = e.id_company
+                )
+                inner join (
+                    select a.i_kode_kelompok, a.id_company, b.e_nama_group_barang FROM tr_kelompok_barang a inner join tr_group_barang b ON (a.i_kode_group_barang = b.i_kode_group_barang and a.id_company = b.id_company) WHERE a.f_status = 't'
+                ) g ON (g.i_kode_kelompok = b.i_kode_kelompok and b.id_company = g.id_company)
+                LEFT JOIN (
+                    SELECT id_op, id_pp, i_material, b.i_supplier, c.e_supplier_name, sum(n_quantity) n_quantity
+                    FROM tm_opbb_item a
+                    INNER JOIN tm_opbb b ON (b.id = a.id_op)
+                    INNER JOIN tr_supplier c ON (c.i_supplier = b.i_supplier AND b.id_company = c.id_company)
+                    WHERE b.id_company = '$this->id_company' AND b.i_status = '6'
+                    GROUP BY 1,2,3,4,5
+                ) f ON (f.id_pp = b.id_pp AND b.i_material = f.i_material)
+                WHERE a.i_status = '6'
+                AND a.id_company = '$this->id_company' $budget
+                AND a.d_pp BETWEEN '$date_from' AND '$date_to' $where $like
+                ORDER BY f.e_supplier_name, a.d_pp, a.i_pp $paginate;"
             );
         }
     }

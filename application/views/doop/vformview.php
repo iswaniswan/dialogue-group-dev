@@ -108,7 +108,7 @@
                                     <td class="text-right"><?= $d->n_quantity_fc; ?></td>
                                     <!-- <td class="text-right"><?= $d->saldo_akhir; ?></td>
                                     <td class="text-right"><?= $d->n_stock_outstanding; ?></td> -->
-                                    <td class="text-right"><?= $d->nquantity_permintaan; ?></td>
+                                    <td class="text-right"></td>
                                     <td class="text-right"><?= $d->n_quantity; ?></td>
                                     <td><?= $d->e_remark; ?></td>
                                 </tr>

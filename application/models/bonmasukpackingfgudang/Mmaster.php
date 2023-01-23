@@ -217,48 +217,64 @@ class Mmaster extends CI_Model
         );
     }
 
-    public function bagianpengirim($cari)
+    public function bagianpengirim($cari, $i_menu)
     {
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("SELECT DISTINCT
-                a.i_bagian,
-                b.e_bagian_name
-            FROM
-                tr_tujuan_menu a
+
+        // $sql = "SELECT DISTINCT
+        //             a.i_bagian,
+        //             b.e_bagian_name
+        //         FROM
+        //             tr_tujuan_menu a
+        //             LEFT JOIN tr_bagian b ON (a.i_bagian = b.i_bagian)
+        //         WHERE
+        //             b.id_company = '$this->idcompany'
+        //             AND a.i_bagian ILIKE '%$cari%'
+        //             AND b.e_bagian_name ILIKE '%$cari%'
+        //         ORDER BY
+        //             b.e_bagian_name";
+
+        $sql = "SELECT DISTINCT
+                    b.id,
+                    a.i_bagian,
+                    b.e_bagian_name,
+                    c.name
+                FROM tr_tujuan_menu a
                 LEFT JOIN tr_bagian b ON (a.i_bagian = b.i_bagian)
-            WHERE
-                b.id_company = '$this->idcompany'
-                AND a.i_bagian ILIKE '%$cari%'
-                AND b.e_bagian_name ILIKE '%$cari%'
-            ORDER BY
-                b.e_bagian_name",false
-        );
+                LEFT JOIN public.company c ON c.id = b.id_company 
+                WHERE a.i_bagian ILIKE '%$cari%' OR b.e_bagian_name ILIKE '%$cari%' OR c.name ILIKE '%$cari%'
+                ORDER BY 4 ASC, 3 ASC";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql ,false);
     }
 
     public function referensi($cari, $iasal, $ibagian)
     {
-        $id_bagian = $this->db->query("SELECT id FROM tr_bagian WHERE id_company = '5' AND i_bagian = '$ibagian'")->row()->id;
+        $id_company = $this->id_company;
+
+        $id_bagian = $this->db->query("SELECT id FROM tr_bagian WHERE id_company = '$id_company' AND i_bagian = '$ibagian'")->row()->id;
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("SELECT DISTINCT
-                a.id,
-                a.i_document,
-                to_char(a.d_document, 'dd-mm-yyyy') AS d_document
-            FROM
-                tm_keluar_produksibp a
-                LEFT JOIN tm_keluar_produksibp_item b
-                    on (a.id = b.id_document AND a.id_company = b.id_company)
-            WHERE
-                a.i_bagian = '$iasal'
-                AND a.id_partner = '$id_bagian'
-                AND a.i_status = '6'
-                AND a.id_company = '$this->idcompany'
-                AND b.n_quantity_sisa <> 0
-                AND a.i_document ILIKE '%$cari%'
-            ORDER BY
-                i_document,
-                d_document",
-            false
-        );
+
+        $sql = "SELECT DISTINCT a.id,
+                        a.i_document,
+                        to_char(a.d_document, 'dd-mm-yyyy') AS d_document
+                    FROM tm_keluar_produksibp a
+                    LEFT JOIN tm_keluar_produksibp_item b on (
+                                            a.id = b.id_document AND a.id_company = b.id_company
+                                        )
+                    WHERE a.i_bagian = '$iasal'
+                        AND a.id_partner = '$id_bagian'
+                        AND a.i_status = '6'
+                        AND a.id_company = '$this->idcompany'
+                        AND b.n_quantity_sisa <> 0
+                        AND a.i_document ILIKE '%$cari%'
+                    ORDER BY i_document ASC, d_document ASC";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_kode($kode, $ibagian)

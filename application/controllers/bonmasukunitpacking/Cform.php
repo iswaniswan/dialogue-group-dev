@@ -129,12 +129,16 @@ class Cform extends CI_Controller {
     {
         $filter = [];
         if ($this->input->get('ibagian')!='') {
-            $data = $this->mmaster->pengirim($this->i_menu,$this->input->get('ibagian'),str_replace("'", "", $this->input->get('q')));
+            
+            $q = $this->input->get('q');
+            $ibagian = $this->input->get('ibagian');
+
+            $data = $this->mmaster->pengirim($this->i_menu, $ibagian, str_replace("'", "", $q));
             if ($data->num_rows()>0) {
                 foreach($data->result() as $key){
                     $filter[] = array(
                         'id'   => $key->id,  
-                        'text' => $key->e_name
+                        'text' => "$key->e_name - $key->company_name" 
                     );
                 }
             }else{
@@ -156,7 +160,8 @@ class Cform extends CI_Controller {
     
     public function referensi()
     {
-        $filter = [];
+        $filter = [];       
+        
         if ($this->input->get('ipengirim')!='' && $this->input->get('ibagian')!='') {
             $data = $this->mmaster->datareferensi(str_replace("'", "", $this->input->get('q')),$this->input->get('ipengirim'),$this->input->get('ibagian'));
             if ($data->num_rows()>0) {
@@ -186,10 +191,17 @@ class Cform extends CI_Controller {
     public function detailreferensi()
     {
         header("Content-Type: application/json", true);
-        $query  = array(
-            'detail' => $this->mmaster->detailreferensi($this->input->post('id',TRUE),$this->input->post('ipengirim'),$this->input->post('ibagian'))->result_array()
-        );
-        echo json_encode($query);  
+        
+        $id = $this->input->post('id');
+        $ipengirim = $this->input->post('pengirim');
+        $ibagian = $this->input->post('ibagian');
+
+        $query = $this->mmaster->detailreferensi($id, $ipengirim, $ibagian);
+
+        $result  = [
+            'detail' => $query->result_array()
+        ];
+        echo json_encode($result);  
     }
     
     /*----------  DATA REFERENSI SESUAI SESUAI PENGIRIM  ----------*/

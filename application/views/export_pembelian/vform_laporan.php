@@ -186,6 +186,7 @@
                                 <th data-field="n_quantity" data-align="right">QTY OP</th>
                                 <th data-field="n_quantity_sj" data-align="right">QTY BTB/SJ</th>
                                 <th data-field="n_quantity_sisa" data-align="right">SISA OP</th>
+                                <th data-field="n_toleransi" data-align="right">TOLERANSI</th>
                             </tr>
                         </thead>
                     </table>
@@ -300,6 +301,59 @@
                             </tr>
                         </thead>
                     </table>
+                <?php } elseif ($laporan == 'exp_obpp') { ?>
+                    <ul class="nav nav nav-pills nav-justified mb-3" id="pills-tab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pills-home-tab" data-bs-toggle="pill" data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true">OVER BUDGET</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab" aria-controls="pills-profile" aria-selected="false">BUKAN OVER BUDGET</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="pills-tabContent">
+                        <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
+                            <table class="nowrap" data-locale="id-ID" data-toggle="table" data-height="600" data-search="true" data-side-pagination="server" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" data-query-params="queryParams" data-url="<?= base_url('export_pembelian/cform/data?type=overbudget'); ?>" data-fixed-columns="true" data-fixed-number="3">
+                                <thead>
+                                    <tr>
+                                        <th data-field="id" data-align="center">NO</th>
+                                        <th data-field="d_pp">TGL. PP</th>
+                                        <th data-field="i_pp">NO. PP</th>
+                                        <th data-field="e_nama_group_barang">NAMA GROUP BARANG</th>
+                                        <th data-field="i_material">KODE MATERIAL</th>
+                                        <th data-field="e_material_name">NAMA MATERIAL</th>
+                                        <th data-field="e_satuan_name">SATUAN</th>
+                                        <th data-field="n_quantity" data-align="right">QTY PP</th>
+                                        <th data-field="n_quantity_sj" data-align="right">QTY OP</th>
+                                        <th data-field="n_quantity_sisa" data-align="right">SISA PP</th>
+                                        <th data-field="i_supplier">KODE SUPPLIER</th>
+                                        <th data-field="e_supplier_name">NAMA SUPPLIER</th>
+                                        <th data-field="f_budgeting">OVER BUDGETING</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab">
+                            <table class="nowrap" data-locale="id-ID" data-toggle="table" data-height="600" data-search="true" data-side-pagination="server" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" data-query-params="queryParams" data-url="<?= base_url('export_pembelian/cform/data?type=notoverbudget'); ?>" data-fixed-columns="true" data-fixed-number="3">
+                                <thead>
+                                    <tr>
+                                        <th data-field="id" data-align="center">NO</th>
+                                        <th data-field="d_pp">TGL. PP</th>
+                                        <th data-field="i_pp">NO. PP</th>
+                                        <th data-field="e_nama_group_barang">NAMA GROUP BARANG</th>
+                                        <th data-field="i_material">KODE MATERIAL</th>
+                                        <th data-field="e_material_name">NAMA MATERIAL</th>
+                                        <th data-field="e_satuan_name">SATUAN</th>
+                                        <th data-field="n_quantity" data-align="right">QTY PP</th>
+                                        <th data-field="n_quantity_sj" data-align="right">QTY OP</th>
+                                        <th data-field="n_quantity_sisa" data-align="right">SISA PP</th>
+                                        <th data-field="i_supplier">KODE SUPPLIER</th>
+                                        <th data-field="e_supplier_name">NAMA SUPPLIER</th>
+                                        <th data-field="f_budgeting">OVER BUDGETING</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
                 <?php } ?>
             </div>
             <div class="card-footer text-muted">

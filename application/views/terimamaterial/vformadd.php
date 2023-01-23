@@ -147,7 +147,6 @@
                     return query;
                 },
                 processResults: function(data) {
-                    console.log(data);
                     return {
                         results: data
                     };

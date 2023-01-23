@@ -105,6 +105,7 @@
                                         ['params' => 'exp_btb_dan_faktur', 'title' => 'Laporan BTB dan Faktur Pembelian', 'color' => 'info'],
                                         ['params' => 'exp_per_kategori', 'title' => 'Laporan Pembelian per Kategori', 'color' => 'info'],
                                         ['params' => 'exp_pp', 'title' => 'Laporan Permintaan Pembelian Belum OP', 'color' => 'info'],
+                                        ['params' => 'exp_obpp', 'title' => 'Laporan OB / PP', 'color' => 'info'],
                                     ]; ?>
                                     <tr class="table-active">
                                         <td colspan="2" class="text-center"><strong> L A P O R A N</strong></td>

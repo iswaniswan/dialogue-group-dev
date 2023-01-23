@@ -95,20 +95,72 @@ class Cform extends CI_Controller {
     }
 
     public function bagianpengirim(){
-        $filter = [];
-        $data   = $this->mmaster->bagianpengirim(strtoupper($this->input->get('q')));
+        $q = $this->input->get('q');
+        $i_menu = $this->i_menu;
+        $data   = $this->mmaster->bagianpengirim($q, $i_menu);
+
+        $filters = [];
         foreach ($data->result() as $row) {
-            $filter[] = array(
-                'id'    => $row->i_bagian,
-                'text'  => $row->e_bagian_name,
-            );
+            $children[0] = [
+                'id' => $row->id,
+                'text' => $row->e_bagian_name
+            ];
+
+            $group = [
+                'text' => trim($row->name),
+                'children' => $children
+            ];
+
+            $filters[] = $group;
+
+            // if (count($filters) == 0) {
+            //     $filters[0] = $group;
+            //     continue;
+            // }
+
+            // for ($i=0; $i<count($filters); $i++) {
+            //     if ($filters[$i]['text'] == $group['text']) {
+            //         $_count = count($filters[$i]['children']) - 1;
+            //         for ($j=0; $j<$_count; $j++) {
+            //             if ($filters[$i]['children'][$j]['id'] == $row->id) {
+            //                 continue;
+            //             } 
+            //             $filters[$i]['children'][$_count+1] = $children;
+            //         }
+            //         continue;
+            //     }
+            //     $filters[$i+1] = $group;         
+            // }
+
+            // foreach ($filters as $filter) {
+            //     if ($filter['text'] == $group['text']) {
+                    
+            //         $_count = count($filter['children']);
+            //         foreach ($filter['children'] as $_children) {
+            //             if ($_children['id'] == $row->id) {
+            //                 continue;
+            //             }
+            //             $filter['children'][$_count+1] = $children;
+            //         }
+            //     }
+            // }
+
+            // $filters[] = $group;
         }
-        echo json_encode($filter);
+
+        // var_dump($filters); die();
+
+
+        echo json_encode($filters);
     }
 
     public function referensi(){
         $filter = [];
-        $data   = $this->mmaster->referensi(strtoupper($this->input->get('q')),$this->input->get('iasal'),$this->input->get('ibagian'));
+        $q = $this->input->get('q');
+        $iasal = $this->input->get('iasal');
+        $ibagian = $this->input->get('ibagian');
+
+        $data   = $this->mmaster->referensi(strtoupper($q), $iasal, $ibagian);
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id'    => $row->id, 

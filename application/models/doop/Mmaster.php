@@ -687,7 +687,7 @@ class Mmaster extends CI_Model
                     FROM
                         tm_sj_item a
                     INNER JOIN tr_product_base b ON (a.id_product = b.id AND a.id_company = b.id_company)
-                    WHERE id_document_reff = '$id_spb'
+                    WHERE id_document_reff = '$id_spb' and a.id_document = '$id'
                     GROUP BY 1) aa ON
                     c.i_product_base = aa.i_product_base
                 JOIN tr_color cc ON (
@@ -777,7 +777,7 @@ class Mmaster extends CI_Model
                 c.i_product_base,
                 c.e_product_basename,
                 co.e_color_name,
-                e_satuan_name
+                c.i_satuan_code
             FROM
                 tm_sj_item a
             JOIN tm_sj b on b.id = a.id_document

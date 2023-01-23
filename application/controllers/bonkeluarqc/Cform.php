@@ -219,6 +219,11 @@ class Cform extends CI_Controller
 
     public function simpan()
     {
+//        echo '<pre>';
+//        var_dump($this->input->post());
+//        echo '</pre>';
+//        die('here');
+
         $data = check_role($this->i_menu, 1);
         if (!$data) {
             redirect(base_url(), 'refresh');

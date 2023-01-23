@@ -100,7 +100,7 @@
                                                 <input id='id_material<?= $i;?>' name='id_material<?= $i;?>' value='<?= $key->id_material;?>' type='hidden'>
                                                 <input id='id_product_wip<?= $i;?>' name='id_product_wip<?= $i;?>' value='<?= $key->id_product_wip;?>' type='hidden'>
                                                 <input id='id_type_makloon<?= $i;?>' name='id_type_makloon<?= $i;?>' value='<?= $key->id_type_makloon;?>' type='hidden'>
-                                                <input id='id<?= $i;?>' name='id<?= $i;?>' value="<?= $key->id_product_wip.'|'.$key->id_material;?>" type='hidden'>
+                                                <input id='id<?= $i;?>' name='id<?= $i;?>' value="<?= $key->id_product_wip.'|'.$key->id_material.'|'.$key->id;?>" type='hidden'>
                                                 <input id='i_periode<?= $i;?>' name='i_periode<?= $i;?>' value='<?= $key->i_periode;?>' type='hidden'>
                                                 <span class='custom-control-indicator'></span>
                                                 <span class='custom-control-description'></span>

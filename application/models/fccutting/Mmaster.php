@@ -1502,21 +1502,23 @@ class Mmaster extends CI_Model
         //     $this->db->where('id_forecast', $id);
         //     $this->db->delete('tm_fccutting_material');
         // }
+        $this->db->query("delete from tm_fccutting_material where id_forecast = '$id'; ");
         $res = $this->db->query("WITH CTE AS (
             SELECT 0 AS no, a.id_forecast, ab.id_referensi, ab.i_periode, c.i_product_wip, initcap(c.e_product_wipname) e_product_wipname,  a.id_product_wip, e.e_color_name, 
-            b.id_material, d.i_material, initcap(d.e_material_name) e_material_name, initcap(f.e_satuan_name) e_satuan_name, a.n_fc_cutting, sum(b.n_quantity) as n_quantity, 
-            (round(sum(b.n_quantity) * a.n_fc_cutting, 2) - COALESCE(h.n_quantity,0)) qty,
+            b.id_material, d.i_material, initcap(d.e_material_name) e_material_name, initcap(f.e_satuan_name) e_satuan_name, a.n_fc_cutting, b.n_quantity as n_quantity, 
+            (round(b.n_quantity * a.n_fc_cutting, 2) - COALESCE(h.n_quantity,0)) qty,
             string_agg(g.d_document::varchar,', ') tanggal_schedule, ROW_NUMBER() OVER (ORDER BY a.id) AS i, a.id, b.id_type_makloon
             FROM tm_fccutting_detail a
             INNER JOIN tm_fccutting ab ON (ab.id = a.id_forecast)
             INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
             INNER JOIN tr_color e ON (e.i_color = c.i_color AND c.id_company = e.id_company)
             INNER JOIN (
-                SELECT a.id_product_wip, a.id_material, a.f_marker_utama, a.id_type_makloon, (1/a.v_set) * a.v_gelar as n_quantity
+                SELECT a.id_product_wip, a.id_material, a.f_marker_utama, a.id_type_makloon, sum((1/a.v_set) * a.v_gelar) as n_quantity
                 FROM tr_polacutting_new a
                 INNER JOIN tr_type_makloon b ON (b.id = ANY(a.id_type_makloon))
-                WHERE id_type_makloon NOTNULL AND (b.e_type_makloon_name ILIKE '%CUTTING%' or b.e_type_makloon_name ILIKE '%AUTO%') AND a.v_bisbisan = '0' AND a.f_marker_utama = 't' and a.f_status = 't' group by 1,2,3,4,5
-            ) b ON (b.id_product_wip = a.id_product_wip)
+                WHERE id_type_makloon NOTNULL 
+                AND (b.e_type_makloon_name ILIKE '%CUTTING%' or b.e_type_makloon_name ILIKE '%AUTO%') AND a.v_bisbisan = '0' AND a.f_marker_utama = 't' and a.f_status = 't' group by 1,2,3,4   
+                ) b ON (b.id_product_wip = a.id_product_wip)
             INNER JOIN tr_material d ON (d.id = b.id_material)
             INNER JOIN tr_satuan f ON (f.i_satuan_code = d.i_satuan_code AND d.id_company = f.id_company)
             LEFT JOIN (
@@ -1530,7 +1532,7 @@ class Mmaster extends CI_Model
             WHERE ab.i_status = '6' AND ab.id_company = '$this->id_company'
             AND (round(b.n_quantity * a.n_fc_cutting, 2) - COALESCE (h.n_quantity,0)) > 0
             AND d.i_kode_group_barang = 'GRB0001' AND ab.id = '$id'
-            GROUP BY 12,2,3,4,5,6,7,8,9,10,11,12,13,a.id,h.n_quantity,b.id_type_makloon
+            GROUP BY 12,2,3,4,5,6,7,8,9,10,11,12,13, 14, a.id,h.n_quantity,b.id_type_makloon
             ORDER BY id_product_wip, e_color_name, i_material
         )
         SELECT no, id, i, id_forecast, id_referensi, i_periode, i_product_wip, e_product_wipname, id_product_wip, e_color_name, 

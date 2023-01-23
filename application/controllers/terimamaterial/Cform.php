@@ -144,11 +144,15 @@ class Cform extends CI_Controller
         $data = $this->mmaster->data_referensi($q, $bagian);
         if ($data->num_rows() > 0) {
             foreach ($data->result() as $key) {
-                $filter[] = array(
-                    'id'   => $key->id,
-                    'text' => $key->i_document,
-                    'company' => $key->name
-                );
+                $filter[] = [
+                    'text' => $key->name,
+                    'children' => [
+                        [
+                            'id'   => $key->id,
+                            'text' => $key->i_document,
+                        ]                        
+                    ]
+                ];
             }
         } else {
             $filter[] = array(
@@ -157,32 +161,7 @@ class Cform extends CI_Controller
             );
         }
 
-        $results = [];
-
-        foreach ($filter as $item) {
-            $children[] = [
-                'id' => $item['id'], 'text' => $item['text']
-            ];
-
-            $group = [
-                'text' => trim($item['company']), 'children' => $children
-            ];
-
-            if (count($results) == 0) {
-                $results[] = $group;
-                continue;
-            }
-
-            foreach ($results as $result) {
-                if ($result['text'] == $group['text']) {
-                    $result['children'][] = $children;
-                    continue;
-                }
-                $results[] = $group;
-            }
-        }
-
-        echo json_encode($results);
+        echo json_encode($filter);
     }
 
     /*----------  DETAIL ITEM REFERENSI  ----------*/
@@ -211,9 +190,9 @@ class Cform extends CI_Controller
             $d_document = formatYmd($d_document);
         }
         $i_bagian      = $this->input->post('i_bagian', TRUE);
-        $array_bagian = explode('|', $i_bagian);
-        $_i_bagian = $array_bagian[1];
-        $_id_company = $array_bagian[0];
+        // $array_bagian = explode('|', $i_bagian);
+        // $_i_bagian = $array_bagian[1];
+        // $_id_company = $array_bagian[0];
 
         $i_referensi   = $this->input->post('i_referensi', TRUE);
         $e_remark      = $this->input->post('e_remark', TRUE);
@@ -221,7 +200,7 @@ class Cform extends CI_Controller
         $id            = $this->mmaster->runningid();
         if ($id != '' && $i_document != '' && $d_document != '' && $i_referensi != '' && $jml > 0) {
             $this->db->trans_begin();
-            $this->mmaster->simpan($id, $i_document, $d_document, $_i_bagian, $i_referensi, $e_remark, $_id_company);
+            $this->mmaster->simpan($id, $i_document, $d_document, $i_bagian, $i_referensi, $e_remark);
             for ($i = 0; $i < $jml; $i++) {
                 $id_material = $this->input->post('id_material' . $i, TRUE);
                 $n_quantity = str_replace(",", "", $this->input->post('n_quantity' . $i, TRUE));
