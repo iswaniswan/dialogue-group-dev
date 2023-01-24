@@ -168,9 +168,17 @@ class Mmaster extends CI_Model
         // $this->db->where('a.i_type', '01');
         $this->db->order_by('e_bagian_name');
         return $this->db->get(); */
-        return $this->db->query("SELECT id, i_bagian, e_bagian_name FROM tr_bagian WHERE id_company = '$this->id_company' AND i_bagian IN (
-            SELECT i_bagian FROM tr_tujuan_menu WHERE id_company = '$this->id_company' AND i_menu = '$this->i_menu' ORDER BY id
-        )");
+
+        $sql = "SELECT id, i_bagian, e_bagian_name 
+                FROM tr_bagian 
+                WHERE id_company = '$this->id_company' 
+                    AND i_bagian IN (
+                                    SELECT i_bagian FROM tr_tujuan_menu
+                                    WHERE id_company = '$this->id_company' 
+                                    AND i_menu = '$this->i_menu' ORDER BY id
+                                    )";
+        // var_dump($sql); die();                                    
+        return $this->db->query($sql);
     }
 
     public function cek_kode($kode, $ibagian)
@@ -371,18 +379,29 @@ class Mmaster extends CI_Model
 
     public function get_export_so($i_bagian)
     {
-        return $this->db->query(
-            "SELECT a.id, a.i_material, initcap(a.e_material_name) e_material_name , initcap(b.e_satuan_name) e_satuan_name  FROM tr_material a 
-            INNER JOIN tr_satuan b ON (
-                b.i_satuan_code = a.i_satuan_code AND a.id_company = b.id_company
-            )
-            WHERE a.f_status = 't' AND a.id_company = '$this->id_company' and i_kode_group_barang IN (
-                SELECT i_kode_group_barang FROM tr_type WHERE i_type IN (
-                    SELECT i_type FROM tr_bagian WHERE id_company = '$this->id_company' AND i_bagian = '$i_bagian' AND f_status = 't'
-                )
-            )
-            order by 3 asc;"
-        );
+        $sql = "SELECT a.id, a.i_material, initcap(a.e_material_name) e_material_name , initcap(b.e_satuan_name) e_satuan_name  
+                FROM tr_material a 
+                INNER JOIN tr_satuan b ON (
+                                            b.i_satuan_code = a.i_satuan_code AND a.id_company = b.id_company
+                                        )
+                WHERE a.f_status = 't' 
+                    AND a.id_company = '$this->id_company' 
+                    and i_kode_group_barang IN (
+                                                SELECT i_kode_group_barang 
+                                                FROM tr_type 
+                                                WHERE i_type IN (
+                                                                    SELECT i_type 
+                                                                    FROM tr_bagian 
+                                                                    WHERE id_company = '$this->id_company' 
+                                                                        AND i_bagian = '$i_bagian' 
+                                                                        AND f_status = 't'
+                                                                )
+                                                )
+                ORDER BY 3 ASC;";
+        
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

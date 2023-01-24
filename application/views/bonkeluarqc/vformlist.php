@@ -52,7 +52,8 @@
     });
 
     $(document).ready(function () {
-        var table = $('#tabledata').DataTable();         
+        var table = $('#tabledata').DataTable();
+        table.order([[8, "DESC"], [3, "DESC"]]).draw();
         table.buttons( '.dt-buttons' ).remove();
     });
 

@@ -521,7 +521,9 @@ class Cform extends CI_Controller {
 
         $this->load->library('upload', $config);
         if ($this->upload->do_upload("userfile")) {
-            $data = array('upload_data' => $this->upload->data());
+            $data = array(
+                'upload_data' => $this->upload->data()
+            );
             $this->Logger->write('Upload File SO Packing : ' . $i_so);
 
             $param =  array(
@@ -543,7 +545,6 @@ class Cform extends CI_Controller {
 
     public function loadview()
     {
-
         $ibagian    = $this->uri->segment(4);
         $i_so       = $this->uri->segment(5);
         $ddocument  = $this->uri->segment(6);

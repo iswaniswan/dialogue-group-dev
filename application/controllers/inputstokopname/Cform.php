@@ -484,6 +484,7 @@ class Cform extends CI_Controller
         $x = 4;
         $no = 0;
         $sql = $this->mmaster->get_export_so($i_bagian);
+        
         if ($sql->num_rows() > 0) {
             foreach ($sql->result() as $row) {
                 $no++;

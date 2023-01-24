@@ -187,6 +187,7 @@
                 success: function(data) {
                     //console.log($('input[type=file]')[0].files[0]);
                     var json = JSON.parse(data);
+                    console.log(json);
                     var status = json.status;
                     if (status == 'berhasil') {
                         var ibagian = json.ibagian;

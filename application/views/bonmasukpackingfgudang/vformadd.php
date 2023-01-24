@@ -107,6 +107,18 @@
         /**
         * Tidak boleh lebih dari hari ini, dan maksimal mundur 1830 hari (5 tahun) dari hari ini
         */
+
+        const mergeLabel = (array) => {
+            let indexes = [];
+            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+                if (indexes.includes(id) == false) {
+                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+                }
+                indexes.push(id);
+                return obj;
+            }, {}));
+        }
+
         showCalendar('.date',1830,0);
         
         $('#idocument').mask('SSS-0000-000000S');
@@ -125,8 +137,9 @@
                     }
                     return query;
                 },
-                processResults: function (data) {
-                    console.log(data);
+                processResults: function (result) {
+                    console.log(result);
+                    const data = mergeLabel(result);
                     return {
                         results: data
                     };

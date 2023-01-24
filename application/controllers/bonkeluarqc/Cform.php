@@ -166,7 +166,10 @@ class Cform extends CI_Controller
     public function marker()
     {
         $filter = [];
-        $data = $this->mmaster->marker(str_replace("'", "", $this->input->get('q')), str_replace("'", "", $this->input->get('id_product_wip')));
+        $q = str_replace("'", "", $this->input->get('q'));
+        $id_product_wip = str_replace("'", "", $this->input->get('id_product_wip'));
+
+        $data = $this->mmaster->marker($q, $id_product_wip);
         if ($data->num_rows() > 0) {
             foreach ($data->result() as $row) {
                 $filter[] = array(

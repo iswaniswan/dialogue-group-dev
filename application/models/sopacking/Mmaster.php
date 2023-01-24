@@ -569,13 +569,37 @@ class Mmaster extends CI_Model
 
     public function get_export_so()
     {
-        $this->db->select("a.id, i_product_base, e_product_basename, e_color_name");
-        $this->db->from("tr_product_base a");
-        $this->db->join("tr_color b","b.i_color = a.i_color AND a.id_company = b.id_company");
-        $this->db->where("a.f_status","t");
-        $this->db->where("a.id_company",$this->id_company);
-        $this->db->order_by(2);
-        return $this->db->get();
+        // $this->db->select("a.id, i_product_base, e_product_basename, e_color_name");
+        // $this->db->from("tr_product_base a");
+        // $this->db->join("tr_color b","b.i_color = a.i_color AND a.id_company = b.id_company");
+        // $this->db->where("a.f_status","t");
+        // $this->db->where("a.id_company",$this->id_company);
+        // $this->db->order_by(2);
+
+        $sql_product_by_company = "SELECT a.id,	i_product_base, e_product_basename,	e_color_name
+                FROM	tr_product_base a
+                JOIN tr_color b ON	b.i_color = a.i_color
+                    AND a.id_company = b.id_company
+                WHERE a.f_status = 't' 
+                    AND a.id_company = '$this->id_company'";
+
+        $sql_product_base = "SELECT tmupi.id_product_base 
+                FROM tm_masuk_unit_packing tmup
+                LEFT JOIN tm_masuk_unit_packing_item tmupi ON tmupi.id_document = tmup.id 
+                WHERE tmup.id_company = '$this->id_company' 
+                    AND i_status = '6'";                
+
+        $sql_product_by_penerimaan_packing = "SELECT a.id, i_product_base, 
+                e_product_basename, e_color_name
+                FROM tr_product_base a
+                JOIN tr_color b ON b.i_color = a.i_color
+                WHERE a.f_status = 't' AND a.id IN ($sql_product_base)
+                ORDER BY 3 ASC, 4 ASC";
+
+        $sql = "$sql_product_by_company UNION $sql_product_by_penerimaan_packing";
+
+        // var_dump($this->db->last_query()); die();
+        return $this->db->query($sql);;
     }
 }
 /* End of file Mmaster.php */

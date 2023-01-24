@@ -44,14 +44,12 @@ class Mmaster extends CI_Model
                 $i_bagian = $cek->row()->i_bagian;
                 $bagian = "AND a.i_bagian = '$i_bagian' ";
             } else {
-                $bagian = "AND a.i_bagian IN (SELECT
-                            i_bagian
-                        FROM
-                            tr_departement_cover
-                        WHERE
-                            i_departement = '" . $this->session->userdata('i_departement') . "'
-                            AND id_company = '" . $this->session->userdata('id_company') . "'
-                            AND username = '" . $this->session->userdata('username') . "')";
+                $bagian = "AND a.i_bagian IN (
+                                                SELECT i_bagian
+                                                FROM tr_departement_cover 
+                                                WHERE i_departement = '" . $this->session->userdata('i_departement') . "'
+                                                    AND id_company = '" . $this->session->userdata('id_company') . "' 
+                                                    AND username = '" . $this->session->userdata('username') . "')";
             }
         }
 
@@ -99,7 +97,9 @@ class Mmaster extends CI_Model
                         )
                     WHERE a.id_company = '$id_company'
                         AND a.i_status <> '5' $where $bagian
-                    ORDER BY a.i_keluar_qc asc";
+                    ORDER BY a.id DESC";
+
+        // var_dump($sql); die();
 
         $datatables->query($sql, false);
 
@@ -155,7 +155,7 @@ class Mmaster extends CI_Model
         $datatables->hide('i_tujuan');
         $datatables->hide('i_level');
         $datatables->hide('e_level_name');
-
+        
         return $datatables->generate();
     }
 
@@ -344,7 +344,8 @@ class Mmaster extends CI_Model
                         AND b.i_type = '$PACKING'
                 ";
 
-        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY e_bagian_name ASC";
+
+        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY 1 ASC";        
 
         return $this->db->query($sql);
     }
@@ -376,23 +377,20 @@ class Mmaster extends CI_Model
     public function marker($cari, $id_product_wip)
     {
         $idcompany = $this->session->userdata("id_company");
-        return $this->db->query("SELECT
-            DISTINCT a.id_marker,
-            b.e_marker_name
-        FROM
-            tr_polacutting_new a
-        INNER JOIN tr_marker b ON
-            (b.id = a.id_marker)
-        INNER JOIN tr_product_wip c ON 
-            (c.id = a.id_product_wip)
-        INNER JOIN tr_product_base d ON 
-            (d.i_product_wip = c.i_product_wip)
-        WHERE
-            a.id_company = '$idcompany'
-            AND a.f_status = 't'
-            AND
-            d.id = '$id_product_wip' 
-            AND b.e_marker_name ILIKE '%$cari%';", false);
+
+        $sql = "SELECT DISTINCT a.id_marker, b.e_marker_name
+                FROM tr_polacutting_new a
+                INNER JOIN tr_marker b ON (b.id = a.id_marker)
+                INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
+                INNER JOIN tr_product_base d ON (d.i_product_wip = c.i_product_wip)
+                WHERE a.id_company = '$idcompany'
+                    AND a.f_status = 't'
+                    AND d.id = '$id_product_wip' 
+                    AND b.e_marker_name ILIKE '%$cari%'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, false);
     }
 
     public function getproduct($eproduct)
@@ -460,36 +458,40 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query("            
-            SELECT DISTINCT 
-                a.id,
-                /* CASE
-                 WHEN c.saldo_akhir IS NULL THEN 0 
-                 WHEN c.saldo_akhir < 0 THEN 0 ELSE c.saldo_akhir
-                END AS saldo_akhir, */
-                CASE
-                 WHEN c.n_saldo_akhir IS NULL THEN 0 
-                 WHEN c.n_saldo_akhir < 0 THEN 0 ELSE c.n_saldo_akhir
-                END AS saldo_akhir,
-                CASE
-                 WHEN c.n_saldo_akhir_repair IS NULL THEN 0 
-                 WHEN c.n_saldo_akhir_repair < 0 THEN 0 ELSE c.n_saldo_akhir_repair
-                END AS saldo_akhir_repair
-            FROM
-                tr_product_base a
-            INNER JOIN tr_color b ON
-                (a.i_color = b.i_color
-                AND a.id_company = b.id_company)
-            LEFT JOIN (SELECT * FROM produksi.f_mutasi_wip($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')) c ON
-                (c.id_product_base = a.id AND c.id_company = '$idcompany')
-            WHERE
-                a.id = '$idproduct'
-                AND a.id_company = '$idcompany'
-                AND a.f_status = 't'
-                AND b.f_status = 't'
-            ORDER BY
-                a.id ASC
-                                ", FALSE);
+
+        $sql = "SELECT DISTINCT a.id,
+                    /* CASE
+                    WHEN c.saldo_akhir IS NULL THEN 0 
+                    WHEN c.saldo_akhir < 0 THEN 0 ELSE c.saldo_akhir
+                    END AS saldo_akhir, */
+                    CASE
+                        WHEN c.n_saldo_akhir IS NULL THEN 0 
+                        WHEN c.n_saldo_akhir < 0 THEN 0 ELSE c.n_saldo_akhir
+                    END AS saldo_akhir,
+                    CASE
+                        WHEN c.n_saldo_akhir_repair IS NULL THEN 0 
+                        WHEN c.n_saldo_akhir_repair < 0 THEN 0 ELSE c.n_saldo_akhir_repair
+                    END AS saldo_akhir_repair
+                FROM tr_product_base a
+                INNER JOIN tr_color b ON (
+                                        a.i_color = b.i_color AND a.id_company = b.id_company
+                                        )
+                LEFT JOIN (
+                            SELECT * FROM produksi.f_mutasi_wip(
+                                                        $idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian'
+                                                        )
+                        ) c ON (
+                                c.id_product_base = a.id AND c.id_company = '$idcompany'
+                                )
+                WHERE a.id = '$idproduct'
+                    AND a.id_company = '$idcompany'
+                    AND a.f_status = 't'
+                    AND b.f_status = 't'
+                ORDER BY a.id ASC";
+        
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark, $id_company_tujuan)

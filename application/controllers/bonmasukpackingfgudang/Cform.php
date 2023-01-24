@@ -101,14 +101,11 @@ class Cform extends CI_Controller {
 
         $filters = [];
         foreach ($data->result() as $row) {
-            $children[0] = [
-                'id' => $row->id,
-                'text' => $row->e_bagian_name
-            ];
 
             $group = [
-                'text' => trim($row->name),
-                'children' => $children
+                'id' => $row->id,
+                'text' => $row->e_bagian_name,
+                'name' => trim($row->name)
             ];
 
             $filters[] = $group;

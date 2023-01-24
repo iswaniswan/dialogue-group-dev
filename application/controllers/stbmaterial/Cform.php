@@ -193,6 +193,7 @@ class Cform extends CI_Controller
         $array_company_tujuan = [];
         $penerima  = [];
         $memo = [];
+
         if ($this->input->post('jml', true) > 0) {
             for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
                 $check       = $this->input->post('chk' . $i, true);
@@ -207,7 +208,12 @@ class Cform extends CI_Controller
                     array_push($memo, $id_memo);
                 }
             }
+        } else {
+            die('jml is zero');
         }
+
+        var_dump($bagian); return;
+
         $bagian   = array_unique($bagian);
         $company_tujuan = array_unique($array_company_tujuan);
         $penerima   = array_unique($penerima);

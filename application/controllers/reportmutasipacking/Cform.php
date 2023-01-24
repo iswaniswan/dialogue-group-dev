@@ -95,7 +95,6 @@ class Cform extends CI_Controller {
     }
 
     public function view(){
-
         $data = check_role($this->i_menu, 2);
         if(!$data){
             redirect(base_url(),'refresh');
@@ -135,7 +134,6 @@ class Cform extends CI_Controller {
     }
 
     public function cetak(){
-
         $data = check_role($this->i_menu, 2);
         if(!$data){
             redirect(base_url(),'refresh');
