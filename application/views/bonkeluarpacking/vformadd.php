@@ -37,19 +37,27 @@
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date"  required="" readonly value="<? echo date("d-m-Y");?>">
+                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date"  required="" readonly value="<?= date("d-m-Y");?>">
                         </div>
                         <div class="col-sm-3">
-                            <select name="itujuan" id="itujuan" class="form-control select2"   onchange="number();">
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">
                                 <?php if ($tujuan) {
-                                    foreach ($tujuan as $row):?>
-                                        <option value="<?= $row->i_bagian;?>">
-                                            <?= $row->e_bagian_name;?>
+                                    $group = "";
+                                    foreach ($tujuan as $row) : ?>
+                                    <?php if ($group!=$row->name) {?>
+                                        </optgroup>
+                                        <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>
+                                        <option value="<?= $row->id_bagian ?>">
+                                            <?= $row->e_bagian_name; ?>
                                         </option>
-                                    <?php endforeach; 
+                                <?php endforeach;
                                 } ?>
                             </select>
-                        </div>  
+                        </div>
+
                     </div>
                     <div class="form-group row">
                         <label class="col-md-3">Jenis Barang Keluar</label>
@@ -171,6 +179,8 @@
                 swal('Error :)');
             }
         });
+
+        clearDetailBarang();
     }
 
     $('#ceklis').click(function(event) {
@@ -205,7 +215,7 @@
         counterx++;
         $("#tabledatax").attr("hidden", false);
         var iproduct = $('#iproduct'+counterx).val();
-        count=$('#tabledatax tr').length;
+        count=$('#tabledatax tr').length;  
         if ((iproduct==''||iproduct==null)&&(count>1)) {
             swal('Isi dulu yang masih kosong!!');
             counter = counter-1;
@@ -218,7 +228,7 @@
 
         cols += '<td class="text-center"><spanx id="snum'+counter+'">'+count+'</spanx></td>';
         cols += '<td><input type="hidden" readonly id="idproduct'+ counter + '" class="form-control" name="idproduct[]"><input type="text" readonly id="iproduct'+ counter + '" class="form-control input-sm" name="iproduct' + counter + '"></td>';
-        cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +');"><option value=""></option></select></td>';
+        cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +'); setIdProduct('+ counter +')"><option value=""></option></select></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
         cols += '<td><input type="text" readonly class="form-control input-sm text-right" id="stok'+ counter +'" name="stok'+ counter +'"></td>';
         cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control input-sm text-right inputitem" name="nquantity[]" value="0" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' onkeyup="validasi('+counter+')"></td>';
@@ -242,7 +252,7 @@
             allowClear: true,
             width:"100%",
             ajax: {
-                url: '<?= base_url($folder.'/cform/dataproduct'); ?>',
+                url: '<?= base_url($folder.'/cform/dataproduct?itujuan='); ?>' + getItujuan(),
                 dataType: 'json',
                 delay: 250,
                 processResults: function (data) {
@@ -324,7 +334,7 @@
         }
 
         if(!ada){
-            var eproduct = $('#eproduct'+id).val();
+            var eproduct = $('#eproduct'+id).val();            
             $.ajax({
                 type: "post",
                 data: {
@@ -339,8 +349,9 @@
                     $('#ecolorproduct'+id).val(data[0].e_color_name);
                     $('#nquantity'+id).focus();
                 },
-                error: function () {
-                    swal('Error :)');
+                error: function (error) {
+                    console.log(error);
+                    // swal('Error :)');
                 }
             });
         }else{
@@ -358,21 +369,26 @@
     }
 
     function getstok(id){
+        var itujuan = getItujuan();
         var idproduct = $('#eproduct'+id).val();
         var ibagian = $('#ibagian').val();
+
         $.ajax({
             type: "post",
             data: {
                 'idproduct'  : idproduct,
                 'ibagian'    : ibagian,
+                'itujuan' : itujuan
             },
             url: '<?= base_url($folder.'/cform/getstok'); ?>',
             dataType: "json",
             success: function (data) {
-                $('#stok'+id).val(data.saldo_akhir);
+                const saldoAkhir = data?.saldo_akhir ?? 0;
+                $('#stok'+id).val(saldoAkhir);
             },
             error: function () {
-                swal('Error :)');
+                // swal('Error :)');
+                console.log('clear select2');
             }
         });
     }
@@ -443,5 +459,28 @@
                 return false;
             }
         }        
+    }    
+
+    function clearDetailBarang() {
+        // trigger click delete button
+        const allButton = $("body .ibtnDel");
+        allButton.each(function() {
+            $(this).trigger('click');
+            counter--;
+            counterx--;
+            $('#jml').val(counter);
+        })
     }
+
+    function getItujuan() {
+        return $('#itujuan').val()
+    }
+
+    function setIdProduct(counter) {
+        const value = $('#eproduct' + counter).val();
+        setTimeout(() => {
+            $('#idproduct' + counter).val(value);
+        }, 300)        
+    }
+    
 </script>

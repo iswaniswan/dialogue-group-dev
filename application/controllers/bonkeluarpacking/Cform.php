@@ -132,7 +132,8 @@ class Cform extends CI_Controller {
     public function dataproduct(){
         $filter = [];
         $cari = strtoupper($this->input->get('q'));
-        $data = $this->mmaster->dataproduct($cari);
+        $itujuan = $this->input->get('itujuan');
+        $data = $this->mmaster->dataproduct($cari, $itujuan);
         foreach($data->result() as $product){       
             $filter[] = array(
                 'id'    => $product->id,
@@ -145,6 +146,11 @@ class Cform extends CI_Controller {
 
     public function getproduct(){
         header("Content-Type: application/json", true);
+        $eproduct = $this->input->post('eproduct');
+        if (!$eproduct) {
+            return;
+        } 
+
         $data = $this->mmaster->getproduct($this->input->post('eproduct'));
 
         echo json_encode($data->result_array());
@@ -154,7 +160,12 @@ class Cform extends CI_Controller {
         header("Content-Type: application/json", true);
         $produk = $this->input->post('idproduct');
         $bagian = $this->input->post('ibagian');
-        $data = $this->mmaster->getstok($produk,$bagian);
+        $itujuan = $this->input->post('itujuan');
+        if (!$produk) {
+            return;
+        }
+
+        $data = $this->mmaster->getstok($produk, $bagian, $itujuan);
 
         echo json_encode($data->row());
     }
@@ -189,6 +200,8 @@ class Cform extends CI_Controller {
         $n_qtyproduct = $this->input->post('nquantity[]',TRUE);
         $n_qtyproduct = str_replace(',','',$n_qtyproduct);
         $e_desc       = $this->input->post('edesc[]',TRUE);
+
+        var_dump($this->input->post()); 
 
         $this->db->trans_begin();
         $this->Logger->write('Simpan Data '.$this->global['title'].' Kode : '.$ibonk);

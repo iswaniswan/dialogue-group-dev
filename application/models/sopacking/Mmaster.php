@@ -576,10 +576,11 @@ class Mmaster extends CI_Model
         // $this->db->where("a.id_company",$this->id_company);
         // $this->db->order_by(2);
 
-        $sql_product_by_company = "SELECT a.id,	i_product_base, e_product_basename,	e_color_name
+        $sql_product_by_company = "SELECT a.id,	i_product_base, e_product_basename,	e_color_name, c.name
                 FROM	tr_product_base a
                 JOIN tr_color b ON	b.i_color = a.i_color
                     AND a.id_company = b.id_company
+                JOIN public.company AS c ON c.id = a.id_company
                 WHERE a.f_status = 't' 
                     AND a.id_company = '$this->id_company'";
 
@@ -589,16 +590,17 @@ class Mmaster extends CI_Model
                 WHERE tmup.id_company = '$this->id_company' 
                     AND i_status = '6'";                
 
-        $sql_product_by_penerimaan_packing = "SELECT a.id, i_product_base, 
-                e_product_basename, e_color_name
+        $sql_product_by_penerimaan_packing = "SELECT a.id, i_product_base, e_product_basename, e_color_name, c.name
                 FROM tr_product_base a
                 JOIN tr_color b ON b.i_color = a.i_color
+                    AND a.id_company = b.id_company
+                JOIN public.company AS c ON c.id = a.id_company
                 WHERE a.f_status = 't' AND a.id IN ($sql_product_base)
                 ORDER BY 3 ASC, 4 ASC";
 
         $sql = "$sql_product_by_company UNION $sql_product_by_penerimaan_packing";
 
-        // var_dump($this->db->last_query()); die();
+        // var_dump($sql); die();
         return $this->db->query($sql);;
     }
 }

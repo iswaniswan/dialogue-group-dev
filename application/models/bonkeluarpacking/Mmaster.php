@@ -343,22 +343,25 @@ class Mmaster extends CI_Model
 
     public function tujuan($i_menu, $idcompany)
     {
-        return $this->db->query(" 
-                                SELECT 
-                                    a.*,
-                                    b.e_bagian_name 
-                                FROM 
-                                    tr_tujuan_menu a
-                                JOIN tr_bagian b 
-                                ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
-                                WHERE
-                                  a.i_menu = '$i_menu'
-                                  AND a.id_company = '$idcompany'");
+        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name
+                FROM tr_tujuan_menu a
+                JOIN tr_bagian b ON a.i_bagian = b.i_bagian
+                JOIN public.company c ON c.id = b.id_company
+                WHERE a.i_menu = '$i_menu'
+                    AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql);
     }
 
-    public function dataproduct($cari)
+    public function dataproduct($cari, $itujuan=null)
     {
         $idcompany  = $this->session->userdata('id_company');
+
+        if ($itujuan != null) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $idcompany = $query->row()->id_company;
+        }
+
         return $this->db->query("    
                                     SELECT  
                                         a.id,
@@ -381,61 +384,120 @@ class Mmaster extends CI_Model
     public function getproduct($eproduct)
     {
         $idcompany  = $this->session->userdata('id_company');
-        return $this->db->query("            
-                                    SELECT 
-                                        a.id as id_product, 
-                                        a.i_product_base,
-                                        a.e_product_basename,
-                                        b.id as id_color,
-                                        a.i_color,
-                                        b.e_color_name
-                                    FROM
-                                        tr_product_base a
-                                    INNER JOIN tr_color b ON
-                                        (b.i_color = a.i_color AND a.id_company = b.id_company)
-                                    WHERE
-                                        a.id_company = '$idcompany'
-                                    AND 
-                                        a.id = '$eproduct'
-                                ", FALSE);
+
+        // return $this->db->query("            
+        //                             SELECT 
+        //                                 a.id as id_product, 
+        //                                 a.i_product_base,
+        //                                 a.e_product_basename,
+        //                                 b.id as id_color,
+        //                                 a.i_color,
+        //                                 b.e_color_name
+        //                             FROM
+        //                                 tr_product_base a
+        //                             INNER JOIN tr_color b ON
+        //                                 (b.i_color = a.i_color AND a.id_company = b.id_company)
+        //                             WHERE
+        //                                 a.id_company = '$idcompany'
+        //                             AND 
+        //                                 a.id = '$eproduct'
+        //                         ", FALSE);
+
+        $sql = "SELECT * 
+                FROM tr_product_base tpb
+                INNER JOIN tr_color tc ON (
+                                        tc.i_color = tpb.i_color AND tc.id_company = tpb.id_company
+                                        )
+                WHERE tpb.id = '$eproduct'";
+
+        return $this->db->query($sql);                
     }
 
-    public function getstok($idproduct, $ibagian)
+    // public function getstok($idproduct, $ibagian)
+    // {
+    //     $idcompany = $this->session->userdata('id_company');
+    //     $today = date('Y-m-d');
+    //     $jangkaawal = date('Y-m-01');
+    //     $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
+    //     $periode = date('Ym');
+
+    //     $sql = "SELECT DISTINCT a.id,
+    //                 CASE
+    //                     WHEN c.n_saldo_akhir IS NULL THEN 0 
+    //                     WHEN c.n_saldo_akhir < 0 THEN 0 ELSE c.n_saldo_akhir
+    //                 END AS saldo_akhir
+    //             FROM tr_product_base a
+    //             INNER JOIN tr_color b ON (
+    //                                     a.i_color = b.i_color AND a.id_company = b.id_company
+    //                                     )
+    //             LEFT JOIN (
+    //                         SELECT * 
+    //                         FROM produksi.f_mutasi_packing(
+    //                                                     $idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian'
+    //                                                     )
+    //                     ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
+    //             WHERE a.id = '$idproduct'
+    //                 AND a.id_company = '$idcompany'
+    //                 AND a.f_status = 't'
+    //                 AND b.f_status = 't'
+    //             ORDER BY a.id ASC";
+
+    //     // var_dump($sql); die();
+
+    //     return $this->db->query($sql,FALSE);
+    // }
+
+    public function getstok($idproduct, $ibagian, $itujuan=null)
     {
         $idcompany = $this->session->userdata('id_company');
+        if ($itujuan != null) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $idcompany = $query->row()->id_company;
+            $ibagian = $query->row()->i_bagian;
+        }
+
         $today = date('Y-m-d');
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query(
-            "SELECT DISTINCT 
-                a.id,
-                CASE
-                    WHEN c.n_saldo_akhir IS NULL THEN 0 
-                    WHEN c.n_saldo_akhir < 0 THEN 0 ELSE c.n_saldo_akhir
-                END AS saldo_akhir
-            FROM
-                tr_product_base a
-            INNER JOIN tr_color b ON
-                (a.i_color = b.i_color
-                AND a.id_company = b.id_company)
-            LEFT JOIN (SELECT * FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')) c ON
-                (c.id_product_base = a.id AND c.id_company = '$idcompany')
-            WHERE
-                a.id = '$idproduct'
-                AND a.id_company = '$idcompany'
-                AND a.f_status = 't'
-                AND b.f_status = 't'
-            ORDER BY
-                a.id ASC
-                                ",
-            FALSE
-        );
+
+        $sql = "SELECT DISTINCT a.id,
+                    CASE
+                        WHEN c.n_saldo_akhir IS NULL THEN 0 
+                        WHEN c.n_saldo_akhir < 0 THEN 0 ELSE c.n_saldo_akhir
+                    END AS saldo_akhir
+                FROM tr_product_base a
+                INNER JOIN tr_color b ON (
+                                        a.i_color = b.i_color AND a.id_company = b.id_company
+                                        )
+                LEFT JOIN (
+                            SELECT * 
+                            FROM produksi.f_mutasi_packing(
+                                                        $idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian'
+                                                        )
+                        ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
+                WHERE a.id = '$idproduct'
+                    AND a.id_company = '$idcompany'
+                    AND a.f_status = 't'
+                    AND b.f_status = 't'
+                ORDER BY a.id ASC";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql,FALSE);
     }
 
     public function insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark)
     {
         $idcompany  = $this->session->userdata('id_company');
+        $id_company_tujuan = $idcompany;
+
+        if (intval($itujuan) >= 1) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $itujuan = $query->row()->i_bagian;
+            $id_company_tujuan = $query->row()->id_company;
+        }
+
         $data = array(
             'id_company'        => $idcompany,
             'id'                => $id,
@@ -446,6 +508,7 @@ class Mmaster extends CI_Model
             'e_remark'          => $eremark,
             'd_entry'           => current_datetime(),
             'id_jenis_barang_keluar' => $ijenis,
+            'id_company_tujuan' => $id_company_tujuan
         );
         $this->db->insert('tm_keluar_qc', $data);
     }
@@ -462,6 +525,7 @@ class Mmaster extends CI_Model
             'id_company'        => $idcompany,
             'e_remark'          => $edesc,
         );
+        // var_dump($data); die();
         $this->db->insert('tm_keluar_qc_item', $data);
     }
 
@@ -600,6 +664,13 @@ class Mmaster extends CI_Model
         $this->db->select('doc_qe');
         $this->db->from('public.tm_menu');
         $this->db->where('i_menu', $imenu);
+        return $this->db->get();
+    }
+
+    public function get_company_by_id_bagian($id_bagian) {
+        $this->db->select();
+        $this->db->from('tr_bagian');
+        $this->db->where('id', $id_bagian);
         return $this->db->get();
     }
 }

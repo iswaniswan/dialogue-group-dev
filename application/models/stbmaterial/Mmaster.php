@@ -188,9 +188,13 @@ class Mmaster extends CI_Model
 
     public function runningnumber($thbl, $ibagian)
     {
-        $query = $this->db->query("SELECT b.e_no_doc_retur, b.e_no_doc FROM tr_bagian a 
-            INNER JOIN tr_kategori_jahit b ON (b.id = a.id_kategori_jahit) 
-            WHERE id_company = '$this->id_company' AND a.i_bagian = '$ibagian'");
+        $sql = "SELECT b.e_no_doc_retur, b.e_no_doc FROM tr_bagian a 
+                INNER JOIN tr_kategori_jahit b ON (b.id = a.id_kategori_jahit) 
+                WHERE id_company = '$this->id_company' AND a.i_bagian = '$ibagian'";
+
+        die($sql);
+        $query = $this->db->query($sql);
+
         if ($query->num_rows() > 0) {
             $kode = $query->row()->e_no_doc;
         } else {
@@ -697,6 +701,7 @@ class Mmaster extends CI_Model
                             e_bagian_name, company_pembuat, i_tujuan, tujuan_bagian, tujuan_name, id_company_tujuan,
                             company_name, d_kirim, (select count(i) as jml FROM CTE) As jml 
                     FROM CTE";
+        // var_dump($sql); die();                    
         return $this->db->query($sql);
     }
 
@@ -825,6 +830,16 @@ class Mmaster extends CI_Model
             WHERE a.id IN ($id)
             ORDER BY i_product_wip, e_product_wipname, e_color_name, i_material
         ");
+    }
+
+    public function query_table_bagian($id)
+    {
+        $sql = "SELECT tb.*, c.name 
+                    FROM tr_bagian tb
+                    INNER JOIN public.company c on c.id = tb.id_company 
+                    WHERE tb.id = '$id'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

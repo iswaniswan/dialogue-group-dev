@@ -456,7 +456,7 @@ class Cform extends CI_Controller {
             ->setCellValue("A2", "FORMAT UPLOAD STOCKOPNAME PACKING");
         $spreadsheet->getActiveSheet()->setTitle('Format Stockopname');
         $h = 3;
-        $header = ['#', 'ID BARANG', 'KODE BARANG', 'NAMA BARANG', 'WARNA', 'SO','KETERANGAN'];
+        $header = ['#', 'ID BARANG', 'KODE BARANG', 'NAMA BARANG', 'WARNA', 'SO','KETERANGAN', 'ASAL'];
         for ($i = 0; $i < count($header); $i++) {
             $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $h, $header[$i]);
         }
@@ -475,7 +475,7 @@ class Cform extends CI_Controller {
             foreach ($sql->result() as $row) {
                 $no++;
                 $isi = [
-                    $no, $row->id, $row->i_product_base, $row->e_product_basename, $row->e_color_name, 0,
+                    $no, $row->id, $row->i_product_base, $row->e_product_basename, $row->e_color_name, 0, "", $row->name
                 ];
                 for ($i = 0; $i < count($isi); $i++) {
                     $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $j, $isi[$i]);

@@ -208,11 +208,9 @@ class Cform extends CI_Controller
                     array_push($memo, $id_memo);
                 }
             }
-        } else {
-            die('jml is zero');
-        }
-
-        var_dump($bagian); return;
+        } 
+        // var_dump($this->input->post()); die();
+        // var_dump($this->input->post('tujuan_bagian19')); return;
 
         $bagian   = array_unique($bagian);
         $company_tujuan = array_unique($array_company_tujuan);
