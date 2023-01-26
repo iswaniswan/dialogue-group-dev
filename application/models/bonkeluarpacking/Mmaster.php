@@ -271,20 +271,29 @@ class Mmaster extends CI_Model
     {
         //var_dump($thbl);
         $id_company = $this->id_company;
-        $cek = $this->db->query("
-        SELECT 
-            a.i_bagian,
-            b.e_no_doc as kode
-        FROM
-            tr_tujuan_menu a
-        INNER JOIN
-            tr_kategori_jahit b 
-            ON (b.id = a.id_kategori)
-        WHERE
-            id_company = '$id_company'
-            AND a.i_menu = '$this->i_menu'
-            AND i_bagian = '$itujuan'
-        ");
+        // $cek = $this->db->query("
+        // SELECT 
+        //     a.i_bagian,
+        //     b.e_no_doc as kode
+        // FROM
+        //     tr_tujuan_menu a
+        // INNER JOIN
+        //     tr_kategori_jahit b 
+        //     ON (b.id = a.id_kategori)
+        // WHERE
+        //     id_company = '$id_company'
+        //     AND a.i_menu = '$this->i_menu'
+        //     AND i_bagian = '$itujuan'
+        // ");
+
+        $sql = "SELECT a.i_bagian, b.i_keluar_qc as kode
+                FROM tr_tujuan_menu a
+                INNER JOIN tm_keluar_qc b ON (b.id = a.id_kategori)
+                WHERE id_company = '$id_company'
+                    AND a.i_menu = '$this->i_menu'
+                    AND i_bagian = '$itujuan'";
+
+        $cek = $this->db->query($sql);
 
         if ($cek->num_rows() > 0) {
             $kode = $cek->row()->kode;
@@ -403,7 +412,7 @@ class Mmaster extends CI_Model
         //                                 a.id = '$eproduct'
         //                         ", FALSE);
 
-        $sql = "SELECT * 
+        $sql = "SELECT tpb.id AS id_product, tpb.i_product_base, tpb.e_product_basename, tc.id AS id_color, tpb.i_color, tc.e_color_name
                 FROM tr_product_base tpb
                 INNER JOIN tr_color tc ON (
                                         tc.i_color = tpb.i_color AND tc.id_company = tpb.id_company
@@ -550,16 +559,14 @@ class Mmaster extends CI_Model
                                         a.i_keluar_qc,
                                         to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
                                         a.i_bagian,
-                                        a.i_tujuan,
+                                        tb.id AS i_tujuan,
                                         a.i_status,
                                         a.e_remark,
                                         a.id_jenis_barang_keluar
-                                    FROM
-                                       tm_keluar_qc a
-                                    WHERE                                        
-                                        a.id = '$id'
-                                    AND
-                                        a.id_company = '$idcompany' 
+                                    FROM tm_keluar_qc a
+                                    LEFT JOIN tr_bagian tb ON tb.i_bagian = a.i_tujuan AND tb.id_company = a.id_company_tujuan
+                                    WHERE a.id = '$id'
+                                    AND a.id_company = '$idcompany' 
                                 ", FALSE);
     }
 
@@ -582,31 +589,29 @@ class Mmaster extends CI_Model
                 c.e_color_name,
                 a.n_quantity_product,
                 a.e_remark,
-                CASE WHEN d.i_status = '6' THEN (CASE
-                    WHEN s.n_saldo_akhir IS NULL THEN 0 
-                    WHEN (s.n_saldo_akhir + a.n_quantity_product) < 0 THEN 0 ELSE (s.n_saldo_akhir + a.n_quantity_product)
-                END) ELSE (
+                CASE 
+                    WHEN d.i_status = '6' THEN (
+                        CASE 
+                            WHEN s.n_saldo_akhir IS NULL THEN 0 
+                            WHEN (s.n_saldo_akhir + a.n_quantity_product) < 0 THEN 0 
+                        ELSE (s.n_saldo_akhir + a.n_quantity_product)
+                    END) 
+                ELSE (
                     CASE
-                    WHEN s.n_saldo_akhir IS NULL THEN 0 
-                    WHEN s.n_saldo_akhir < 0 THEN 0 ELSE s.n_saldo_akhir
-                END) END AS saldo_akhir
-            FROM
-                tm_keluar_qc_item a 
-                JOIN
-                    tm_keluar_qc d 
-                    ON a.id_keluar_qc = d.id 
-                JOIN
-                    tr_product_base b 
-                    ON a.id_product = b.id 
-                    AND d.id_company = b.id_company 
-                JOIN
-                    tr_color c 
-                    ON a.id_color = c.id 
-                    AND d.id_company = c.id_company 
-                LEFT JOIN (SELECT * FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '')) s ON
-                (s.id_product_base = a.id_product AND s.id_company = '$idcompany')
-            WHERE
-                a.id_keluar_qc = '$id' 
+                        WHEN s.n_saldo_akhir IS NULL THEN 0 
+                        WHEN s.n_saldo_akhir < 0 THEN 0 ELSE s.n_saldo_akhir
+                    END) END AS saldo_akhir
+            FROM tm_keluar_qc_item a 
+                JOIN tm_keluar_qc d ON a.id_keluar_qc = d.id 
+                JOIN tr_product_base b ON a.id_product = b.id AND d.id_company = b.id_company 
+                JOIN tr_color c ON a.id_color = c.id AND d.id_company = c.id_company 
+                LEFT JOIN (
+                        SELECT * 
+                        FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '')
+                        ) s ON (
+                            s.id_product_base = a.id_product AND s.id_company = '$idcompany'
+                            )
+            WHERE a.id_keluar_qc = '$id' 
                 AND d.id_company = '$idcompany'
             ", FALSE);
     }
@@ -630,6 +635,14 @@ class Mmaster extends CI_Model
     public function updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $ijenis, $eremark)
     {
         $idcompany  = $this->session->userdata('id_company');
+        $id_company_tujuan = $idcompany;
+
+        if (intval($itujuan) >= 1) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $itujuan = $query->row()->i_bagian;
+            $id_company_tujuan = $query->row()->id_company;
+        }
+
         $data = array(
             'i_keluar_qc'       => $ibonk,
             'd_keluar_qc'       => $datebonk,
@@ -638,9 +651,9 @@ class Mmaster extends CI_Model
             'e_remark'          => $eremark,
             'd_update'          => current_datetime(),
             'id_jenis_barang_keluar' => $ijenis,
+            'id_company_tujuan' => $id_company_tujuan
         );
         $this->db->where('id', $id);
-        $this->db->where('id_company', $idcompany);
         $this->db->update('tm_keluar_qc', $data);
     }
 
@@ -672,6 +685,39 @@ class Mmaster extends CI_Model
         $this->db->from('tr_bagian');
         $this->db->where('id', $id_bagian);
         return $this->db->get();
+    }
+
+    public function generate_nomor_dokumen($bagian, $itujuan) {
+        $id_company = $this->id_company;
+        $id_company_tujuan = $id_company;
+
+        if (intval($itujuan) >= 1) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $itujuan = $query->row()->i_bagian;
+            $id_company_tujuan = $query->row()->id_company;
+        }    
+
+        $kode = 'STB';
+        $where = "AND id_company_tujuan = '$id_company_tujuan'";
+
+        if ($id_company_tujuan != $id_company) {
+            $kode = 'SJ';
+            $where = "AND NOT id_company_tujuan = '$id_company'";
+        }
+
+        $sql = "SELECT count(*) FROM tm_keluar_qc tkq
+                    WHERE i_bagian = '$bagian'
+                    AND id_company = '$id_company'
+                    $where 
+                    AND to_char(d_keluar_qc, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
+
+        $query = $this->db->query($sql);
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
+
+        return $generated;
     }
 }
 /* End of file Mmaster.php */

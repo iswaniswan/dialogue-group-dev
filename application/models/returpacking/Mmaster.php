@@ -3,8 +3,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use Ozdemir\Datatables\Datatables;
 use Ozdemir\Datatables\DB\CodeigniterAdapter;
 class Mmaster extends CI_Model {
+    
     function data($i_menu, $folder, $dfrom, $dto) {
         $idcompany = $this->session->userdata('id_company');
+        $i_departement = $this->session->userdata('i_departement');
+        $id_company = $this->session->userdata('id_company');
+        $username = $this->session->userdata('username');
+
         if ($dfrom != '' && $dto != '') {
             $dfrom = date('Y-m-d', strtotime($dfrom));
             $dto = date('Y-m-d', strtotime($dto));
@@ -13,87 +18,77 @@ class Mmaster extends CI_Model {
             $where = "";
         }
         $datatables = new Datatables(new CodeigniterAdapter);
-        $cek = $this->db->query("
-            SELECT
-                i_bagian
-            FROM
-                tm_retur_produksi_gdjd
-            WHERE
-                i_status <> '5'
-                AND id_company = '" . $this->session->userdata('id_company') . "'
-                $where
-                AND i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '" . $this->session->userdata('i_departement') . "'
-                        AND id_company = '" . $this->session->userdata('id_company') . "'
-                        AND username = '" . $this->session->userdata('username') . "')
+        
+        $sql = "SELECT i_bagian
+                FROM tm_retur_produksi_gdjd
+                WHERE i_status <> '5'
+                    AND id_company = '$idcompany'
+                    $where
+                    AND i_bagian IN (
+                                    SELECT i_bagian
+                                    FROM tr_departement_cover
+                                    WHERE i_departement = '$i_departement'
+                                        AND id_company = '$id_company'
+                                        AND username = '$username'
+                                    )";
 
-        ", FALSE);
-        if ($this->session->userdata('i_departement') == '1') {
+        $cek = $this->db->query($sql);
+
+        if ($i_departement == '1') {
             $bagian = "";
         } else {
             if ($cek->num_rows() > 0) {
                 $i_bagian = $cek->row()->i_bagian;
                 $bagian = "AND a.i_bagian = '$i_bagian' ";
             } else {
-                $bagian = "AND a.i_bagian IN (SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '" . $this->session->userdata('i_departement') . "'
-                        AND id_company = '" . $this->session->userdata('id_company') . "'
-                        AND username = '" . $this->session->userdata('username') . "')";
+                $bagian = "AND a.i_bagian IN (
+                                        SELECT i_bagian
+                                        FROM tr_departement_cover
+                                        WHERE i_departement = '$i_departement'
+                                            AND id_company = '$id_company'
+                                            AND username = '$username'
+                                    )";
             }
         }
-        $datatables->query("SELECT
-                             0 as no,
-                             a.id,
-                             a.i_document,
-                             to_char(a.d_document, 'dd-mm-yyyy') as d_document,
-                             a.i_tujuan,
-                             bc.e_bagian_name pembuat,
-                             b.e_bagian_name,
-                             a.e_remark,
-                             a.id_company,
-                             a.i_status,
-                             c.e_status_name,
-                             a.i_bagian,
-                             c.label_color,
-                             f.i_level,
-                             l.e_level_name,
-                             '$dfrom' AS dfrom,
-                             '$dto' AS dto,
-                             '$i_menu' as i_menu,
-                             '$folder' AS folder
-                          FROM
-                             tm_retur_produksi_gdjd a 
-                             JOIN
-                                tr_bagian b 
-                                ON (a.i_tujuan = b.i_bagian AND a.id_company = b.id_company) 
-                             JOIN
-                                tr_bagian bc 
-                                ON (a.i_bagian = bc.i_bagian AND a.id_company = bc.id_company) 
-                             JOIN
-                                tr_status_document c 
-                                ON (a.i_status = c.i_status)                       
-                            LEFT JOIN tr_menu_approve f ON
-                                (a.i_approve_urutan = f.n_urut
-                                AND f.i_menu = '$i_menu')
-                            LEFT JOIN public.tr_level l ON
-                                (f.i_level = l.i_level)
-                             WHERE 
-                                a.id_company = '$idcompany'
-                             AND
-                                a.i_status <> '5'
-                          $where
-                          $bagian
-                          ORDER BY
-                             a.i_document asc", false);
+
+        $sql = "SELECT 0 as no,
+                        a.id,
+                        a.i_document,
+                        to_char(a.d_document, 'dd-mm-yyyy') as d_document,
+                        b.id as id_bagian_tujuan,
+                        bc.e_bagian_name pembuat,
+                        b.e_bagian_name,
+                        a.e_remark,
+                        a.id_company,
+                        a.i_status,
+                        c.e_status_name,
+                        a.i_bagian,
+                        c.label_color,
+                        f.i_level,
+                        l.e_level_name,
+                        '$dfrom' AS dfrom,
+                        '$dto' AS dto,
+                        '$i_menu' as i_menu,
+                        '$folder' AS folder
+                    FROM tm_retur_produksi_gdjd a 
+                    JOIN tr_bagian b ON b.id = a.id_bagian_tujuan 
+                    JOIN tr_bagian bc ON (
+                                        a.i_bagian = bc.i_bagian AND a.id_company = bc.id_company
+                                    ) 
+                    JOIN tr_status_document c ON a.i_status = c.i_status
+                    LEFT JOIN tr_menu_approve f ON (
+                                                a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
+                                                )
+                    LEFT JOIN public.tr_level l ON f.i_level = l.i_level
+                    WHERE a.id_company = '$idcompany'
+                        AND a.i_status <> '5'
+                    $where $bagian
+                    ORDER BY a.i_document asc";
+
+        // var_dump($sql); die();                            
+
+        $datatables->query($sql);
+
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
             if ($i_status == '2') {
@@ -104,7 +99,7 @@ class Mmaster extends CI_Model {
         $datatables->add('action', function ($data) {
             $id = trim($data['id']);
             $i_status = trim($data['i_status']);
-            $itujuan = trim($data['i_tujuan']);
+            $id_bagian_tujuan = trim($data['id_bagian_tujuan']);
             $ibagian = trim($data['i_bagian']);
             $folder = $data['folder'];
             $dfrom = $data['dfrom'];
@@ -139,9 +134,10 @@ class Mmaster extends CI_Model {
         $datatables->hide('id');
         $datatables->hide('i_status');
         $datatables->hide('i_bagian');
-        $datatables->hide('i_tujuan');
+        $datatables->hide('id_bagian_tujuan');
         $datatables->hide('i_level');
         $datatables->hide('e_level_name');
+
         return $datatables->generate();
     }
     public function estatus($istatus) {
@@ -268,21 +264,25 @@ class Mmaster extends CI_Model {
         $this->db->from('tm_retur_produksi_gdjd');
         return $this->db->get()->row()->id + 1;
     }
-    public function tujuan($i_menu, $idcompany) {
-        return $this->db->query(" 
-                                SELECT 
-                                    a.*,
-                                    b.e_bagian_name 
-                                FROM 
-                                    tr_tujuan_menu a
-                                JOIN tr_bagian b 
-                                ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
-                                WHERE
-                                  a.i_menu = '$i_menu'
-                                  AND a.id_company = '$idcompany'");
+    
+    public function tujuan($i_menu, $idcompany=null) {
+        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name
+                FROM tr_tujuan_menu a
+                JOIN tr_bagian b ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company)
+                JOIN public.company c ON c.id = b.id_company
+                WHERE a.i_menu = '$i_menu'";
+        
+        return $this->db->query($sql);
     }
-    public function dataproduct($cari) {
-        $idcompany = $this->session->userdata('id_company');
+
+    public function dataproduct($cari, $itujuan=null) {
+        $idcompany  = $this->session->userdata('id_company');
+
+        if ($itujuan != null) {
+            $query = $this->get_company_by_id_bagian($itujuan);
+            $idcompany = $query->row()->id_company;
+        }
+
         return $this->db->query("    
                                     SELECT  
                                         a.id,
@@ -306,7 +306,7 @@ class Mmaster extends CI_Model {
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d',strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query("SELECT 
+        $sql = "SELECT 
                 a.id as id_product, 
                 a.i_product_base,
                 a.e_product_basename,
@@ -314,45 +314,57 @@ class Mmaster extends CI_Model {
                 a.i_color,
                 b.e_color_name,
                 coalesce(n_saldo_akhir,0) n_saldo_akhir
-            FROM
-                tr_product_base a
-            INNER JOIN tr_color b ON
-                (b.i_color = a.i_color AND a.id_company = b.id_company)
-            LEFT JOIN (SELECT * FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')) c ON
-                (c.id_product_base = a.id AND c.id_company = '$idcompany')
-            WHERE
-                a.id_company = '$idcompany'
-            AND 
-                a.id = '$eproduct'
-        ", FALSE);
+            FROM tr_product_base a
+            INNER JOIN tr_color b ON (
+                                b.i_color = a.i_color AND a.id_company = b.id_company
+                            )
+            LEFT JOIN (
+                        SELECT * 
+                        FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
+                    ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
+            WHERE a.id_company = '$idcompany'
+            AND a.id = '$eproduct'";
+
+        return $this->db->query($sql);
     }
-    function insertheader($id, $iretur, $ibagian, $dateretur, $itujuan, $eremarkh) {
-        $idcompany = $this->session->userdata('id_company');
-        $this->db->set(array('id' => $id, 'id_company' => $idcompany, 'i_document' => $iretur, 'd_document' => $dateretur, 'i_bagian' => $ibagian, 'i_tujuan' => $itujuan, 'e_remark' => $eremarkh, 'i_status' => '1', 'd_entry' => current_datetime(),));
+
+    function insertheader($id, $iretur, $ibagian, $dateretur, $id_bagian_tujuan, $eremarkh) {
+        $idcompany  = $this->session->userdata('id_company');
+        $data = [            
+            'id' => $id, 
+            'id_company' => $idcompany, 
+            'i_document' => $iretur, 
+            'd_document' => $dateretur, 
+            'i_bagian' => $ibagian, 
+            'id_bagian_tujuan' => $id_bagian_tujuan,
+            'e_remark' => $eremarkh, 
+            'i_status' => '1', 
+            'd_entry' => current_datetime()
+        ];
+        // var_dump($data); die();
+        $this->db->set($data);
         $this->db->insert('tm_retur_produksi_gdjd');
     }
+
     function insertdetail($id, $iproduct, $icolor, $nqtyproduct, $edesc) {
         $idcompany = $this->session->userdata('id_company');
-        $this->db->set(array('id_document' => $id, 'id_product' => $iproduct, 'n_quantity' => $nqtyproduct, 'n_sisa_retur' => $nqtyproduct, 'id_company' => $idcompany, 'e_remark' => $edesc,));
+        $this->db->set(array(
+            'id_document' => $id, 'id_product' => $iproduct, 'n_quantity' => $nqtyproduct, 'n_sisa_retur' => $nqtyproduct, 'id_company' => $idcompany, 'e_remark' => $edesc,));
         $this->db->insert('tm_retur_produksi_gdjd_item');
     }
     function cek_data($id, $idcompany) {
-        $this->db->select(" 
-                           a.id,
-                           a.i_document as i_retur,
-                           to_char(a.d_document, 'dd-mm-yyyy') as d_retur,
-                           a.i_bagian,
-                           a.i_tujuan,
-                           a.e_remark,
-                           a.i_status 
-                        FROM
-                           tm_retur_produksi_gdjd a 
-                        WHERE
-                           a.id = '$id'
-                        AND 
-                           a.id_company = '$idcompany' 
-                        ORDER BY
-                           d_document asc", false);
+        $this->db->select(" a.id,
+                            a.i_document as i_retur,
+                            to_char(a.d_document, 'dd-mm-yyyy') as d_retur,
+                            a.i_bagian,
+                            a.i_tujuan,
+                            a.e_remark,
+                            a.i_status,
+                            a.id_bagian_tujuan
+                            FROM tm_retur_produksi_gdjd a 
+                            WHERE a.id = '$id'
+                            AND a.id_company = '$idcompany' 
+                            ORDER BY d_document asc", false);
         return $this->db->get();
     }
     public function dataeditdetail($id,$ibagian) {
@@ -403,6 +415,13 @@ class Mmaster extends CI_Model {
     function deletedetail($id) {
         $idcompany = $this->session->userdata('id_company');
         $this->db->query("DELETE FROM tm_retur_produksi_gdjd_item WHERE id_document='$id' AND id_company = '$idcompany'");
+    }
+
+    public function get_company_by_id_bagian($id_bagian) {
+        $this->db->select();
+        $this->db->from('tr_bagian');
+        $this->db->where('id', $id_bagian);
+        return $this->db->get();
     }
 }
 /* End of file Mmaster.php */

@@ -42,17 +42,25 @@
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date"  required="" readonly value="<?= $data->d_keluar_qc;?>">
                         </div>
-                        <div class="col-sm-3">
-                            <select name="itujuan" id="itujuan" class="form-control select2">
+                        <div class="col-sm-3">               
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">      
                                 <?php if ($tujuan) {
-                                    foreach ($tujuan as $row):?>
-                                        <option value="<?= $row->i_bagian;?>" <?php if ($row->i_bagian==$data->i_tujuan) {?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name;?>
+                                    $group = "";
+                                    foreach ($tujuan as $row) : ?>
+                                    <?php if ($group!=$row->name) {?>
+                                        </optgroup>
+                                        <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>            
+                                        <?php $selected = $row->id_bagian == $data->i_tujuan ? 'selected' : ''; ?>                            
+                                        <option value="<?= $row->id_bagian ?>" <?= $selected ?>>
+                                            <?= $row->e_bagian_name; ?>
                                         </option>
-                                    <?php endforeach; 
+                                <?php endforeach;
                                 } ?>
                             </select>
-                        </div>  
+                        </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-md-3">Jenis Barang Keluar</label>
@@ -146,7 +154,7 @@
                                         <input type="text" value="<?= $row->e_color_name;?>" readonly id="ecolorproduct<?=$i;?>" name="ecolorproduct[]" class="form-control input-sm">
                                     </td>
                                     <td>
-                                        <input type="text" readonly class="form-control text-right input-sm" id="stok<?=$i;?>" name="stok<?=$i;?>" value="<?= $row->saldo_akhir;?>">
+                                        <input type="text" readonly class="form-control text-right input-sm" id="stok<?=$i;?>" name="stok<?=$i;?>" value="<?= $row->saldo_akhir?>">
                                     </td>
                                     <td>
                                         <input type="text" value="<?= $row->n_quantity_product;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="angkahungkul(this); validasi();">
@@ -173,39 +181,43 @@
                                             <i class="fa fa-check-circle-o fa-lg text-success" aria-hidden="true"></i>
                                         </td>
                                         <td colspan="3">
-                                            <select type="text" data-placeholder="Pilih Barang" id="eproduct_bundle<?= $i ?><?= $k;?>"   class="form-control" name="eproduct_bundle<?= $i ?><?= $k;?>"><option value="<?= $b->id_product ?>"><?= $b->e_product_basename ?></option></select>
-                                            <script>
-                                                // for(let i = 1; i<=parseInt($('#jml_item').val()); i++) {
-                                                    // $(`#eproduct_bundle<?= $i ?><?= $k;?>`).select2({
-                                                    //     placeholder: 'Cari Berdasarkan Nama / Kode',
-                                                    //     templateSelection: formatSelection,
-                                                    //     allowClear: true,
-                                                    //     width: "100%",
-                                                    //     ajax: {
-                                                    //         url: '<?= base_url($folder . '/cform/dataproduct'); ?>',
-                                                    //         dataType: 'json',
-                                                    //         delay: 250,
-                                                    //         processResults: function(data) {
-                                                    //             return {
-                                                    //                 results: data
-                                                    //             };
-                                                    //         },
-                                                    //         cache: true
-                                                    //     }
-                                                    // });
-                                                // }
-                                                $(`#eproduct_bundle<?= $i ?><?= $k;?>`).select2({
-                                                    width: "100%",
-                                                });
-                                            </script>
+                                            <select type="text" data-placeholder="Pilih Barang" 
+                                                    id="eproduct_bundle<?= $i ?><?= $k;?>"                                                     
+                                                    name="eproduct_bundle<?= $i ?><?= $k;?>"
+                                                    class="form-control">
+                                                <option value="<?= $b->id_product ?>"><?= $b->e_product_basename ?></option>
+                                            </select>
                                         </td>
-                                        <td  class="d-flex justify-content-between">
-                                            <input type="text" id="n_qty_bundle_<?= $i ?>_<?= $k;?>" class="form-control text-right input-sm" name="n_qty_bundle<?= $i ?><?= $k;?>" value="<?= $b->n_quantity_bundling ?>" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="angkahungkul(this);validasi(<?= $i ?>);">
+                                        <td  class="">
+                                            <input type="text" id="n_stok_bundle_<?= $i ?>_<?= $k;?>" class="form-control text-right input-sm" name="n_stok_bundle<?= $i ?><?= $k;?>" value="" readonly>
                                         </td>
-                                        <td colspan="2">
+                                        <td  class="">
+                                            <input type="text" id="n_qty_bundle_<?= $i ?>_<?= $k;?>" 
+                                                    class="form-control text-right input-sm" 
+                                                    name="n_qty_bundle<?= $i ?><?= $k;?>" 
+                                                    value="<?= $b->n_quantity_bundling ?>" 
+                                                    onblur='if(this.value==""){this.value="0";}' 
+                                                    onfocus='if(this.value=="0"){this.value="";}' 
+                                                    onkeyup="validasiStockBundle(this, n_stok_bundle_<?= $i ?>_<?= $k ?>);">
+                                        </td>
+                                        <td>
                                             <?= $b->e_remark; ?>
                                         </td>
                                         <td class="text-center"><button type="button" title="Delete" data-b = "<?= $i ?>" class="ibtnDel btn-sm btn btn-circle btn-warning"><i class="fa fa-lg fa-minus-circle" aria-hidden="true"></i></td>
+                                        <script>
+                                            setTimeout(() => {
+                                                $(`#eproduct_bundle<?= $i ?><?= $k;?>`)
+                                                    .select2({
+                                                        'width': '100%'
+                                                    })
+                                                    .val("<?= $b->id_product ?>")
+                                                    .trigger("change");    
+
+                                                let elementProduct = $("#eproduct_bundle<?= $i ?><?= $k;?>");
+                                                let elementStock = $("#n_stok_bundle_<?= $i ?>_<?= $k;?>");
+                                                getStockBundle(elementProduct , elementStock);
+                                            }, 200);                                              
+                                        </script>
                                     </tr>
                                     <?php
                                         $k++; } /* $o++; */
@@ -232,29 +244,29 @@
             width : '100%',
         });
         showCalendar('.date');
-        $('#ibagian').select2({
-            placeholder: 'Pilih Bagian',
-            width: '100%',
-            allowClear: true,
-            ajax: {
-                url: '<?= base_url($folder.'/cform/bagian'); ?>',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    var query = {
-                        q: params.term,
-                        ibagian : $('#xbagian').val(),
-                    }
-                    return query;
-                },
-                processResults: function (data) {
-                    return {
-                        results: data,
-                    };
-                },
-                cache: false
-            }
-        });
+        // $('#ibagian').select2({
+        //     placeholder: 'Pilih Bagian',
+        //     width: '100%',
+        //     allowClear: true,
+        //     ajax: {
+        //         url: '<?= base_url($folder.'/cform/bagian'); ?>',
+        //         dataType: 'json',
+        //         delay: 250,
+        //         data: function (params) {
+        //             var query = {
+        //                 q: params.term,
+        //                 ibagian : $('#xbagian').val(),
+        //             }
+        //             return query;
+        //         },
+        //         processResults: function (data) {
+        //             return {
+        //                 results: data,
+        //             };
+        //         },
+        //         cache: false
+        //     }
+        // });
 
         var jmls = $('#jml').val();
         for(s=1;s<= jmls;s++){
@@ -315,6 +327,8 @@
                 swal('Error :)');
             }
         });
+
+        clearDetailBarang();
     }
 
     function tambah_material(i) {
@@ -325,10 +339,18 @@
         col += `
         <td class="text-center"><i class="fa fa-check-circle-o fa-lg text-success" aria-hidden="true"></i></td>
         <td colspan="3">
-            <select type="text" data-placeholder="Pilih Barang" id="eproduct_bundle${i}${ii}" class="form-control" name="eproduct_bundle${i}${ii}"><option value=""></option></select>
+            <select type="text" data-placeholder="Pilih Barang" 
+                id="eproduct_bundle${i}${ii}" class="form-control" name="eproduct_bundle${i}${ii}"
+                onchange="getStockBundle(this, n_stok_bundle_${i}_${ii})">
+                <option value=""></option>
+            </select>
         </td>
-        <td><input type="text" id="n_qty_bundle_${i}_${ii}" class="form-control text-right input-sm" name="n_qty_bundle${i}${ii}" value="0" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' onkeyup="angkahungkul(this);validasi(${i});"></td>
-        <td colspan="2"></td>
+        <td><input type="text" id="n_stok_bundle_${i}_${ii}" class="form-control text-right input-sm" name="n_stok_bundle${i}${ii}" value="0" readonly></td>
+        <td><input type="text" id="n_qty_bundle_${i}_${ii}" class="form-control text-right input-sm" name="n_qty_bundle${i}${ii}" value="0" 
+                onblur=\'if(this.value==""){this.value="0";}\' 
+                onfocus=\'if(this.value=="0"){this.value="";}\' 
+                onkeyup="validasiStockBundle(this, n_stok_bundle_${i}_${ii});">
+        <td></td>
         <td class="text-center"><button type="button" title="Delete" data-b = "${i}" class="ibtnDel btn-sm btn btn-circle btn-warning"><i class="fa fa-lg fa-minus-circle" aria-hidden="true"></i></td>
         `;
         newRow.append(col);
@@ -340,7 +362,7 @@
             allowClear: true,
             width: "100%",
             ajax: {
-                url: '<?= base_url($folder . '/cform/dataproduct'); ?>',
+                url: '<?= base_url($folder . '/cform/dataproduct?itujuan='); ?>' + getItujuan(),
                 dataType: 'json',
                 delay: 250,
                 processResults: function(data) {
@@ -389,18 +411,18 @@
     });
 
     var counter = $('#jml').val();
-    //var counterx = counter-1;
+    var counterx = counter-1;
     $("#addrow").on("click", function () {
         counter++;
         $("#tabledatax").attr("hidden", false);
-      //  var iproduct = $('#iproduct'+counterx).val();
+       var iproduct = $('#iproduct'+counterx).val();
         count=$('#tabledatax tr').length;
-        // if ((iproduct==''||iproduct==null)&&(count>1)) {
-        //     swal('Isi dulu yang masih kosong!!');
-        //     counter = counter-1;
-        //     counterx = counterx-1;
-        //     return false;
-        // }
+        if ((iproduct==''||iproduct==null)&&(count>1)) {
+            swal('Isi dulu yang masih kosong!!');
+            counter = counter-1;
+            counterx = counterx-1;
+            return false;
+        }
         $('#jml').val(counter);
         var newRow = $("<tr class='no tr" + counter + "'>");
         var cols = "";
@@ -410,7 +432,7 @@
         cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +');"><option value=""></option></select><input type="hidden" id="stok'+ counter +'" name="stok'+ counter +'"></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" class="form-control" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
         cols += '<td><input type="text" id="stok'+ counter + '" class="form-control text-right input-sm" name="stok[]" value="0" readonly></td>';
-        cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control text-right input-sm inputitem" name="nquantity[]" value="0" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' onkeyup="validasi('+i+')"></td>';
+        cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control text-right input-sm inputitem" name="nquantity[]" value="0" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' onkeyup="validasi('+counter+')"></td>';
         cols += '<td><input type="text" id="edesc'+ counter + '" class="form-control input-sm" name="edesc[]"></td>';
         cols += '<td class="text-center"><button data-urut="' + counter + '" type="button" onclick="tambah_material(' + counter + ');" title="Tambah List" class="btn btn-sm btn-circle btn-info"><i data-urut="' + counter + '" id="addlist' + counter + '"  class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button><button type="button" data-i="' + counter +'" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 
@@ -431,7 +453,7 @@
             width: "100%",
             allowClear: true,
             ajax: {
-                url: '<?= base_url($folder.'/cform/dataproduct'); ?>',
+                url: '<?= base_url($folder.'/cform/dataproduct?itujuan='); ?>' + getItujuan(),
                 dataType: 'json',
                 delay: 250,
                 processResults: function (data) {
@@ -497,6 +519,7 @@
     }
 
     function getstok(id){
+        var itujuan = getItujuan();
         var idproduct = $('#eproduct'+id).val();
         var ibagian = $('#ibagian').val();
         $.ajax({
@@ -504,16 +527,60 @@
             data: {
                 'idproduct'  : idproduct,
                 'ibagian'    : ibagian,
+                'itujuan'   : itujuan,
             },
             url: '<?= base_url($folder.'/cform/getstok'); ?>',
             dataType: "json",
             success: function (data) {
-                $('#stok'+id).val(data.saldo_akhir);
+                updateRowSaldo(id, data);
             },
             error: function () {
                 swal('Error :)');
             }
         });
+    }
+
+    function getStockBundle(element, target)
+    {
+        var itujuan = getItujuan();
+        var idproduct = $(element).val();
+        var ibagian = $('#ibagian').val();
+
+        $.ajax({
+            type: "post",
+            data: {
+                'idproduct'  : idproduct,
+                'ibagian'    : ibagian,
+                'itujuan' : itujuan
+            },
+            url: '<?= base_url($folder.'/cform/getstok'); ?>',
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                const saldoAkhir = data?.saldo_akhir ?? 0;
+                $(target).prop('readonly', false);
+                $(target).val(saldoAkhir);
+                $(target).prop('readonly', true);
+            },
+            error: function(err) {
+                console.log(err);
+            }
+        });
+    }
+
+    function validasiStockBundle(element, target){
+        const stock = $(target).val();
+        const request = $(element).val();
+
+        if(parseFloat(request)>parseFloat(stock)){
+            swal('Quantity Kirim Tidak Boleh Melebihi \nSaldo akhir ' + stock);
+            $(element).val(stock); 
+        }
+
+        if(parseFloat(request) == 0 && parseFloat(request) == ''){
+            swal('Quantity Tidak Boleh 0 atau Kosong');
+            $(element).val(stock);
+        }
     }
 
     $("#tabledatax").on("click", ".ibtnDel", function (event) {    
@@ -584,4 +651,26 @@
             }
         }        
     }
+
+    function clearDetailBarang() {
+        // trigger click delete button
+        const allButton = $("body .ibtnDel");
+        allButton.each(function() {
+            $(this).trigger('click');
+            counter--;
+            counterx--;
+            $('#jml').val(counter);
+        })
+    }
+
+    function getItujuan() {
+        return $('#itujuan').val()
+    }
+
+    function updateRowSaldo(id, data) {
+        $('html #stok'+id).prop('readonly', false);
+        $('html #stok'+id).val(data.saldo_akhir);
+        $('html #stok'+id).prop('readonly', true);
+    }
+
 </script>

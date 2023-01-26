@@ -148,10 +148,11 @@
                                             <td>
                                                 <?= $b->e_color_name; ?>
                                             </td>
+                                            <td></td>
                                             <td class="text-right">
                                                 <?= $b->n_quantity_bundling; ?>
                                             </td>
-                                            <td colspan="2">
+                                            <td>
                                                 <?= $b->e_remark; ?>
                                             </td>
                                         </tr>

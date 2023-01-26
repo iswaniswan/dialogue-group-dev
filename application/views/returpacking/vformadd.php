@@ -37,19 +37,26 @@
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="dretur" name="dretur" class="form-control input-sm date"  required="" readonly value="<? echo date("d-m-Y");?>">
+                            <input type="text" id="dretur" name="dretur" class="form-control input-sm date"  required="" readonly value="<?= date("d-m-Y") ?>">
                         </div>
                         <div class="col-sm-3">
-                            <select name="itujuan" id="itujuan" class="form-control select2">
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">
                                 <?php if ($tujuan) {
-                                    foreach ($tujuan as $row):?>
-                                        <option value="<?= $row->i_bagian;?>">
-                                            <?= $row->e_bagian_name;?>
+                                    $group = "";
+                                    foreach ($tujuan as $row) : ?>
+                                    <?php if ($group!=$row->name) {?>
+                                        </optgroup>
+                                        <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>
+                                        <option value="<?= $row->id_bagian ?>">
+                                            <?= $row->e_bagian_name; ?>
                                         </option>
-                                    <?php endforeach; 
+                                <?php endforeach;
                                 } ?>
                             </select>
-                        </div>  
+                        </div> 
                     </div>
                     <div class="form-group row">
                         <label class="col-md-12">Keterangan</label>
@@ -88,8 +95,9 @@
                     <tr>
                         <th class="text-center" style="width: 3%;">No</th>
                         <th class="text-center" style="width: 15%;">Kode Barang</th>
-                        <th class="text-center" style="width: 27%;">Nama Barang Jadi</th>
-                        <th class="text-center" style="width: 15%;">Warna</th>
+                        <th class="text-center" style="width: 26%;">Nama Barang Jadi</th>
+                        <th class="text-center" style="width: 8%;">Warna</th>
+                        <th class="text-center" style="width: 8%;">Stok</th>
                         <th class="text-center" style="width: 10%;">Quantity</th>
                         <th class="text-center" style="width: 30%;">Keterangan</th>
                         <th class="text-center" style="width: 5%;">Action</th>
@@ -156,6 +164,8 @@
                 swal('Error :)');
             }
         });
+
+        clearDetailBarang();
     }
 
     $('#ceklis').click(function(event) {
@@ -205,7 +215,8 @@
         cols += '<td><input type="hidden" readonly id="idproduct'+ counter + '" class="form-control" name="idproduct[]"><input type="text" readonly id="iproduct'+ counter + '" class="form-control input-sm" name="iproduct' + counter + '"></td>';
         cols += '<td><select type="text" id="eproduct'+ counter + '" class="form-control select2" name="eproduct'+ counter + '" onchange="getproduct('+ counter + ');"></select></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" class="form-control" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
-        cols += '<td><input type="hidden" id="nquantity_stok'+ counter + '" value="0"><input type="text" id="nquantity'+ counter + '" class="form-control text-right input-sm" name="nquantity[]" value="" placeholder="0" onblur=\"if(this.value==""){this.value="0";}\" onfocus=\"if(this.value=="0"){this.value="";}\" onkeypress="return hanyaAngka(event);" onkeyup="hetang('+ counter + ');"></td>';
+        cols += '<td><input type="text" id="nquantity_stok'+ counter + '" value="" class="form-control input-sm" readonly></td>';
+        cols += '<td><input type="number" id="nquantity'+ counter + '" class="form-control text-right input-sm" name="nquantity[]" value="" placeholder="0" onkeyup="hetang('+ counter + ');"></td>';
         cols += '<td><input type="text" id="edesc'+ counter + '" class="form-control input-sm" name="edesc[]" placeholder="Isi keterangan jika ada!"></td>';
         cols += '<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 
@@ -218,7 +229,7 @@
             width:"100%",
             allowClear: true,
             ajax: {
-                url: '<?= base_url($folder.'/cform/dataproduct'); ?>',
+                url: '<?= base_url($folder.'/cform/dataproduct?itujuan='); ?>' + getItujuan(), 
                 dataType: 'json',
                 delay: 250,
                 processResults: function (data) {
@@ -240,6 +251,24 @@
         }
     }
 
+    function validasi(id){
+        var jml=document.getElementById("jml").value;
+        for(i=1;i<=jml;i++){
+            var nquantity    =document.getElementById("nquantity"+i).value;
+            var stok         =document.getElementById("stok"+i).value;
+            if(parseFloat(nquantity)>parseFloat(stok)){
+                swal('Quantity Kirim Tidak Boleh Melebihi \nSaldo akhir ' + stok);
+                document.getElementById("nquantity"+i).value=stok;
+                break;
+            }
+            if(parseFloat(nquantity) == 0 && parseFloat(nquantity) == ''){
+                swal('Quantity Tidak Boleh 0 atau Kosong');
+                document.getElementById("nquantity"+i).value=stok;
+                break;
+            }
+        }
+    }
+
     function formatSelection(val) {
         return val.name;
     }
@@ -250,7 +279,7 @@
         var x = $('#jml').val();
         for(i=1;i<=x;i++){
             if((a == $('#eproduct'+i).val()) && (i!=x)){
-                swal ("kode Barang : "+a+" sudah ada !!!!!");            
+                swal ("Kode Barang sudah ada !!!!!");            
                 ada=true;            
                 break;        
             }else{            
@@ -274,7 +303,7 @@
                     $('#idcolorproduct'+id).val(data[0].id_color);
                     $('#ecolorproduct'+id).val(data[0].e_color_name);
                     $('#nquantity_stok'+id).val(data[0].n_saldo_akhir);
-                    $('#nquantity'+id).focus();
+                    // $('#nquantity'+id).focus();
                 },
                 error: function () {
                     swal('Error :)');
@@ -329,4 +358,20 @@
             return false;
         }
     }
+
+    function clearDetailBarang() {
+        // trigger click delete button
+        const allButton = $("body .ibtnDel");
+        allButton.each(function() {
+            $(this).trigger('click');
+            counter--;
+            counterx--;
+            $('#jml').val(counter);
+        })
+    }
+
+    function getItujuan() {
+        return $('#itujuan').val()
+    }
+
 </script>

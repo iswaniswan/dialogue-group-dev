@@ -137,7 +137,8 @@ class Cform extends CI_Controller {
     public function dataproduct(){
         $filter = [];
         $cari = strtoupper($this->input->get('q'));
-        $data = $this->mmaster->dataproduct($cari);
+        $itujuan = $this->input->get('itujuan');
+        $data = $this->mmaster->dataproduct($cari, $itujuan);
         if ($data->num_rows()>0) {
             foreach($data->result() as $product){       
                 $filter[] = array(

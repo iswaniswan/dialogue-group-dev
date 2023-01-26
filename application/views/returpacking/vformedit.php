@@ -42,17 +42,25 @@
                         <div class="col-sm-3">
                             <input type="text" id="dretur" name="dretur" class="form-control input-sm date"  required="" readonly value="<?= $data->d_retur;?>">
                         </div>
-                        <div class="col-sm-3">
-                            <select name="itujuan" id="itujuan" class="form-control select2">
+                        <div class="col-sm-3">               
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">      
                                 <?php if ($tujuan) {
-                                    foreach ($tujuan as $row):?>
-                                        <option value="<?= $row->i_bagian;?>" <?php if ($row->i_bagian==$data->i_tujuan) {?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name;?>
+                                    $group = "";
+                                    foreach ($tujuan as $row) : ?>
+                                    <?php if ($group!=$row->name) {?>
+                                        </optgroup>
+                                        <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                    <?php }
+                                    $group = $row->name;
+                                    ?>            
+                                        <?php $selected = $row->id_bagian == $data->id_bagian_tujuan ? 'selected' : ''; ?>                            
+                                        <option value="<?= $row->id_bagian ?>" <?= $selected ?>>
+                                            <?= $row->e_bagian_name; ?>
                                         </option>
-                                    <?php endforeach; 
+                                <?php endforeach;
                                 } ?>
                             </select>
-                        </div>  
+                        </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-md-12">Keterangan</label>
@@ -101,9 +109,10 @@
                 <thead>
                     <tr>
                         <th class="text-center" style="width: 3%;">No</th>
-                        <th class="text-center" style="width: 17%;">Kode Barang</th>
-                        <th class="text-center" style="width: 27%;">Nama Barang Jadi</th>
-                        <th class="text-center" style="width: 15%;">Warna</th>
+                        <th class="text-center" style="width: 15%;">Kode Barang</th>
+                        <th class="text-center" style="width: 26%;">Nama Barang Jadi</th>
+                        <th class="text-center" style="width: 8%;">Warna</th>
+                        <th class="text-center" style="width: 8%;">Stok</th>
                         <th class="text-center" style="width: 10%;">Quantity</th>
                         <th class="text-center" style="width: 30%;">Keterangan</th>
                         <th class="text-center" style="width: 5%;">Action</th>
@@ -133,8 +142,10 @@
                                     <input type="text" value="<?= $row->e_color_name;?>" readonly id="ecolorproduct<?=$i;?>" name="ecolorproduct[]" class="form-control input-sm">
                                 </td>
                                 <td>
-                                    <input type="hidden" id="nquantity_stok<?=$i;?>" value="<?= $row->n_saldo_akhir;?>">
-                                    <input type="text" value="<?= $row->n_quantity;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);hetang(<?=$i;?>);">
+                                    <input type="number" id="nquantity_stok<?=$i;?>" value="<?= $row->n_saldo_akhir;?>" class="form-control input-sm" readonly>                                    
+                                </td>
+                                <td>
+                                <input type="text" value="<?= $row->n_quantity;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);hetang(<?=$i;?>);">
                                 </td>
                                 <td>
                                     <input type="text" id="edesc<?=$i;?>" class="form-control input-sm" value="<?= $row->e_remark;?>" name="edesc[]">
@@ -215,7 +226,8 @@
         cols += '<td><input type="hidden" readonly id="idproduct'+ counter + '" class="form-control" name="idproduct[]"><input type="text" readonly id="iproduct'+ counter + '" class="form-control input-sm" name="iproduct' + counter + '"></td>';
         cols += '<td><select type="text" id="eproduct'+ counter + '" class="form-control select2" name="eproduct'+ counter + '" onchange="getproduct('+ counter + ');"></select></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" class="form-control" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
-        cols += '<td><input type="hidden" id="nquantity_stok'+ counter + '" value="0"><input type="text" id="nquantity'+ counter + '" class="form-control text-right input-sm" name="nquantity[]" value="" placeholder="0" onblur=\"if(this.value==""){this.value="0";}\" onfocus=\"if(this.value=="0"){this.value="";}\" onkeypress="return hanyaAngka(event);" onkeyup="hetang('+ counter + ');"></td>';
+        cols += '<td><input type="text" id="nquantity_stok'+ counter + '" value="" class="form-control input-sm" readonly></td>';
+        cols += '<td><input type="number" id="nquantity'+ counter + '" class="form-control text-right input-sm" name="nquantity[]" value="" placeholder="0" onkeyup="hetang('+ counter + ');"></td>';
         cols += '<td><input type="text" id="edesc'+ counter + '" class="form-control input-sm" name="edesc[]" placeholder="Isi keterangan jika ada!"></td>';
         cols += '<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 
@@ -228,7 +240,7 @@
             width:"100%",
             allowClear: true,
             ajax: {
-                url: '<?= base_url($folder.'/cform/dataproduct'); ?>',
+                url: '<?= base_url($folder.'/cform/dataproduct?itujuan='); ?>' + getItujuan(),
                 dataType: 'json',
                 delay: 250,
                 processResults: function (data) {
@@ -340,6 +352,8 @@
                 }
             });
         }
+
+        clearDetailBarang();
     }
 
     $('#ceklis').click(function(event) {
@@ -406,4 +420,20 @@
         }
         
     }
+
+    function clearDetailBarang() {
+        // trigger click delete button
+        const allButton = $("body .ibtnDel");
+        allButton.each(function() {
+            $(this).trigger('click');
+            counter--;
+            counterx--;
+            $('#jml').val(counter);
+        })
+    }
+
+    function getItujuan() {
+        return $('#itujuan').val()
+    }
+
 </script>

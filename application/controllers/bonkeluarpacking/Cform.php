@@ -124,7 +124,13 @@ class Cform extends CI_Controller {
     public function number(){
         $number = "";
         if ($this->input->post('tgl', TRUE) != '') {
-            $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))),date('Y', strtotime($this->input->post('tgl', TRUE))),$this->input->post('ibagian', TRUE),$this->input->post('itujuan', TRUE));
+            // $thbl = date('ym', strtotime($this->input->post('tgl', TRUE)));
+            // $tahun = date('Y', strtotime($this->input->post('tgl', TRUE)));
+            $ibagian = $this->input->post('ibagian', TRUE);
+            $itujuan = $this->input->post('itujuan', TRUE);
+            
+            // $number = $this->mmaster->runningnumber($thbl, $tahun, $ibagian, $itujuan);
+            $number = $this->mmaster->generate_nomor_dokumen($ibagian, $itujuan);
         }
         echo json_encode($number);
     }
@@ -200,8 +206,6 @@ class Cform extends CI_Controller {
         $n_qtyproduct = $this->input->post('nquantity[]',TRUE);
         $n_qtyproduct = str_replace(',','',$n_qtyproduct);
         $e_desc       = $this->input->post('edesc[]',TRUE);
-
-        var_dump($this->input->post()); 
 
         $this->db->trans_begin();
         $this->Logger->write('Simpan Data '.$this->global['title'].' Kode : '.$ibonk);
