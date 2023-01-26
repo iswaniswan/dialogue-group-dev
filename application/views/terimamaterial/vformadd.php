@@ -131,15 +131,30 @@
         });
 
         const mergeLabel = (array) => {
-            let indexes = [];
-            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
-                if (indexes.includes(id) == false) {
-                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+
+            let grouped = array.reduce((result, item) => {
+
+                if (result[item.name]) {
+                    result[item.name].children.some(function(e) {
+                        if (e.id === item.id) {
+                            return;
+                        }
+                        return result[item.name].children.push({
+                            id:item.id, text:item.text
+                        })
+                    })
+                    return result;
                 }
-                indexes.push(id);
-                return obj;
-            }, {}));
+
+                (result[item.name] ??= { text: item.name, children: []}).children.push({
+                    id:item.id, text:item.text
+                });
+                return result;
+            }, {})
+
+            return Object.values(grouped);
         }
+
         /*Tidak boleh lebih dari hari ini*/
         showCalendar('.date', null, 0);
         $('#i_referensi').select2({
@@ -162,7 +177,7 @@
                         results: data
                     };
                 },
-                cache: true
+                cache: false
             }
         }).change(function() {
 
