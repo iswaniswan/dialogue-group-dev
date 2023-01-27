@@ -135,7 +135,8 @@ class Cform extends CI_Controller {
                 foreach($data->result() as $key){
                     $filter[] = array(
                         'id'   => $key->id,  
-                        'text' => $key->e_name
+                        'text' => $key->e_bagian_name,
+                        'name' => $key->name
                     );
                 }
             }else{
@@ -304,6 +305,7 @@ class Cform extends CI_Controller {
             'dfrom'      => $this->uri->segment(5),
             'dto'        => $this->uri->segment(6),
             'bagian'     => $this->mmaster->bagian(),
+            'pengirim' => $this->mmaster->pengirim(),
             'data'       => $this->mmaster->dataedit($this->uri->segment(4))->row(),
             'datadetail' => $this->mmaster->dataeditdetail($this->uri->segment(4))->result(),
             'jenisbarang'   => $this->mmaster->jeniskeluar()->result(),

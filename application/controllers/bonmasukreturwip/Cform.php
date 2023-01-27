@@ -75,8 +75,10 @@ class Cform extends CI_Controller
         $data   = $this->mmaster->bagianpengirim(strtoupper($this->input->get('q')));
         foreach ($data->result() as $row) {
             $filter[] = array(
-                'id'    => $row->i_bagian,
-                'text'  => $row->e_bagian_name,
+                'id' => $row->id,
+                'kode' => $row->i_bagian,
+                'text' => $row->e_bagian_name,
+                'name' => $row->name,
             );
         }
         echo json_encode($filter);

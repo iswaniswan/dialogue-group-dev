@@ -75,7 +75,8 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-3">
-                            <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-lg fa-save mr-2"></i>Simpan</button>
+                            <button type="submit" class="d-none"></button>
+                            <button type="button" id="btn-submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-lg fa-save mr-2"></i>Simpan</button>
                         </div>
                         <div class="col-sm-3">
                             <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2"><i class="fa fa-lg fa-plus mr-2"></i>Item</button>
@@ -231,11 +232,19 @@
         }
     });
 
-    $("form").submit(function(event) {
-        event.preventDefault();
+    $("#btn-submit").click(function(event) {
+        //check quantity item pertama
+        const qtys = $('input[name="nquantity[]"]').val();
+        if (qtys === '' || qtys === undefined || qtys <= 0) {
+            swal('Quantity kosong');
+            return false;
+        }
+
+        $('form').submit();
+
         $("input").attr("disabled", true);
         $("select").attr("disabled", true);
-        $("#submit").attr("disabled", true);
+        $("#btn-submit").attr("disabled", true);
         $("#addrow").attr("disabled", true);
         $("#send").attr("disabled", false);
     });

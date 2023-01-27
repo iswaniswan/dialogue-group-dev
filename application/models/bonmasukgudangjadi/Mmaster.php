@@ -180,36 +180,59 @@ class Mmaster extends CI_Model
 
     /*----------  BACA BAGIAN PENGIRIM  ----------*/    
 
-    public function pengirim($i_menu,$ibagian,$cari)
+    public function pengirim($i_menu=null, $ibagian=null, $cari=null)
     {
-        $idcompany = $this->session->userdata('id_company');
-        return $this->db->query("SELECT
-                id,
-                e_bagian_name AS e_name
-            FROM
-                tr_bagian
-            WHERE
-                i_type IN (
-                SELECT
-                    i_type
-                FROM
-                    tr_bagian
-                WHERE
-                    i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_tujuan_menu
-                    WHERE
-                        i_menu = '$i_menu'
-                        AND id_company = '$idcompany')
-                    AND id_company = '$idcompany')
-                AND id_company = '$idcompany'
-                AND e_bagian_name ILIKE '%$cari%'
-                AND i_bagian <> '$ibagian'
-            ORDER BY
-                2
-        ", FALSE);
+        // $idcompany = $this->session->userdata('id_company');
+        // return $this->db->query("SELECT
+        //         id,
+        //         e_bagian_name AS e_name
+        //     FROM
+        //         tr_bagian
+        //     WHERE
+        //         i_type IN (
+        //         SELECT
+        //             i_type
+        //         FROM
+        //             tr_bagian
+        //         WHERE
+        //             i_bagian IN (
+        //             SELECT
+        //                 i_bagian
+        //             FROM
+        //                 tr_tujuan_menu
+        //             WHERE
+        //                 i_menu = '$i_menu'
+        //                 AND id_company = '$idcompany')
+        //             AND id_company = '$idcompany')
+        //         AND id_company = '$idcompany'
+        //         AND e_bagian_name ILIKE '%$cari%'
+        //         AND i_bagian <> '$ibagian'
+        //     ORDER BY
+        //         2
+        // ", FALSE);
+
+        if ($i_menu == null) {
+            $i_menu = $this->i_menu;
+        }
+
+        $cari = str_replace("'", "", $cari);
+
+        $sql = "SELECT
+                    b.id,
+                    a.i_bagian,
+                    b.e_bagian_name,
+                    c.name
+                FROM tr_tujuan_menu a
+                JOIN tr_bagian b ON (
+                        a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+                        )
+                JOIN public.company c ON c.id = b.id_company                    
+                WHERE a.i_menu = '$i_menu'
+                    AND a.i_bagian ILIKE '%$cari%'
+                    AND b.e_bagian_name ILIKE '%$cari%'
+                ORDER BY b.e_bagian_name";
+
+        return $this->db->query($sql);
     }    
 
     public function jeniskeluar(){

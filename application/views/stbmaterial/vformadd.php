@@ -333,7 +333,7 @@
                 $('#i_stb_sj').val(data);
             },
             error: function() {
-                swal('Error :(');
+                swal('Error, generate doc number :(');
             }
         });
     }

@@ -168,13 +168,22 @@ class Mmaster extends CI_Model
         $this->db->where('a.id_company', $this->session->userdata('id_company'));
         $this->db->order_by('e_bagian_name');
         return $this->db->get(); */
-        return $this->db->query("SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement FROM tr_bagian a 
-			INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
-			LEFT JOIN tr_type c on (a.i_type = c.i_type)
-			LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
-			WHERE a.f_status = 't' AND b.i_departement = '$this->i_departement' AND username = '$this->username' AND a.id_company = '$this->id_company' 
-			ORDER BY 4, 3 ASC NULLS LAST
-        ", false);
+
+        $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement 
+                    FROM tr_bagian a 
+                    INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
+                    LEFT JOIN tr_type c on (a.i_type = c.i_type)
+                    LEFT JOIN public.tm_menu d on (
+                                                    d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement
+                                                )
+                    WHERE a.f_status = 't' 
+                        AND b.i_departement = '$this->i_departement' 
+                        AND username = '$this->username' 
+                        AND a.id_company = '$this->id_company' 
+                    ORDER BY 4, 3 ASC NULLS LAST";
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     /*----------  BACA BAGIAN PENGIRIM  ----------*/    

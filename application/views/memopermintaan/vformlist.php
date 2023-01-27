@@ -45,9 +45,11 @@
 </div>
 <script type="text/javascript">
     $(document).ready(function () {
+        console.log(1234);
+
         /*Tidak boleh lebih dari hari ini*/
         showCalendar2('.date');
-        datatablemod('#tabledata', base_url + '<?= $folder; ?>/Cform/data/<?= $dfrom.'/'.$dto;?>');
+        datatablemod('#tabledata', base_url + '<?= $folder; ?>/Cform/data/<?= $dfrom.'/'.$dto;?>');        
     });
 
     $( "#dfrom" ).change(function() {
