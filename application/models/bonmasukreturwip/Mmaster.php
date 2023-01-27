@@ -58,8 +58,8 @@ class Mmaster extends CI_Model
                         AND username = '".$this->session->userdata('username')."')";
             }
         }
-        $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("SELECT
+
+        $sql = "SELECT
                 0 as no,
                 a.id,
                 a.i_document,
@@ -99,7 +99,10 @@ class Mmaster extends CI_Model
             ORDER BY 
                 a.i_document,
                 a.d_document
-            ", FALSE
+            ";
+
+        $datatables = new Datatables(new CodeigniterAdapter);
+        $datatables->query($sql, FALSE
         );
 
         $datatables->edit('e_status_name', function ($data) {
@@ -199,8 +202,11 @@ class Mmaster extends CI_Model
             LEFT JOIN tm_retur_produksi_gdjd_item b ON
                 (a.id = b.id_document
                     AND a.id_company = b.id_company)
+            INNER JOIN tr_bagian tb ON (
+                                        tb.i_bagian = a.i_bagian AND tb.id_company = a.id_company
+                                    )       
             WHERE
-                a.i_bagian = '$iasal'
+                tb.id = '$iasal'
                 AND a.i_status = '6'
                 AND a.id_company = '$this->id_company'
                 AND b.n_quantity <> 0
@@ -223,17 +229,44 @@ class Mmaster extends CI_Model
         return $this->db->get();
     }
 
+//    public function getdataheader($idreff, $ipengirim){
+//        return $this->db->query("SELECT
+//            to_char(d_document, 'dd-mm-yyyy') as d_document
+//            FROM
+//                tm_retur_produksi_gdjd
+//            WHERE
+//                id = '$idreff'
+//                AND i_bagian = '$ipengirim'
+//                AND id_company = '$this->idcompany'
+//                                ", FALSE);
+//    }
+
     public function getdataheader($idreff, $ipengirim){
         return $this->db->query("SELECT
             to_char(d_document, 'dd-mm-yyyy') as d_document
             FROM 
                 tm_retur_produksi_gdjd
             WHERE
-                id = '$idreff'
-                AND i_bagian = '$ipengirim'
-                AND id_company = '$this->idcompany'
-                                ", FALSE);
+                id = '$idreff'", FALSE);
     }
+
+//    public function getdataitem($idreff, $ipengirim)
+//    {
+//        return $this->db->query("SELECT
+//                a.*,
+//                b.i_product_base,
+//                b.e_product_basename
+//            FROM
+//                tm_retur_produksi_gdjd_item a
+//            INNER JOIN tr_product_base b ON
+//                (b.id = a.id_product)
+//            INNER JOIN tm_retur_produksi_gdjd c ON
+//                (c.id = a.id_document )
+//            WHERE
+//                a.id_document = '$idreff'
+//            ORDER BY
+//                a.id", FALSE);
+//    }
 
     public function getdataitem($idreff, $ipengirim)
     {
@@ -248,7 +281,7 @@ class Mmaster extends CI_Model
             INNER JOIN tm_retur_produksi_gdjd c ON
                 (c.id = a.id_document )
             WHERE
-                a.id_document = '$idreff'
+                c.id = '$idreff'
             ORDER BY
                 a.id", FALSE);
     }
@@ -305,14 +338,14 @@ class Mmaster extends CI_Model
 
     public function insertheader($id, $ibonm, $datebonm, $ikodemaster, $iasal, $ireff, $eremark)
     {
-        $id_bagian_pengirim = $this->db->query("SELECT id FROM tr_bagian WHERE i_bagian = '$iasal' AND id_company = '$this->id_company' ")->row()->id;
+//        $id_bagian_pengirim = $this->db->query("SELECT id FROM tr_bagian WHERE i_bagian = '$iasal' AND id_company = '$this->id_company' ")->row()->id;
         $data = array(
             'id'                 => $id,
             'id_company'         => $this->idcompany,
             'i_document'         => $ibonm,
             'd_document'         => $datebonm,
             'i_bagian'           => $ikodemaster,
-            'id_bagian_pengirim' => $id_bagian_pengirim,
+            'id_bagian_pengirim' => $iasal,
             'id_document_reff'   => $ireff,
             'e_remark'           => $eremark,
             'd_entry'            => current_datetime(),
