@@ -298,6 +298,10 @@
                 url: '<?= base_url($folder.'/cform/getproduct'); ?>',
                 dataType: "json",
                 success: function (data) {
+                    if (!data[0]?.id_product) {
+                        swal('Tidak ada data');
+                        return false;
+                    }
                     $('#idproduct'+id).val(data[0].id_product);
                     $('#iproduct'+id).val(data[0].i_product_base);
                     $('#idcolorproduct'+id).val(data[0].id_color);

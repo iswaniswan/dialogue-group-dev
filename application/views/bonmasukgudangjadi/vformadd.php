@@ -128,7 +128,8 @@
                     }
                     return query;
                 },
-                processResults: function(data) {
+                processResults: function(result) {
+                    const data = mergeLabel(result);
                     return {
                         results: data
                     };
@@ -313,4 +314,29 @@
         $("#submit").attr("disabled", true);
         $("#send").attr("hidden", false);
     });
+
+    const mergeLabel = (data) => {
+        let _data = data.reduce((result, item) => {
+            if (result[item.name]) {
+                result[item.name].children.forEach((e) => {
+                    if (e.id !== item.id) {
+                        return result[item.name].children.push({
+                            id:item.id, text:item.text
+                        });
+                    }
+                })
+                return result;
+            }
+
+            (result[item.name] ??= { text:item.name, children: [] }).children.push({
+                id:item.id, text:item.text
+            })
+            
+            return result;
+        }, {});
+
+        console.log(Object.values(_data));
+        return Object.values(_data);
+    }
+
 </script>

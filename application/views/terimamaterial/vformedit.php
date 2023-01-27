@@ -46,14 +46,14 @@
                         <div class="row">
                             <div class="col-sm-12">
                                 <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
-                                    <button type="button" id="submit" class="btn btn-success btn-rounded btn-sm"><i class="fa fa-save fa-lg mr-3"></i>Update</button>
+                                    <button type="button" id="submit" class="btn btn-success btn-sm"><i class="fa fa-save fa-lg mr-3"></i>Update</button>
                                 <?php } ?>
-                                <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"><i class="fa fa-arrow-circle-left fa-lg mr-3"></i>Kembali</button>
+                                <button type="button" class="btn btn-inverse btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"><i class="fa fa-arrow-circle-left fa-lg mr-3"></i>Kembali</button>
                                 <?php if ($data->i_status == '1') { ?>
-                                    <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm"><i class="fa fa-paper-plane-o fa-lg mr-3"></i>Send</button>
-                                    <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm"><i class="fa fa-trash fa-lg mr-3"></i>Delete</button>
+                                    <button type="button" id="send" class="btn btn-primary btn-sm"><i class="fa fa-paper-plane-o fa-lg mr-3"></i>Send</button>
+                                    <button type="button" id="hapus" class="btn btn-danger btn-sm"><i class="fa fa-trash fa-lg mr-3"></i>Delete</button>
                                 <?php } elseif ($data->i_status == '2') { ?>
-                                    <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm"><i class="fa fa-refresh fa-lg mr-3"></i>Cancel</button>
+                                    <button type="button" id="cancel" class="btn btn-primary btn-sm"><i class="fa fa-refresh fa-lg mr-3"></i>Cancel</button>
                                 <?php } ?>
                             </div>
                         </div>
@@ -130,25 +130,25 @@
         showCalendar('.date', null, 0);
         $('#i_referensi').select2({
             placeholder: 'Cari Referensi',
-            allowClear: true,
-            ajax: {
-                url: '<?= base_url($folder . '/cform/referensi'); ?>',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    var query = {
-                        q: params.term,
-                        i_bagian: $('#i_bagian').val(),
-                    }
-                    return query;
-                },
-                processResults: function(data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            }
+            allowClear: false,
+            // ajax: {
+            //     url: '<?= base_url($folder . '/cform/referensi'); ?>',
+            //     dataType: 'json',
+            //     delay: 250,
+            //     data: function(params) {
+            //         var query = {
+            //             q: params.term,
+            //             i_bagian: $('#i_bagian').val(),
+            //         }
+            //         return query;
+            //     },
+            //     processResults: function(data) {
+            //         return {
+            //             results: data
+            //         };
+            //     },
+            //     cache: true
+            // }
         }).change(function() {
 
             /*----------  GET DATA DETAIL AFTER CHANGE REFERENSI  ----------*/

@@ -72,11 +72,11 @@
         <div class="m-b-0">
             <div class="form-group row">
                 <div class="col-sm-1">
-                <?php if($data->i_status == '2'){?>
+                <?php if($data->i_status == '2'){ ?>
                     <button type="button" id="addrow" class="btn btn-info btn-sm" hidden="true"><i class="fa fa-plus"></i>&nbsp;&nbsp;Item</button>
-                <?}else{?>
+                <?php } else { ?>
                     <button type="button" id="addrow" class="btn btn-info btn-sm"><i class="fa fa-plus"></i>&nbsp;&nbsp;Item</button>
-                <?}?>
+                <?php } ?>
                 </div>
             </div>
         </div>
@@ -99,29 +99,18 @@
                     $i = 0;
                     if ($datadetail) {
                         foreach ($datadetail as $row) {
-                            $i++;?>
+                            $i++; 
+                            ?>
                             <tr>
-                                <td class="text-center">
-                                    <spanx id="snum<?=$i;?>"><?= $i;?></spanx>
-                                </td>
-                                <td>                                   
-                                   <?= $row->i_product_base;?>
-                                </td>
-                                <td>
-                                  <?= $row->e_product_basename;?>
-                                </td>
-                                <td>
-                                   <?= $row->e_color_name;?>
-                                </td>
-                                <td class="text-right">
-                                  <?= $row->n_quantity;?>
-                                </td>
-                                <td>
-                                   <?= $row->e_remark;?>
-                                </td>
+                                <td class="text-center"><span id="snum<?= $i;?>"><?= $i;?></span></td>
+                                <td><?= $row->i_product_base;?></td>
+                                <td><?= $row->e_product_basename;?></td>
+                                <td><?= $row->e_color_name;?></td>
+                                <td class="text-right"><?= $row->n_quantity;?></td>
+                                <td><?= $row->e_remark;?></td>
                             </tr>
                         <?php } 
-                    }?>
+                    } ?>
                     <input type="hidden" name="jml" id="jml" value ="<?= $i;?>">
                 </tbody>
             </table>
@@ -130,10 +119,12 @@
 </div>
 </form>
 <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
-<script>
+<script type="text/javascript">
     $(document).ready(function () {
+        
         $('.select2').select2({
             width : '100%',
         });
+        
     });
 </script>

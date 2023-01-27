@@ -171,19 +171,19 @@ class Mmaster extends CI_Model
     {
         $cari = str_replace("'", "", $cari);
         return $this->db->query("SELECT
+                b.id,
                 a.i_bagian,
-                b.e_bagian_name
-            FROM
-                tr_tujuan_menu a
-            JOIN tr_bagian b 
-                 ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company)
-            WHERE
-                b.id_company = '$this->idcompany'
-                AND a.i_menu = '$this->i_menu'
+                b.e_bagian_name,
+                c.name
+            FROM tr_tujuan_menu a
+            JOIN tr_bagian b ON (
+                    a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+                    )
+            JOIN public.company c ON c.id = b.id_company                    
+            WHERE a.i_menu = '$this->i_menu'
                 AND a.i_bagian ILIKE '%$cari%'
                 AND b.e_bagian_name ILIKE '%$cari%'
-            ORDER BY
-                b.e_bagian_name
+            ORDER BY b.e_bagian_name
         ", FALSE);
     }
 

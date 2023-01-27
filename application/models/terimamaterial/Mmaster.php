@@ -199,18 +199,21 @@ class Mmaster extends CI_Model
             $id_company = $this->id_company;
         }
 
-        $sql = "SELECT tsm.id, tsm.i_document||' - '||to_char(tsm.d_document, 'dd FMMonth yyyy') i_document, c.id AS id_company, c.name
+        $sql = "SELECT tsm.id, tsm.i_document||' - '||to_char(tsm.d_document, 'dd FMMonth yyyy') i_document, 
+                        c.id AS id_company, c.name, 
+                        c2.id AS id_company_pengirim, c2.name AS name_pengirim
                         FROM tm_stb_material tsm
                         INNER JOIN tm_stb_material_item tsmi ON tsmi.id_document = tsm.id
                         INNER JOIN public.company c ON c.id = tsm.id_company_receive
-                        WHERE id_company = '$id_company'
-                            AND i_bagian = '$i_bagian' 
+                        INNER JOIN public.company c2 ON c2.id = tsm.id_company
+                        WHERE id_company_receive = '$id_company'
+                            AND i_bagian_receive = '$i_bagian' 
                             AND i_document ILIKE '%$cari%' 
                             AND tsm.i_status = '6' 
                             AND n_quantity_sisa > 0
                         ORDER BY 3 ASC, 1 DESC ";
 
-//         var_dump($sql);
+        // var_dump($sql);
 
         return $this->db->query($sql);
     }

@@ -192,7 +192,7 @@ class Mmaster extends CI_Model
                 INNER JOIN tr_kategori_jahit b ON (b.id = a.id_kategori_jahit) 
                 WHERE id_company = '$this->id_company' AND a.i_bagian = '$ibagian'";
 
-        die($sql);
+        // die($sql);
         $query = $this->db->query($sql);
 
         if ($query->num_rows() > 0) {

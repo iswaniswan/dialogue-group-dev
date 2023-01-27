@@ -21,8 +21,7 @@ class Mmaster extends CI_Model
 		$this->db->order_by('e_bagian_name');
 
 		$query = $this->db->get();
-
-		// var_dump($this->db->last_query());
+				
 		return $query;
 	}
 

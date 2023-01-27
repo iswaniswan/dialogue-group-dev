@@ -79,7 +79,7 @@ class Mmaster extends CI_Model
                 WHERE a.i_status <> '5'
                     AND (a.id_company = '$this->id_company' OR a.id_company_penerima = '$this->id_company') 
                     $and $bagian
-                ORDER BY a.id ASC";                    
+                ORDER BY d_document DESC, a.i_document DESC";                    
 
         $datatables->query($sql, FALSE);
         $datatables->edit('company_tujuan', function ($data) {

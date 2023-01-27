@@ -359,6 +359,8 @@ class Mmaster extends CI_Model
                 WHERE a.i_menu = '$i_menu'
                     AND a.id_company = '$idcompany'";
 
+        // var_dump($sql);
+
         return $this->db->query($sql);
     }
 
@@ -577,8 +579,8 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query(
-            "SELECT
+       
+        $sql = "SELECT DISTINCT ON (a.id)
                 a.id,
                 a.id_keluar_qc,
                 a.id_product,
@@ -612,8 +614,11 @@ class Mmaster extends CI_Model
                             s.id_product_base = a.id_product AND s.id_company = '$idcompany'
                             )
             WHERE a.id_keluar_qc = '$id' 
-                AND d.id_company = '$idcompany'
-            ", FALSE);
+                AND d.id_company = '$idcompany'";
+
+        // var_dump($sql); 
+        
+        return $this->db->query($sql);
     }
 
     public function view_databundling($id, $company)

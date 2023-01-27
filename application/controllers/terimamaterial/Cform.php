@@ -157,7 +157,7 @@ class Cform extends CI_Controller
             $group = [
                 'id'   => $result->id,
                 'text' => $result->i_document,
-                'name' => $result->name
+                'name' => $result->name_pengirim
             ];
 
             $filters[] = $group;

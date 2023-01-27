@@ -38,9 +38,24 @@
                         <div class="col-sm-3">
                             <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= $data->d_document; ?>" readonly>
                         </div>
-                        <div class="col-sm-3">
-                            <select name="ipengirim" required="" id="ipengirim" class="form-control select2" data-placeholder="Pilih Pengirim">
-                                <option value="<?= $data->id_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                        
+                        <div class="col-sm-3">               
+                            <select name="ipengirim" id="ipengirim" class="form-control select2" data-placeholder="Pilih Pengirim" required>      
+                                <?php if ($pengirim->result()) {                                    
+                                    $group = "";
+                                    foreach ($pengirim->result() as $row) : ?>
+                                        <?php if ($group!=$row->name) {?>
+                                            </optgroup>
+                                            <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
+                                        <?php }
+                                        $group = $row->name;
+                                        ?>            
+                                        <?php $selected = $row->id == $data->id_bagian_pengirim ? 'selected' : ''; ?>                            
+                                        <option value="<?= $row->id ?>" <?= $selected ?>>
+                                            <?= $row->e_bagian_name; ?>
+                                        </option>
+                                <?php endforeach;
+                                } ?>
                             </select>
                         </div>
                     </div>
@@ -166,25 +181,7 @@ if ($datadetail) { ?>
 
         $('#ipengirim').select2({
             placeholder: 'Pilih Pengirim',
-            allowClear: true,
-            ajax: {
-                url: '<?= base_url($folder . '/cform/pengirim'); ?>',
-                dataType: 'json',
-                delay: 250,
-                data: function(params) {
-                    var query = {
-                        q: params.term,
-                        ibagian: $('#ibagian').val(),
-                    }
-                    return query;
-                },
-                processResults: function(data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            }
+            allowClear: false
         }).change(function(event) {
             $('#ireff').val('');
             $('#ireff').html('');
