@@ -397,11 +397,27 @@ class Mmaster extends CI_Model
                                         )                    
                     WHERE a.id = '$id'
                     ) AS x
-                ORDER BY 4 ";
-
-                        // var_dump($sql); die();
+                ORDER BY 4 ";                        
 
         return $this->db->query($sql, FALSE);
+    }
+
+    public function detailreferensi_with_bundling($id, $ipengirim, $ibagian)
+    {
+        $products = [];
+
+        $query = $this->detailreferensi($id, $ipengirim, $ibagian);
+
+        foreach ($query->result_array() as $result) {
+            $product = $result;            
+            $bundling = $this->get_data_bundling($id)->result_array();
+            $products[] = [
+                'product' => $product,
+                'bundling' => $bundling
+            ];
+        }
+
+        return $products;
     }
 
     public function product($cari){
@@ -767,6 +783,29 @@ class Mmaster extends CI_Model
             i_bagian = '$ibagian'
             AND id_company = '$this->company'
         ", FALSE);
+    }
+
+    public function get_data_bundling($id, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->userdata('id_company');
+        }
+
+        $sql = "SELECT j.*, 
+                    k.i_product_base, k.e_product_basename, l.e_color_name 
+                FROM tm_keluar_qc_bundling j
+                INNER JOIN tm_keluar_qc_item a ON (a.id = j.id_keluar_qc_item)
+                JOIN tr_product_base k ON (
+                                            j.id_product = k.id AND j.id_company = k.id_company
+                                        )
+                JOIN tr_color l ON (
+                                    k.i_color = l.i_color AND j.id_company = l.id_company
+                                )
+                WHERE a.id_keluar_qc = '$id' 
+                    AND j.id_company = '$id_company'
+                ORDER BY j.id_product";
+
+        return $this->db->query($sql, FALSE);
     }
     
 }

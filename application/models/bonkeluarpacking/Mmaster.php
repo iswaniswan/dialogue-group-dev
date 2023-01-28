@@ -352,7 +352,7 @@ class Mmaster extends CI_Model
 
     public function tujuan($i_menu, $idcompany)
     {
-        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name
+        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name, c.id AS id_company
                 FROM tr_tujuan_menu a
                 JOIN tr_bagian b ON a.i_bagian = b.i_bagian
                 JOIN public.company c ON c.id = b.id_company

@@ -108,29 +108,15 @@
                             $i++;
                             if ($group != $row->id_product) { ?>
                                 <tr>
-                                    <td class="text-center">
-                                        <spanx id="snum<?= $i; ?>"><?= $j; ?></spanx>
-                                    </td>
-                                    <td>
-                                        <?= $row->i_product_base; ?>
-                                    </td>
+                                    <td class="text-center"><spanx id="snum<?= $i; ?>"><?= $j; ?></spanx></td>
+                                    <td><?= $row->i_product_base; ?></td>
                                     <td  class="d-flex justify-content-between">
-                                        <span>
-                                            <?= $row->e_product_basename; ?>
-                                        </span>
-                                        <span>
-                                            <?= $row->e_marker_name; ?>
-                                        </span>
+                                        <span><?= $row->e_product_basename; ?></span>
+                                        <span><?= $row->e_marker_name; ?></span>
                                     </td>
-                                    <td>
-                                        <?= $row->e_color_name; ?>
-                                    </td>
-                                    <td class="text-right">
-                                        <?= $row->n_quantity_product; ?>
-                                    </td>
-                                    <td colspan="2">
-                                        <?= $row->e_remark; ?>
-                                    </td>
+                                    <td><?= $row->e_color_name; ?></td>
+                                    <td class="text-right"><?= $row->n_quantity_product; ?></td>
+                                    <td colspan="2"><?= $row->e_remark; ?></td>
                                 </tr>
                                 <?php
                                 // if ($group2 != $row->id_keluar_qc_item) { ?>
@@ -138,34 +124,18 @@
                                         <td class="text-center"><i class="fa fa-hashtag fa-lg"></i></a></td>
                                         <td colspan="7"><b>Bundling Produk</b></td>
                                     </tr>
-                                    <?php $o = 1; foreach($bundling as $b) {
-                                        if($b->id_keluar_qc_item == $row->id) { 
-                                            ?>
+                                    <?php $o = 1; foreach($bundling as $b) { ?>
+                                        <?php if($b->id_keluar_qc_item == $row->id) { ?>
                                             <tr>
-                                                <td class="text-center">
-                                                    <spanx id="snum<?= $i; ?>"><?= $o; ?></spanx>
-                                                </td>
-                                                <td>
-                                                    <?= $b->i_product_base; ?>
-                                                </td>
-                                                <td  class="d-flex justify-content-between">
-                                                    <span>
-                                                        <?= $b->e_product_basename; ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?= $b->e_color_name; ?>
-                                                </td>
-                                                <td class="text-right">
-                                                    <?= $b->n_quantity_bundling; ?>
-                                                </td>
-                                                <td colspan="2">
-                                                    <?= $b->e_remark; ?>
-                                                </td>
+                                                <td class="text-center"><spanx id="snum<?= $i; ?>"><?= $o; ?></spanx></td>
+                                                <td><?= $b->i_product_base; ?></td>
+                                                <td  class="d-flex justify-content-between"><span><?= $b->e_product_basename; ?></span></td>
+                                                <td><?= $b->e_color_name; ?></td>
+                                                <td class="text-right"><?= $b->n_quantity_bundling; ?></td>
+                                                <td colspan="2"><?= $b->e_remark; ?></td>
                                             </tr>
-                                    <?php
-                                            } $o++;
-                                        } ?>
+                                        <?php } $o++; ?>
+                                    <?php } ?>
                                 <?php // }
                                 //$group = $row->id_keluar_qc_item;
                                 ?>

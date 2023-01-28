@@ -179,22 +179,7 @@
                 url: '<?= base_url($folder.'/cform/detailreferensi'); ?>',
                 dataType: "json",
                 success: function (data) {
-                    if (data['detail']!=null) {
-                        $('#jml').val(data['detail'].length);
-                        for (let x = 0; x < data['detail'].length; x++) {
-                            var cols   = "";
-                            var newRow = $("<tr>");
-                            cols += '<td class="text-center">'+(x+1)+'</td>';
-                            cols += '<td><input class="form-control input-sm" readonly type="text" id="iproduct'+x+'" name="iproduct'+x+'" value="'+data['detail'][x]['i_product']+'"><input type="hidden" id="idproduct'+x+'" name="idproduct'+x+'" value="'+data['detail'][x]['id_product']+'"></td>';
-                            cols += '<td><input class="form-control input-sm" readonly type="text" id="eproduct'+x+'" name="eproduct'+x+'" value="'+data['detail'][x]['e_product']+'"></td>';
-                            cols += '<td><input readonly class="form-control input-sm" type="text" id="ecolor'+x+'" name="ecolor'+x+'" value="'+data['detail'][x]['e_color_name']+'"></td>';
-                            cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="nquantity'+x+'" name="nquantity'+x+'" value="'+data['detail'][x]['n_quantity_sisa']+'"></td>';
-                            cols += '<td><input class="form-control input-sm text-right" type="text" id="npemenuhan'+x+'" name="npemenuhan'+x+'" value="'+data['detail'][x]['n_quantity_sisa']+'" placeholder="0" onkeypress="return hanyaAngka(event);" onkeyup="ceksaldo('+x+');"></td>';
-                            cols += '<td><input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="eremark'+x+'"></td>';
-                            newRow.append(cols);
-                            $("#tabledatax").append(newRow);
-                        }
-                    }
+                    createDetailBarang(data);
                 },
                 error: function () {
                     swal('Ada kesalahan :(');
@@ -306,4 +291,97 @@
         $("#submit").attr("disabled", true);
         $("#send").attr("hidden", false);
     });
+
+    const createDetailBarang = (data) => {
+        console.log(data);
+        const count = data.length;
+        $('#jml').val(count);
+
+        data.map(({product, bundling}, index) => {
+            let cols = "";
+            let newRow = $('<tr>');
+
+            cols += `<td class="text-center">${index + 1}</td>`;
+            cols += `<td>
+                        <input class="form-control input-sm" readonly type="text" id="iproduct${index}" name="iproduct${index}" value="${product?.i_product}">
+                        <input type="hidden" id="idproduct${index}" name="idproduct${index}" value="${product?.id_product}">
+                    </td>`;
+            cols += `<td>
+                        <input class="form-control input-sm" readonly type="text" id="eproduct${index}" name="eproduct${index}" value="${product?.e_product}">
+                    </td>`;
+
+            cols += `<td>
+                        <input readonly class="form-control input-sm" type="text" id="ecolor${index}" name="ecolor${index}" value="${product?.e_color_name}">
+                    </td>`;
+
+            cols += `<td>
+                        <input readonly class="form-control input-sm text-right" type="text" id="nquantity${index}" name="nquantity${index}" value="${product?.n_quantity_sisa}">
+                    </td>`;
+
+            cols += `<td>
+                        <input class="form-control input-sm text-right" type="text" id="npemenuhan${index}" name="npemenuhan${index}" value="${product?.n_quantity_sisa}" placeholder="0" onkeypress="return hanyaAngka(event);" onkeyup="ceksaldo(${index});">
+                    </td>`;
+
+            cols += `<td>
+                        <input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="eremark${index}">
+                    </td>`;
+
+            newRow.append(cols);
+
+            $('#tabledatax').append(newRow);
+
+            if (bundling.length <= 0) {
+                return;
+            }
+
+            cols = `<td class="text-center">
+                        <i class="fa fa-hashtag fa-lg"></i>
+                    </td>
+                    <td colspan="7">
+                        <b>Bundling Produk</b>
+                    </td>`;
+                    
+            newRow = $('<tr class="th1 bold table-active">');
+
+            newRow.append(cols);
+
+            $('#tabledatax').append(newRow);
+
+            // <!-- if data bundling -->
+            bundling.map((obj, index) => {
+                let cols = "";
+                let newRow = $('<tr>');
+
+                cols += `<td class="text-center"><spanx>${index + 1}</spanx></td>`;
+
+                cols += `<td>${obj?.i_product_base}</td>`;
+                
+                cols += `<td  class="d-flex justify-content-between"><span>${obj?.e_product_basename}</span></td>`;
+
+                cols += `<td>${obj?.e_color_name}</td>`;
+
+                cols += `<td class="text-right">${obj?.n_quantity_bundling}</td>`;
+
+                cols += `<td>
+                            <input class="form-control input-sm text-right" type="text" 
+                                id="bundling_terima${index}" 
+                                name="bundling_terima${index}" 
+                                value="${obj?.n_quantity_bundling}" 
+                                placeholder="0" 
+                                onkeypress="return hanyaAngka(event);" 
+                                onkeyup="ceksaldo(${index});">
+                        </td>`;
+
+                cols += `<td>
+                            <input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="bundling_eremark${index}">
+                        </td>`;
+                                                
+                newRow.append(cols);
+
+                $('#tabledatax').append(newRow);
+            });
+
+        });
+    }
+
 </script>

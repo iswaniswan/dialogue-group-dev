@@ -40,21 +40,19 @@
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date"  required="" readonly value="<?= date("d-m-Y");?>">
                         </div>
                         <div class="col-sm-3">
-                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">
-                                <?php if ($tujuan) {
-                                    $group = "";
-                                    foreach ($tujuan as $row) : ?>
-                                    <?php if ($group!=$row->name) {?>
+                            <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">                                                      
+                                <?php $group = ""; foreach ($tujuan as $row) { ?>
+                                    <?php if ($group != $row->name) { ?>
                                         </optgroup>
                                         <optgroup label="<?= strtoupper(str_replace(".","",$row->name));?>">
-                                    <?php }
-                                    $group = $row->name;
-                                    ?>
-                                        <option value="<?= $row->id_bagian ?>">
-                                            <?= $row->e_bagian_name; ?>
+                                    <?php } ?>
+                                    <?php $grup = $row->name; 
+                                        /** default company select */
+                                        $selected = ($row->id_company == $this->session->userdata('id_company')) ? 'selected' : '' ?>
+                                        <option value="<?= $row->id_bagian ?>" <?= $selected ?>><?= $row->e_bagian_name; ?>
                                         </option>
-                                <?php endforeach;
-                                } ?>
+                                <?php } ?>
+                                
                             </select>
                         </div>
 

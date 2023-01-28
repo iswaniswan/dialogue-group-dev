@@ -266,7 +266,7 @@ class Mmaster extends CI_Model {
     }
     
     public function tujuan($i_menu, $idcompany=null) {
-        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name
+        $sql = "SELECT a.*, b.id AS id_bagian, b.e_bagian_name, c.name, c.id AS id_company
                 FROM tr_tujuan_menu a
                 JOIN tr_bagian b ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company)
                 JOIN public.company c ON c.id = b.id_company
@@ -324,6 +324,8 @@ class Mmaster extends CI_Model {
                     ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
             WHERE a.id_company = '$idcompany'
             AND a.id = '$eproduct'";
+
+            // var_dump($sql); die();
 
         return $this->db->query($sql);
     }

@@ -15,12 +15,10 @@
                             <label class="col-md-3">Referensi</label>
                             
                             <div class="col-sm-3">
-                                <select name="i_bagian" id="i_bagian" required="" class="form-control select2">
-                                    <?php if ($bagian) {
-                                        foreach ($bagian->result() as $key) { ?>
-                                            <option value="<?= trim($key->i_bagian); ?>"><?= $key->e_bagian_name; ?></option>
-                                    <?php }
-                                    } ?>
+                                <select name="i_bagian" id="i_bagian" required="" class="form-control select2">            
+                                    <?php foreach ($bagian->result() as $key) { ?>
+                                        <option value="<?= trim($key->i_bagian); ?>"><?= $key->e_bagian_name; ?></option>
+                                    <?php } ?>                                    
                                 </select>
                             </div>
                             
@@ -131,30 +129,15 @@
         });
 
         const mergeLabel = (array) => {
-
-            let grouped = array.reduce((result, item) => {
-
-                if (result[item.name]) {
-                    result[item.name].children.some(function(e) {
-                        if (e.id === item.id) {
-                            return;
-                        }
-                        return result[item.name].children.push({
-                            id:item.id, text:item.text
-                        })
-                    })
-                    return result;
+            let indexes = [];
+            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+                if (indexes.includes(id) == false) {
+                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
                 }
-
-                (result[item.name] ??= { text: item.name, children: []}).children.push({
-                    id:item.id, text:item.text
-                });
-                return result;
-            }, {})
-
-            return Object.values(grouped);
+                indexes.push(id);
+                return obj;
+            }, {}));
         }
-
         /*Tidak boleh lebih dari hari ini*/
         showCalendar('.date', null, 0);
         $('#i_referensi').select2({
@@ -177,7 +160,7 @@
                         results: data
                     };
                 },
-                cache: false
+                cache: true
             }
         }).change(function() {
 

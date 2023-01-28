@@ -806,18 +806,19 @@ class Mmaster extends CI_Model
 
     public function view_databundling($id, $company)
     {
-        return $this->db->query("SELECT j.*, k.i_product_base, k.e_product_basename, l.e_color_name FROM tm_keluar_qc_bundling j
-        INNER JOIN tm_keluar_qc_item a ON (a.id = j.id_keluar_qc_item)
-        JOIN tr_product_base k ON (
-            j.id_product = k.id AND j.id_company = k.id_company
-        )
-        JOIN tr_color l ON (
-            k.i_color = l.i_color AND j.id_company = l.id_company
-        )
-        WHERE
-            a.id_keluar_qc = '$id' 
-            AND j.id_company = '$company'
-        ORDER BY j.id_product", FALSE);
+        $sql = "SELECT j.*, k.i_product_base, k.e_product_basename, l.e_color_name FROM tm_keluar_qc_bundling j
+                INNER JOIN tm_keluar_qc_item a ON (a.id = j.id_keluar_qc_item)
+                JOIN tr_product_base k ON (
+                                            j.id_product = k.id AND j.id_company = k.id_company
+                                        )
+                JOIN tr_color l ON (
+                                    k.i_color = l.i_color AND j.id_company = l.id_company
+                                )
+                WHERE a.id_keluar_qc = '$id' 
+                    AND j.id_company = '$company'
+                ORDER BY j.id_product";
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $id_company_tujuan, $ijenis, $eremark)
@@ -1096,6 +1097,7 @@ class Mmaster extends CI_Model
             'id_company' => $default_company_tujuan,
             'i_document' => $i_document,
             'd_document' => date('Y-m-d'),
+            'd_kirim' => date('Y-m-d'),
             'i_bagian' => $i_bagian,
             'id_type_penerima' => 3,
             'i_status' => 6,

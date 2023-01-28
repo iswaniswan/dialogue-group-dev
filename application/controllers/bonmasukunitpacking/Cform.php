@@ -188,6 +188,22 @@ class Cform extends CI_Controller {
     
     /*----------  DETAIL ITEM REFERENSI  ----------*/    
     
+    // public function detailreferensi()
+    // {
+    //     header("Content-Type: application/json", true);
+        
+    //     $id = $this->input->post('id');
+    //     $ipengirim = $this->input->post('pengirim');
+    //     $ibagian = $this->input->post('ibagian');
+
+    //     $query = $this->mmaster->detailreferensi($id, $ipengirim, $ibagian);
+
+    //     $result  = [
+    //         'detail' => $query->result_array()
+    //     ];
+    //     echo json_encode($result);  
+    // }
+
     public function detailreferensi()
     {
         header("Content-Type: application/json", true);
@@ -196,12 +212,9 @@ class Cform extends CI_Controller {
         $ipengirim = $this->input->post('pengirim');
         $ibagian = $this->input->post('ibagian');
 
-        $query = $this->mmaster->detailreferensi($id, $ipengirim, $ibagian);
+        $query = $this->mmaster->detailreferensi_with_bundling($id, $ipengirim, $ibagian);
 
-        $result  = [
-            'detail' => $query->result_array()
-        ];
-        echo json_encode($result);  
+        echo json_encode($query);  
     }
     
     /*----------  DATA REFERENSI SESUAI SESUAI PENGIRIM  ----------*/
