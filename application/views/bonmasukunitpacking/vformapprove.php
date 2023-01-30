@@ -73,25 +73,59 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($datadetail as $key) {
+                    <?php foreach ($datadetail as $result) {
+                        $product = $result['product'];
                         ?>
+
+                        <?php if ($i >= 1) { ?>
+                            <tr class="table-info">
+                                <td colspan="8">
+                                    <hr class="mb-0 mt-0">
+                                </td>
+                            </tr>
+                        <?php } ?>
+
                         <tr>
                             <td class="text-center"><?=$i+1;?></td>
                             <td>
-                                <?= $key->i_product;?>
-                                <input type="hidden" id="iproduct<?=$i;?>" name="iproduct<?=$i;?>" value="<?= $key->i_product;?>">
+                                <?= $product->i_product;?>
+                                <input type="hidden" id="iproduct<?=$i;?>" name="iproduct<?=$i;?>" value="<?= $product->i_product;?>">
                             </td>
-                            <td><?= $key->e_product;?></td>
-                            <td><?= $key->e_color_name;?></td>
+                            <td><?= $product->e_product;?></td>
+                            <td><?= $product->e_color_name;?></td>
                             <td class="text-right">
-                                <?= $key->n_quantity_reff;?>
-                                <input type="hidden" id="nquantity<?=$i;?>" name="nquantity<?=$i;?>" value="<?= $key->n_quantity_sisa;?>">
+                                <?= $product->n_quantity_reff;?>
+                                <input type="hidden" id="nquantity<?=$i;?>" name="nquantity<?=$i;?>" value="<?= $product->n_quantity_sisa;?>">
                             </td>
                             <td class="text-right">
-                                <?= $key->n_quantity;?>
-                                <input type="hidden" id="npemenuhan<?=$i;?>" name="npemenuhan<?=$i;?>" value="<?= $key->n_quantity;?>"></td>
-                            <td><?= $key->e_remark;?></td>
+                                <?= $product->n_quantity;?>
+                                <input type="hidden" id="npemenuhan<?=$i;?>" name="npemenuhan<?=$i;?>" value="<?= $product->n_quantity;?>"></td>
+                            <td><?= $product->e_remark;?></td>
                         </tr>
+
+                        <?php if (!empty($result['bundling'])) { ?>
+                            <tr class="th<?= $i; ?> bold table-active">
+                                <td class="text-center"><i class="fa fa-hashtag fa-lg"></i></a></td>
+                                <td colspan="7"><b>Bundling Produk</b></td>
+                            </tr>
+
+                            <?php $o = 1; ?>
+                            <?php foreach($result['bundling'] as $bundling) { ?>
+
+                            <tr>
+                                <td class="text-center"><spanx id="snum<?= $i; ?>"><?= $o; ?></spanx></td>
+                                <td><?= $bundling->i_product_base; ?></td>
+                                <td  class="d-flex justify-content-between"><span><?= $bundling->e_product_basename; ?></span></td>
+                                <td><?= $bundling->e_color_name; ?></td>
+                                <td class="text-right"><?= $bundling->n_quantity_bundling; ?></td>
+                                <td colspan="2"><?= $bundling->e_remark; ?></td>
+                            </tr>
+
+                            <?php $o++; ?>                            
+                            <?php } ?>
+                            
+                        <?php } ?>
+
                     <?php $i++; } ?>
                 </tbody>
             </table>

@@ -85,6 +85,15 @@
                     <?php foreach ($datadetail as $result) { 
                         $product = $result['product'];
                         ?>
+
+                        <?php if ($i >= 1) { ?>
+                            <tr class="table-info">
+                                <td colspan="8">
+                                    <hr class="mb-0 mt-0">
+                                </td>
+                            </tr>
+                        <?php } ?>
+
                         <tr>
                             <td class="text-center"><?=$i+1;?></td>
                             <td><?= $product->i_product;?></td>
