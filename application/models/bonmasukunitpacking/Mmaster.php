@@ -540,7 +540,8 @@ class Mmaster extends CI_Model
                     WHEN n_sisa ISNULL THEN h.n_quantity_sisa
                     ELSE n_sisa
                 END AS n_quantity_sisa,
-                a.n_quantity_reff
+                a.n_quantity_reff,
+                a.id_document_reff
             FROM
                 tm_masuk_unit_packing_item a
             INNER JOIN tm_masuk_unit_packing b ON
@@ -571,6 +572,26 @@ class Mmaster extends CI_Model
             ",
             FALSE
         );
+    }
+
+    public function dataeditdetail_with_bundling($id)
+    {
+        $products = [];
+        
+        $query = $this->dataeditdetail($id);
+
+        foreach ($query->result() as $result) {
+            $product = $result;
+            $_id = $result->id_document_reff;
+            $bundling = $this->get_data_bundling($_id)->result();
+
+            $products[] = [
+                'product' => $product,
+                'bundling' => $bundling
+            ];
+        }
+
+        return $products;
     }
 
     /*----------  UPDATE DATA  ----------*/   
@@ -807,6 +828,7 @@ class Mmaster extends CI_Model
 
         return $this->db->query($sql, FALSE);
     }
+
     
 }
 /* End of file Mmaster.php */

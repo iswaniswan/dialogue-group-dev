@@ -105,7 +105,7 @@
                                         <td><?= $key->i_product; ?></td>
                                         <td><?= $key->e_product; ?> [ <?= $key->e_marker_name ?> ]</td>
                                         <td><?= $key->e_color_name; ?></td>
-                                        <td><?= $key->n_quantity_product; ?></td>
+                                        <td class="text-right"><?= $key->n_quantity_product; ?></td>
                                         <td colspan="3"></td>
                                     </tr>
                                     <tr class="table-active tr_second<?= $i; ?>">

@@ -960,21 +960,29 @@ class Mmaster extends CI_Model
         $this->db->update('tm_keluar_qc', $data);
     }
 
-    public function runningnumber_memo($ibagian)
+    public function runningnumber_memo($ibagian, $id_company=null)
     {
+        if ($id_company == null) {
+            $id_company = $this->id_company;
+        }
+
         $thbl = date('ym');
         $kode = "MM";
-        $query  = $this->db->query("SELECT
-                max(substring(i_document, 9, 4)) AS max
-            FROM
-                tm_memo_permintaan
-            WHERE to_char (d_document, 'yymm') = '$thbl'
-            AND i_status <> '5'
-            AND i_bagian = '$ibagian'
-            AND substring(i_document, 1, 2) = '$kode'
-            AND substring(i_document, 4, 2) = substring('$thbl',1,2)
-            AND id_company = '$this->id_company'
-        ", false);
+        $sql = "SELECT
+                    max(substring(i_document, 9, 4)) AS max
+                FROM
+                    tm_memo_permintaan
+                WHERE to_char (d_document, 'yymm') = '$thbl'
+                AND i_status <> '5'
+                AND i_bagian = '$ibagian'
+                AND substring(i_document, 1, 2) = '$kode'
+                AND substring(i_document, 4, 2) = substring('$thbl',1,2)
+                AND id_company = '$id_company'";
+
+        // var_dump($sql); die();
+
+        $query = $this->db->query($sql);
+
         if ($query->num_rows() > 0) {
             foreach ($query->result() as $row) {
                 $no = $row->max;
@@ -1074,23 +1082,28 @@ class Mmaster extends CI_Model
     {
         $this->db->select("i_tujuan, i_bagian, id, id_company, id_company_tujuan");
         $this->db->where("id", $id);
+        
         $head = $this->db->get("tm_keluar_qc")->row();
-        $i_bagian = $head->i_tujuan;
+        
+        $i_bagian = $head->i_bagian;
+        $default_company_tujuan = $head->id_company;
+
+        if ($head->id_company != $head->id_company_tujuan) {
+            $i_bagian = $head->i_tujuan;
+            $default_company_tujuan = $head->id_company_tujuan;
+        }
+
         $bagian = $head->i_bagian;
         $this->db->select('max(id) AS id');
         $this->db->from('tm_memo_permintaan');
         $id = $this->db->get()->row()->id + 1;
-        $i_document = $this->runningnumber_memo($i_bagian);
+        $i_document = $this->runningnumber_memo($i_bagian, $default_company_tujuan);
 
         // table tr_bagian
         $this->db->select('id')
-            ->where(['i_bagian' => $i_bagian, 'id_company' => $head->id_company_tujuan]);
-        $query_bagian = $this->db->get("tr_bagian")->row();
+            ->where(['i_bagian' => $i_bagian, 'id_company' => $default_company_tujuan]);
+        $query_bagian = $this->db->get("tr_bagian")->row();        
 
-        $default_company_tujuan = $head->id_company;
-        if (@$head->id_company_tujuan != null) {
-            $default_company_tujuan = $head->id_company_tujuan;
-        }
 
         $data_header = array(
             'id' => $id,
@@ -1122,6 +1135,7 @@ class Mmaster extends CI_Model
                         "n_quantity" => $key->n_kebutuhan_material,
                         "n_quantity_sisa" => $key->n_kebutuhan_material,
                         "e_remark" => "Generate Dari STB WIP",
+                        "n_quantity_product" => $key->n_quantity_product
                     );
                     $this->db->insert("tm_memo_permintaan_item", $data_detail);
                 }

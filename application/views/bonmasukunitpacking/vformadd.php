@@ -362,19 +362,19 @@
 
                 cols += `<td class="text-right">${obj?.n_quantity_bundling}</td>`;
 
-                cols += `<td>
-                            <input class="form-control input-sm text-right" type="text" 
-                                id="bundling_terima${index}" 
-                                name="bundling_terima${index}" 
-                                value="${obj?.n_quantity_bundling}" 
-                                placeholder="0" 
-                                onkeypress="return hanyaAngka(event);" 
-                                onkeyup="ceksaldo(${index});">
-                        </td>`;
+                // cols += `<td>
+                //             <input class="form-control input-sm text-right" type="text" 
+                //                 id="bundling_terima${index}" 
+                //                 name="bundling_terima${index}" 
+                //                 value="${obj?.n_quantity_bundling}" 
+                //                 placeholder="0" 
+                //                 onkeypress="return hanyaAngka(event);" 
+                //                 onkeyup="ceksaldo(${index});">
+                //         </td>`;
 
-                cols += `<td>
-                            <input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="bundling_eremark${index}">
-                        </td>`;
+                // cols += `<td>
+                //             <input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="bundling_eremark${index}">
+                //         </td>`;
                                                 
                 newRow.append(cols);
 

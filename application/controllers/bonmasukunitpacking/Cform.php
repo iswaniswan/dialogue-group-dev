@@ -419,7 +419,7 @@ class Cform extends CI_Controller {
             'dto'        => $this->uri->segment(6),
             'bagian'     => $this->mmaster->bagian(),
             'data'       => $this->mmaster->dataedit($this->uri->segment(4))->row(),
-            'datadetail' => $this->mmaster->dataeditdetail($this->uri->segment(4))->result(),
+            'datadetail' => $this->mmaster->dataeditdetail_with_bundling($this->uri->segment(4)),
             'jenisbarang'   => $this->mmaster->jeniskeluar()->result(),
         );
         

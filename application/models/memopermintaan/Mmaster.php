@@ -77,9 +77,10 @@ class Mmaster extends CI_Model
                 LEFT join public.company h ON (h.id = g.id_company)
                 LEFT join public.company h2 ON (h2.id = a.id_company_penerima)
                 WHERE a.i_status <> '5'
-                    AND (a.id_company = '$this->id_company' OR a.id_company_penerima = '$this->id_company') 
-                    $and $bagian
-                ORDER BY d_document DESC, a.i_document DESC";                    
+                    AND a.id_company = '$this->id_company' $and $bagian
+                ORDER BY d_document DESC, a.i_document DESC";
+                
+        // var_dump($sql); die();
 
         $datatables->query($sql, FALSE);
         $datatables->edit('company_tujuan', function ($data) {
@@ -528,28 +529,32 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query(
-            "SELECT a.*, b.i_product_wip i_product, b.e_product_wipname e_product, c.e_color_name, d.i_material, d.e_material_name, e.e_satuan_name, a.id_marker, h.e_marker_name,
-            round(1 / v_set * v_gelar,4) n_kebutuhan, coalesce(n_saldo_akhir,0) n_saldo_akhir
-            FROM tm_memo_permintaan_item a
-            INNER JOIN tr_product_wip b ON (b.id = a.id_product)
-            INNER JOIN tr_color c ON (
-                c.i_color = b.i_color AND b.id_company = c.id_company
-            )
-            INNER JOIN tr_material d ON (d.id = a.id_material)
-            INNER JOIN tr_satuan e ON (
-                e.i_satuan_code = d.i_satuan_code AND d.id_company = e.id_company
-            )
-            INNER JOIN tr_polacutting_new f ON (
-                f.id_product_wip = a.id_product AND a.id_material = f.id_material AND a.id_marker = f.id_marker
-            )
-            LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$i_bagian') g ON (g.id_material = a.id_material) 
-            inner join tr_marker h ON (h.id = a.id_marker) 
-            WHERE a.id_document = '$id'
-            and f.v_gelar > 0
-            ORDER BY a.id_product
-            "
-        );
+
+        $sql = "SELECT a.*, 
+                    b.i_product_wip i_product, b.e_product_wipname e_product, c.e_color_name, d.i_material, 
+                    d.e_material_name, e.e_satuan_name, a.id_marker, h.e_marker_name,
+                    round(1 / v_set * v_gelar,4) n_kebutuhan, 
+                    coalesce(n_saldo_akhir,0) n_saldo_akhir
+                FROM tm_memo_permintaan_item a
+                INNER JOIN tr_product_wip b ON (b.id = a.id_product)
+                INNER JOIN tr_color c ON (
+                    c.i_color = b.i_color AND b.id_company = c.id_company
+                )
+                INNER JOIN tr_material d ON (d.id = a.id_material)
+                INNER JOIN tr_satuan e ON (
+                    e.i_satuan_code = d.i_satuan_code AND d.id_company = e.id_company
+                )
+                INNER JOIN tr_polacutting_new f ON (
+                    f.id_product_wip = a.id_product AND a.id_material = f.id_material AND a.id_marker = f.id_marker
+                )
+                LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$i_bagian') g ON (g.id_material = a.id_material) 
+                INNER JOIN tr_marker h ON (h.id = a.id_marker) 
+                WHERE a.id_document = '$id' and f.v_gelar > 0
+                ORDER BY a.id_product";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     /*---------- GET DETAIL FOR EXPORT EXCEL ----------*/

@@ -100,21 +100,23 @@ class Mmaster extends CI_Model
 			$where3 = "AND (a.id = '$i_product')";
 		}
 
-		$this->db->select("
-			x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, upper(b.e_color_name) AS e_color_name 
-			from f_mutasi_wip('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
-			INNER JOIN tr_product_base a ON
-				(a.id_company = x.id_company
-				AND a.id = x.id_product_base)
-			INNER JOIN tr_color b ON
-				(a.id_company = b.id_company
-				AND a.i_color = b.i_color)
-			INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
-			LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
-			WHERE x.id_company is not null
-			$where $where2 $where3
-			ORDER BY e_class_name, a.i_product_wip, e_product_basename,e_color_name
-			", FALSE);
+		$sql = "x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, upper(b.e_color_name) AS e_color_name 
+				from f_mutasi_wip('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+				INNER JOIN tr_product_base a ON
+					(a.id_company = x.id_company
+					AND a.id = x.id_product_base)
+				INNER JOIN tr_color b ON
+					(a.id_company = b.id_company
+					AND a.i_color = b.i_color)
+				INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
+				LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
+				WHERE x.id_company is not null
+				$where $where2 $where3
+				ORDER BY e_class_name, a.i_product_wip, e_product_basename,e_color_name";
+
+		// var_dump($sql); die();
+
+		$this->db->select($sql, FALSE);
 		return $this->db->get();
 	}
 
