@@ -223,21 +223,24 @@ class Mmaster extends CI_Model
             ORDER BY
                 b.e_bagian_name
         ", FALSE); */
-        return $this->db->query(
-            "SELECT
-                DISTINCT b.id, b.i_bagian, b.id_company, b.e_bagian_name, c.name as company_name
-            FROM
-                tm_keluar_jahit a
-            INNER JOIN tm_keluar_jahit_item ab ON (ab.id_keluar_jahit = a.id)
-            INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
-            INNER JOIN public.company c ON (c.id = b.id_company)
-            WHERE a.id_company_bagian = '$this->idcompany' AND a.i_tujuan = '$ibagian'
-            AND (b.i_bagian ILIKE '%$cari%'
-                OR b.e_bagian_name ILIKE '%$cari%') AND a.i_status = '6'
-                AND ab.n_quantity_product <> 0
-                AND ab.n_sisa <> 0
-            ORDER BY 5, 4
-        ", FALSE);
+
+        $sql = "SELECT
+                    DISTINCT b.id, b.i_bagian, b.id_company, b.e_bagian_name, c.name as company_name
+                FROM
+                    tm_keluar_jahit a
+                INNER JOIN tm_keluar_jahit_item ab ON (ab.id_keluar_jahit = a.id)
+                INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
+                INNER JOIN public.company c ON (c.id = b.id_company)
+                WHERE a.id_company_bagian = '$this->idcompany' AND a.i_tujuan = '$ibagian'
+                AND (b.i_bagian ILIKE '%$cari%'
+                    OR b.e_bagian_name ILIKE '%$cari%') AND a.i_status = '6'
+                    AND ab.n_quantity_product <> 0
+                    AND ab.n_sisa <> 0
+                ORDER BY 5, 4";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     public function referensi($cari,$iasal)

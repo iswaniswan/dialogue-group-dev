@@ -186,67 +186,29 @@ class Mmaster extends CI_Model
 
     /*----------  RUNNING NO DOKUMEN  ----------*/
 
-    public function runningnumber($thbl, $ibagian)
+    public function runningnumber($i_bagian, $id_company_tujuan=null)
     {
-        $sql = "SELECT b.e_no_doc_retur, b.e_no_doc FROM tr_bagian a 
-                INNER JOIN tr_kategori_jahit b ON (b.id = a.id_kategori_jahit) 
-                WHERE id_company = '$this->id_company' AND a.i_bagian = '$ibagian'";
+        if ($id_company_tujuan == null) {
+            $id_company_tujuan = $this->id_company;
+        }
 
-        // die($sql);
+        $prefix = "STB";
+        if ($id_company_tujuan != $this->id_company) {
+            $prefix = "SJ";
+        }
+        
+        $sql = "SELECT count(*) FROM tm_stb_material tkq
+                    WHERE i_bagian = '$i_bagian'
+                    AND id_company_receive = '$id_company_tujuan'
+                    AND to_char(d_document, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
+
         $query = $this->db->query($sql);
-
-        if ($query->num_rows() > 0) {
-            $kode = $query->row()->e_no_doc;
-        } else {
-            $kode = 'SJ';
-        }
-        // var_dump($kode);
-        if (strlen($kode) == 4) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 11, 4)) AS max 
-                FROM tm_stb_material
-                WHERE to_char (d_document, 'yymm') = '$thbl'
-                AND i_status <> '5'
-                AND i_bagian_receive = '$ibagian'
-                AND id_company = '$this->id_company'
-                AND i_document ILIKE '$kode%'
-            ", false);
-        } elseif (strlen($kode) == 3) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max 
-                FROM tm_stb_material
-                WHERE to_char (d_document, 'yymm') = '$thbl'
-                AND i_status <> '5'
-                AND i_bagian_receive = '$ibagian'
-                AND id_company = '$this->id_company'
-                AND i_document ILIKE '$kode%'
-            ", false);
-        } elseif (strlen($kode) == 2) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 9, 4)) AS max 
-                FROM tm_stb_material
-                WHERE to_char (d_document, 'yymm') = '$thbl'
-                AND i_status <> '5'
-                AND i_bagian_receive = '$ibagian'
-                AND id_company = '$this->id_company'
-                AND i_document ILIKE '$kode%'
-            ", false);
-        }
-        if ($sql->num_rows() > 0) {
-            foreach ($sql->result() as $row) {
-                $no = $row->max;
-            }
-            $number = $no + 1;
-            settype($number, "string");
-            $n = strlen($number);
-            while ($n < 4) {
-                $number = "0" . $number;
-                $n = strlen($number);
-            }
-            $number = $kode . "-" . $thbl . "-" . $number;
-            return $number;
-        } else {
-            $number = "0001";
-            $nomer  = $kode . "-" . $thbl . "-" . $number;
-            return $nomer;
-        }
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $prefix . '-' . date('ym') . '-' . sprintf('%04d', $count);
+        return $generated;
+        
     }
     /* public function runningnumber($thbl, $tahun, $ibagian)
     {

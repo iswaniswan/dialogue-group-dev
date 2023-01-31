@@ -17,9 +17,10 @@
                         <div class="col-sm-4">
                             <select name="ibagian" id="ibagian" class="form-control select2" required="">
                                 <?php if ($bagian) {
-                                    foreach ($bagian as $row):?>
-                                        <option value="<?= $row->i_bagian;?>">
-                                            <?= $row->e_bagian_name;?>
+                                    foreach ($bagian as $row):?>      
+                                        <?php $selected = $row->e_bagian_name == 'PACKING' ? 'selected' : '' ?>
+                                        <option value="<?= $row->i_bagian?>" <?= $selected ?>>
+                                            <?= $row->e_bagian_name?>
                                         </option>
                                     <?php endforeach; 
                                 } ?>
@@ -104,6 +105,8 @@
 <script>
     $(document).ready(function () {
         $('.select2').select2();
+
+        /** default pembuat adalah packing */
         /**
         * Tidak boleh lebih dari hari ini, dan maksimal mundur 1830 hari (5 tahun) dari hari ini
         */
@@ -138,7 +141,6 @@
                     return query;
                 },
                 processResults: function (result) {
-                    console.log(result);
                     const data = mergeLabel(result);
                     return {
                         results: data
@@ -159,7 +161,6 @@
                     var query = {
                         q: params.term,
                         iasal : $('#ipengirim').val(),
-                        ibagian : $('#ibagian').val(),
                     }
                     return query;
                 },

@@ -1274,8 +1274,7 @@ class Mmaster extends CI_Model
                          ) AS x 
                          INNER JOIN (SELECT t.id, t.i_product_base, t.e_product_basename, t.id_company, t.f_status, t.i_color
                                         FROM (
-                                            SELECT t.*, LAG(i_product_base) OVER (ORDER BY i_product_base) AS prev_name
-                                            FROM tr_product_base t
+                                            SELECT t.*, LAG(i_product_base) OVER (ORDER BY i_product_base) AS prev_name FROM tr_product_base t where id_company = '$this->id_company' and f_status = true
                                         ) t
                                     WHERE
                                         (prev_name IS NULL

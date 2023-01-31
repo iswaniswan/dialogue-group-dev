@@ -266,11 +266,14 @@ class Cform extends CI_Controller
 
     public function number()
     {
-        $number = "";
-        $date = $this->input->post('tgl', TRUE);
-        if ($date != '') {
-            $number = $this->mmaster->runningnumber(date('ym', strtotime($date)), $this->input->post('i_bagian', TRUE));
-        }
+        $i_bagian = $this->input->post('i_bagian');
+        $i_bagian_receive = $this->input->post('i_bagian_receive');
+        
+        $array_tujuan = explode("|", $i_bagian_receive);
+        $id_company_tujuan = $array_tujuan[0];
+
+        $number = $this->mmaster->runningnumber($i_bagian, $id_company_tujuan);
+
         echo json_encode($number);
     }
 

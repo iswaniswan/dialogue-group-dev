@@ -109,45 +109,9 @@ class Cform extends CI_Controller {
             ];
 
             $filters[] = $group;
-
-            // if (count($filters) == 0) {
-            //     $filters[0] = $group;
-            //     continue;
-            // }
-
-            // for ($i=0; $i<count($filters); $i++) {
-            //     if ($filters[$i]['text'] == $group['text']) {
-            //         $_count = count($filters[$i]['children']) - 1;
-            //         for ($j=0; $j<$_count; $j++) {
-            //             if ($filters[$i]['children'][$j]['id'] == $row->id) {
-            //                 continue;
-            //             } 
-            //             $filters[$i]['children'][$_count+1] = $children;
-            //         }
-            //         continue;
-            //     }
-            //     $filters[$i+1] = $group;         
-            // }
-
-            // foreach ($filters as $filter) {
-            //     if ($filter['text'] == $group['text']) {
-                    
-            //         $_count = count($filter['children']);
-            //         foreach ($filter['children'] as $_children) {
-            //             if ($_children['id'] == $row->id) {
-            //                 continue;
-            //             }
-            //             $filter['children'][$_count+1] = $children;
-            //         }
-            //     }
-            // }
-
-            // $filters[] = $group;
         }
 
         // var_dump($filters); die();
-
-
         echo json_encode($filters);
     }
 
@@ -155,9 +119,8 @@ class Cform extends CI_Controller {
         $filter = [];
         $q = $this->input->get('q');
         $iasal = $this->input->get('iasal');
-        $ibagian = $this->input->get('ibagian');
 
-        $data   = $this->mmaster->referensi(strtoupper($q), $iasal, $ibagian);
+        $data   = $this->mmaster->referensi(strtoupper($q), $iasal);
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id'    => $row->id, 

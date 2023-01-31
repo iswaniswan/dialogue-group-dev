@@ -357,7 +357,7 @@ class Mmaster extends CI_Model
                         tm_forecast_distributor
                     WHERE
                         periode IN ('$i_periode_last', '$i_periode', '$i_periode_next')
-                            AND id_company = '4'
+                            AND id_company = '$this->id_company'
                             AND i_status = '6'
                         ORDER BY
                             periode,
@@ -383,7 +383,7 @@ class Mmaster extends CI_Model
                 (c.i_style = h.i_style
                     AND c.id_company = h.id_company)
             WHERE
-                c.id_company = '4'   
+                c.id_company = '$this->id_company'   
             )   
               SELECT
                 a.id_company,
@@ -437,8 +437,8 @@ class Mmaster extends CI_Model
                     0 AS persen_up
                 FROM
                     cte a
-                LEFT JOIN f_mutasi_gudang_jadi ('4',
-                    '$i_periode_last',
+                LEFT JOIN f_mutasi_gudang_jadi ('$this->id_company',
+                    '$i_periode',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',
@@ -446,8 +446,8 @@ class Mmaster extends CI_Model
                     '') e ON
                     (e.id_product_base = a.id_product_base
                         AND a.id_company = e.id_company)
-                LEFT JOIN f_mutasi_wip ('4',
-                    '$i_periode_last',
+                LEFT JOIN f_mutasi_wip ('$this->id_company',
+                    '$i_periode',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',
@@ -461,8 +461,8 @@ class Mmaster extends CI_Model
                         id_product_base,
                         sum(saldo_akhir) AS saldo_akhir
                     FROM
-                        f_mutasi_unitjahit('4',
-                        '$i_periode_last',
+                        f_mutasi_unitjahit('$this->id_company',
+                        '$i_periode',
                         '9999-01-01',
                         '9999-01-31',
                         '$dfrom',
@@ -479,8 +479,8 @@ class Mmaster extends CI_Model
                         a.*,
                         c.id id_product_base
                     FROM
-                        f_mutasi_saldoawal_pengadaan_newbie ('4',
-                        '$i_periode_last',
+                        f_mutasi_saldoawal_pengadaan_newbie ('$this->id_company',
+                        '$i_periode',
                         '9999-01-01',
                         '9999-01-31',
                         '$dfrom',
@@ -494,8 +494,8 @@ class Mmaster extends CI_Model
                             AND c.id_company = b.id_company)) h ON
                     (h.id_product_base = a.id_product_base
                         AND a.id_company = h.id_company)
-                LEFT JOIN f_mutasi_packing ('4',
-                    '$i_periode_last',
+                LEFT JOIN f_mutasi_packing ('$this->id_company',
+                    '$i_periode',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',
@@ -526,7 +526,7 @@ class Mmaster extends CI_Model
                     (b.id_document = a.id)
                 WHERE
                     a.i_status = '6'
-                    AND a.id_company = '4'
+                    AND a.id_company = '$this->id_company'
                     AND to_char(a.d_document, 'YYYYMM') = '$i_periode_last'
                 GROUP BY
                     1,
@@ -547,7 +547,7 @@ class Mmaster extends CI_Model
                     FROM
                         tm_forecast_distributor a
                     WHERE
-                        a.id_company = '4'
+                        a.id_company = '$this->id_company'
                         AND a.periode = '$i_periode_last'
                         AND i_status = '6'
                     ORDER BY
@@ -576,7 +576,7 @@ class Mmaster extends CI_Model
                     FROM
                         tm_forecast_distributor a
                     WHERE
-                        a.id_company = '4'
+                        a.id_company = '$this->id_company'
                         AND a.periode = '$i_periode'
                         AND i_status = '6'
                     ORDER BY
@@ -604,7 +604,7 @@ class Mmaster extends CI_Model
                     FROM
                         tm_forecast_distributor a
                     WHERE
-                        a.id_company = '4'
+                        a.id_company = '$this->id_company'
                         AND a.periode = '$i_periode_next'
                         AND i_status = '6'
                     ORDER BY

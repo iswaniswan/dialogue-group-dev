@@ -234,48 +234,72 @@ class Mmaster extends CI_Model
         //         ORDER BY
         //             b.e_bagian_name";
 
-        $sql = "SELECT DISTINCT
-                    b.id,
-                    a.i_bagian,
-                    b.e_bagian_name,
-                    c.name
-                FROM tr_tujuan_menu a
-                LEFT JOIN tr_bagian b ON (a.i_bagian = b.i_bagian)
-                LEFT JOIN public.company c ON c.id = b.id_company 
-                WHERE a.i_bagian ILIKE '%$cari%' OR b.e_bagian_name ILIKE '%$cari%' OR c.name ILIKE '%$cari%'
-                ORDER BY 4 ASC, 3 ASC";
+        /**
+         *  01 = GUDANG BAHAN BAKU
+         *  02 = GUDANG AKSESORIS
+         *  03 = GUDANG AKSESORIS PACKING 
+         *  04 = GUDANG JADI         *  
+         *  19 = GUDANG SPAREPART
+         *  10 = UNIT JAHIT
+         */
 
-        // var_dump($sql); die();
+        $sql = "SELECT tb.id, tb.i_bagian, tb.e_bagian_name, c.name  
+                FROM tr_bagian tb 
+                LEFT JOIN public.company c ON c.id = tb.id_company
+                WHERE tb.i_type IN ('02', '03', '12') 
+                    AND tb.f_status = 't'
+                    AND (tb.i_bagian ILIKE '%$cari%' OR tb.e_bagian_name ILIKE '%$cari%')";
 
         return $this->db->query($sql ,false);
     }
 
-    public function referensi($cari, $iasal, $ibagian)
+    public function referensi($cari, $iasal, $id_company=null)
     {
-        $id_company = $this->id_company;
-
-        $id_bagian = $this->db->query("SELECT id FROM tr_bagian WHERE id_company = '$id_company' AND i_bagian = '$ibagian'")->row()->id;
         $cari = str_replace("'", "", $cari);
 
-        $sql = "SELECT DISTINCT a.id,
-                        a.i_document,
-                        to_char(a.d_document, 'dd-mm-yyyy') AS d_document
-                    FROM tm_keluar_produksibp a
-                    LEFT JOIN tm_keluar_produksibp_item b on (
-                                            a.id = b.id_document AND a.id_company = b.id_company
-                                        )
-                    WHERE a.i_bagian = '$iasal'
-                        AND a.id_partner = '$id_bagian'
-                        AND a.i_status = '6'
-                        AND a.id_company = '$this->idcompany'
-                        AND b.n_quantity_sisa <> 0
-                        AND a.i_document ILIKE '%$cari%'
-                    ORDER BY i_document ASC, d_document ASC";
+        if ($id_company == null) {
+            $id_company = $this->id_company;
+        }
 
-        // var_dump($sql); die();
+        $sql = "SELECT tsm.id, tsm.i_document
+                FROM tm_stb_material tsm
+                INNER JOIN tr_bagian tb ON tb.i_bagian = tsm.i_bagian_receive AND tb.id_company = tsm.id_company_receive
+                WHERE tsm.id_company_receive = '$id_company' 
+                    AND tsm.i_document ILIKE '%$cari%'
+                    AND tb.id = '$iasal'
+                ORDER BY id desc";
 
-        return $this->db->query($sql, FALSE);
+        // var_dump($sql); die();                    
+
+        return $this->db->query($sql);
     }
+
+    // public function referensi__($cari, $iasal, $ibagian)
+    // {
+    //     $id_company = $this->id_company;
+
+    //     $id_bagian = $this->db->query("SELECT id FROM tr_bagian WHERE id_company = '$id_company' AND i_bagian = '$ibagian'")->row()->id;
+    //     $cari = str_replace("'", "", $cari);
+
+    //     $sql = "SELECT DISTINCT a.id,
+    //                     a.i_document,
+    //                     to_char(a.d_document, 'dd-mm-yyyy') AS d_document
+    //                 FROM tm_keluar_produksibp a
+    //                 LEFT JOIN tm_keluar_produksibp_item b on (
+    //                                         a.id = b.id_document AND a.id_company = b.id_company
+    //                                     )
+    //                 WHERE a.i_bagian = '$iasal'
+    //                     AND a.id_partner = '$id_bagian'
+    //                     AND a.i_status = '6'
+    //                     AND a.id_company = '$this->idcompany'
+    //                     AND b.n_quantity_sisa <> 0
+    //                     AND a.i_document ILIKE '%$cari%'
+    //                 ORDER BY i_document ASC, d_document ASC";
+
+    //     // var_dump($sql); die();
+
+    //     return $this->db->query($sql, FALSE);
+    // }
 
     public function cek_kode($kode, $ibagian)
     {
@@ -316,28 +340,16 @@ class Mmaster extends CI_Model
 
     public function getdataitem($idreff, $ipengirim)
     {
-        return $this->db->query("SELECT DISTINCT 
-                    a.id,
-                    a.id_product as id_material,
-                    d.i_material,
-                    d.e_material_name,
-                    a.n_quantity as n_quantity,
-                    a.n_quantity_sisa as n_quantity_sisa,
-                    a.e_remark
-                FROM
-                    tm_keluar_produksibp_item a
-                    LEFT JOIN tm_keluar_produksibp b
-                    ON (a.id_document = b.id AND a.id_company = b.id_company)
-                    INNER JOIN tr_material d
-                    ON (a.id_product = d.id AND a.id_company = d.id_company)
-                WHERE
-                    b.id = '$idreff' 
-                    AND a.id_document = '$idreff'
-                    AND b.id_company = '$this->idcompany'
-                    AND b.i_bagian = '$ipengirim'
-                    AND a.n_quantity_sisa <> 0",
-            false
-        );
+        $sql = "SELECT * 
+                FROM tm_stb_material tsm
+                INNER JOIN tm_stb_material_item tsmi ON tsmi.id_document = tsm.id
+                WHERE tsm.id = '$idreff'
+                ";
+
+
+        // var_dump($sql); die
+
+        return $this->db->query($sql);
     }
 
     public function runningid()

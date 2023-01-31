@@ -93,7 +93,7 @@
                                     <td><?= $key->i_material; ?></td>
                                     <td><?= $key->e_material_name; ?></td>
                                     <td><?= $key->e_satuan_name; ?></td>
-                                    <td class="text-right"><?= $key->n_quantity; ?></td>
+                                    <td class="text-right"><?= number_format($key->n_quantity, 2, ".", ",") ?></td> 
                                     <td><?= $key->e_remark; ?></td>
                                 </tr>
                         <?php }

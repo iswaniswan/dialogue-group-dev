@@ -2,9 +2,11 @@
     <div class="col-lg-12">
         <div class="panel panel-info">
             <div class="panel-heading"> <i class="fa fa-list"></i> <?= $title; ?>
+                <?php /*
                 <?php  if(check_role($this->i_menu1, 1)){ ?><a href="#" onclick="show('<?= $folder1; ?>/cform/tambah/<?=$dfrom;?>/<?=$dto;?>','#main'); return false;" class="btn btn-info btn-sm pull-right"><i
                     class="fa fa-plus"></i> &nbsp;<?= $title; ?> Makloon & Jahit</a>
                 <?php } ?>
+                */ ?>
                 <?php  if(check_role($this->i_menu, 1)){ ?><a href="#" onclick="show('<?= $folder; ?>/cform/tambah/<?=$dfrom;?>/<?=$dto;?>','#main'); return false;" class="btn btn-info btn-sm pull-right"><i
                     class="fa fa-plus"></i> &nbsp;<?= $title; ?> Gudang Aksesoris Packing</a>
                 <?php } ?>

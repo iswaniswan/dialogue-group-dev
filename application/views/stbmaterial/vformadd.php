@@ -128,10 +128,10 @@
                                         <?= $key->e_satuan_name; ?>
                                     </td>
                                     <td class="text-right">
-                                        <?= $key->n_stock; ?>
+                                        <?= number_format($key->n_stock, 2, ".", ",") ?>
                                     </td>
                                     <td class="text-right">
-                                        <?= $key->n_quantity; ?>
+                                        <?= number_format($key->n_quantity, 4, ".", ",") ?>
                                         <input value="<?= $key->n_quantity; ?>" type="hidden" id="n_quantity_kebutuhan<?= $i; ?>" class="form-control text-right input-sm" autocomplete="off" name="n_quantity_kebutuhan<?= $i; ?>" readonly>
                                         <input value="<?= $key->n_quantity_sisa; ?>" type="hidden" id="n_quantity_sisa<?= $i; ?>" class="form-control text-right input-sm" autocomplete="off" name="n_quantity_sisa<?= $i; ?>" readonly>
                                     </td>
@@ -326,6 +326,7 @@
             data: {
                 'tgl': $('#d_document').val(),
                 'i_bagian': $('#i_bagian').val(),
+                'i_bagian_receive': $('#i_bagian_receive').val(),
             },
             url: '<?= base_url($folder . '/cform/number'); ?>',
             dataType: "json",

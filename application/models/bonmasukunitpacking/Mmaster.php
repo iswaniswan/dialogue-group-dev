@@ -364,7 +364,8 @@ class Mmaster extends CI_Model
                         i_product_base AS i_product,
                         e_product_basename AS e_product,
                         e_color_name,
-                        n_quantity_sisa
+                        n_quantity_sisa,
+                        a.id_company
                     FROM tm_keluar_gudang_jadi a
                     INNER JOIN tr_bagian b ON (b.id = a.id_bagian_tujuan)
                     INNER JOIN tm_keluar_gudang_jadi_item c ON (c.id_document = a.id)
@@ -385,7 +386,8 @@ class Mmaster extends CI_Model
                         i_product_base AS i_product,
                         e_product_basename AS e_product,
                         e_color_name,
-                        n_sisa AS n_quantity_sisa
+                        n_sisa AS n_quantity_sisa,
+                        a.id_company
                     FROM tm_keluar_qc a
                     INNER JOIN tm_keluar_qc_item b ON (b.id_keluar_qc = a.id)
                     INNER JOIN tr_bagian c ON (
@@ -410,7 +412,8 @@ class Mmaster extends CI_Model
 
         foreach ($query->result_array() as $result) {
             $product = $result;            
-            $bundling = $this->get_data_bundling($id)->result_array();
+            $id_company = $product['id_company'];
+            $bundling = $this->get_data_bundling($id, $id_company)->result_array();
             $products[] = [
                 'product' => $product,
                 'bundling' => $bundling
@@ -529,49 +532,44 @@ class Mmaster extends CI_Model
 
     public function dataeditdetail($id)
     {
-        return $this->db->query("SELECT
+        $sql ="SELECT
                 i_product_base AS i_product,
                 a.id_product_base AS id_product,
                 e_product_basename AS e_product,
                 e_color_name,
                 a.e_remark,
                 a.n_quantity,
+                e.id_company,
                 CASE
                     WHEN n_sisa ISNULL THEN h.n_quantity_sisa
                     ELSE n_sisa
                 END AS n_quantity_sisa,
                 a.n_quantity_reff,
                 a.id_document_reff
-            FROM
-                tm_masuk_unit_packing_item a
-            INNER JOIN tm_masuk_unit_packing b ON
-                (b.id = a.id_document)
-            INNER JOIN tr_product_base c ON
-                (c.id = a.id_product_base)
-            INNER JOIN tr_color d ON
-                (d.i_color = c.i_color
-                AND c.id_company = d.id_company)
-            INNER JOIN tr_bagian i ON
-                (i.id = b.id_bagian_pengirim)
-            LEFT JOIN tm_keluar_qc e ON
-                (e.id = b.id_document_reff
-                AND i.i_bagian = e.i_bagian)
-            LEFT JOIN tm_keluar_gudang_jadi f ON
-                (f.id = b.id_document_reff
-                AND b.id_bagian_pengirim = f.id_bagian_tujuan)
-            LEFT JOIN tm_keluar_qc_item g ON
-                (g.id_keluar_qc = e.id
-                AND a.id_product_base = g.id_product)
-            LEFT JOIN tm_keluar_gudang_jadi_item h ON
-                (h.id_document = f.id
-                AND a.id_product_base = h.id_product_base)
-            WHERE
-                a.id_document = '$id'
-            ORDER BY
-                1
-            ",
-            FALSE
-        );
+            FROM tm_masuk_unit_packing_item a
+            INNER JOIN tm_masuk_unit_packing b ON b.id = a.id_document
+            INNER JOIN tr_product_base c ON c.id = a.id_product_base
+            INNER JOIN tr_color d ON (
+                                    d.i_color = c.i_color AND c.id_company = d.id_company
+                                )
+            INNER JOIN tr_bagian i ON i.id = b.id_bagian_pengirim
+            LEFT JOIN tm_keluar_qc e ON (
+                                    e.id = b.id_document_reff AND i.i_bagian = e.i_bagian
+                                )
+            LEFT JOIN tm_keluar_gudang_jadi f ON (
+                                    f.id = b.id_document_reff AND b.id_bagian_pengirim = f.id_bagian_tujuan
+                                )
+            LEFT JOIN tm_keluar_qc_item g ON (
+                                    g.id_keluar_qc = e.id AND a.id_product_base = g.id_product
+                                )
+            LEFT JOIN tm_keluar_gudang_jadi_item h ON (
+                                    h.id_document = f.id AND a.id_product_base = h.id_product_base
+                                )
+            WHERE a.id_document = '$id'
+            ORDER BY 1";
+
+
+        return $this->db->query($sql);
     }
 
     public function dataeditdetail_with_bundling($id)
@@ -583,7 +581,8 @@ class Mmaster extends CI_Model
         foreach ($query->result() as $result) {
             $product = $result;
             $_id = $result->id_document_reff;
-            $bundling = $this->get_data_bundling($_id)->result();
+            $_id_company = $result->id_company;
+            $bundling = $this->get_data_bundling($_id, $_id_company)->result();
 
             $products[] = [
                 'product' => $product,

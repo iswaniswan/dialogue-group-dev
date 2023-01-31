@@ -27,11 +27,11 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="16" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
+                                <!-- <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
+                                </span> -->
                             </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
+                            <!-- <span class="notekode">Format : (<?php // $number;?>)</span><br> -->
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-3">
@@ -52,13 +52,16 @@
                         </div>
                         <div class="col-sm-3">
                             <select name="ijenis" id="ijenis" class="form-control select2">
-                                <?php if ($jenisbarang) {
-                                    foreach ($jenisbarang as $row):?>
-                                        <option value="<?= $row->id;?>">
-                                            <?= $row->e_jenis_name;?>
-                                        </option>
-                                    <?php endforeach; 
-                                } ?>
+                                <?php foreach ($jenisbarang as $jenis) { ?>
+                                    
+                                    <?php /** Tampilkan hanya opsi bagus */ ?>
+                                    <?php if ($jenis->id != 1) continue;  ?>
+
+                                    <option value="<?= $jenis->id;?>">
+                                        <?= $jenis->e_jenis_name;?>
+                                    </option>
+
+                                <?php } ?>
                             </select>
                         </div>  
                         <div class="col-sm-6">
@@ -88,7 +91,7 @@
                     <th class="text-center" width="10%">Kode</th>
                     <th class="text-center" width="30%">Nama Barang</th>
                     <th class="text-center" width="12%">Warna</th>
-                    <th class="text-center" width="8%">Qty</th>
+                    <th class="text-center" width="8%">Qty Kirim</th>
                     <th class="text-center" width="10%">Qty Terima</th>
                     <th class="text-center">Keterangan</th>
                 </tr>
@@ -319,7 +322,13 @@
                     </td>`;
 
             cols += `<td>
-                        <input class="form-control input-sm text-right" type="text" id="npemenuhan${index}" name="npemenuhan${index}" value="${product?.n_quantity_sisa}" placeholder="0" onkeypress="return hanyaAngka(event);" onkeyup="ceksaldo(${index});">
+                        <input class="form-control input-sm text-right" 
+                            type="number" 
+                            id="npemenuhan${index}" 
+                            name="npemenuhan${index}" 
+                            value="${product?.n_quantity_sisa}" 
+                            placeholder="0" onkeyup="ratioTerimaItemBundling(this)"
+                            data-index="${index}">
                     </td>`;
 
             cols += `<td>
@@ -348,6 +357,8 @@
             $('#tabledatax').append(newRow);
 
             // <!-- if data bundling -->
+            let rootProductIndex = index;
+
             bundling.map((obj, index) => {
                 let cols = "";
                 let newRow = $('<tr>');
@@ -360,17 +371,21 @@
 
                 cols += `<td>${obj?.e_color_name}</td>`;
 
-                cols += `<td class="text-right">${obj?.n_quantity_bundling}</td>`;
+                cols += `<td class="text-right">
+                            <input data-children="bundling_kirim" 
+                            class="form-control input-sm"
+                            value="${obj?.n_quantity_bundling}" readonly>
+                        </td>`;
 
-                // cols += `<td>
-                //             <input class="form-control input-sm text-right" type="text" 
-                //                 id="bundling_terima${index}" 
-                //                 name="bundling_terima${index}" 
-                //                 value="${obj?.n_quantity_bundling}" 
-                //                 placeholder="0" 
-                //                 onkeypress="return hanyaAngka(event);" 
-                //                 onkeyup="ceksaldo(${index});">
-                //         </td>`;
+                cols += `<td>
+                            <input class="form-control input-sm text-right" type="number" 
+                                id="bundling_terima${index}" 
+                                name="bundling_terima${index}" 
+                                value="${obj?.n_quantity_bundling}" 
+                                placeholder="0" 
+                                data-children="bundling_terima${rootProductIndex}"
+                                readonly>
+                        </td>`;
 
                 // cols += `<td>
                 //             <input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="bundling_eremark${index}">
@@ -382,6 +397,28 @@
             });
 
         });
+    }
+
+    const calcRatio = (a, b, c) => a / b * c;
+
+    function ratioTerimaItemBundling(e) {
+        const index = $(e).attr('data-index');
+        const value = $(e).val();
+
+        let elementQtyKirim = $(`#nquantity${index}`);
+        const qtyKirim = elementQtyKirim.val();
+        
+        let allBundling = $(`*[data-children="bundling_terima${index}"]`);
+
+        allBundling.each(function() {
+
+            let elementQtyBundling = $(this).closest('tr').find('input[data-children="bundling_kirim"]');
+            const qtyBundling = $(elementQtyBundling).val();
+
+            const newValue = calcRatio(qtyBundling, qtyKirim, value);
+            $(this).val(newValue);
+        })
+        
     }
 
 </script>

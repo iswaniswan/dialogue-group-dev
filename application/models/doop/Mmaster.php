@@ -431,10 +431,10 @@ class Mmaster extends CI_Model
                 SELECT id_product, sum(n_quantity_sisa) AS n_quantity_sisa_total FROM tm_spb a, tm_spb_item b WHERE a.id = b.id_document AND a.i_status IN ('6') AND a.id_company = '$this->id_company' AND a.id <> '$id' GROUP BY 1) i ON (i.id_product = cc.id)
             WHERE 
                 COALESCE (b.n_quantity_sisa, 0) > 0
-                AND a.id = '$id'
+                AND a.id = '$id' and cc.f_status = true
             ORDER BY
                 a.i_document,
-                cc.i_product_base ASC
+                cc.i_product_base asc ,e.e_color_name desc
             ", FALSE);
         } else {
             return $this->db->query("SELECT
@@ -497,7 +497,7 @@ class Mmaster extends CI_Model
                     AND a.id = '$id'
                 ORDER BY
                     a.i_document,
-                    c.e_product_basename ASC
+                    c.i_product_base ASC, e.e_color_name desc
             ", FALSE);
         }
     }

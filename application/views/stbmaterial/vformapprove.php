@@ -36,7 +36,7 @@
                                 <input type="text" name="d_document" required="" id="d_document" class="form-control input-sm date" value="<?= $data->date_document; ?>" readonly>
                             </div>
                             <div class="col-sm-3">
-                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?>">
+                            <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?> - <?= $data->company_receive_name ?>">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -102,7 +102,7 @@
                                     <td><?= $key->i_material; ?></td>
                                     <td><?= $key->e_material_name; ?></td>
                                     <td><?= $key->e_satuan_name; ?></td>
-                                    <td class="text-right"><?= $key->n_quantity; ?></td>
+                                    <td class="text-right"><?= number_format($key->n_quantity, 2, ".", ",") ?></td>
                                     <td><?= $key->e_remark; ?></td>
                                 </tr>
                         <?php }

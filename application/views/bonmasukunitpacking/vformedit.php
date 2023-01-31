@@ -109,20 +109,54 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($datadetail as $key) {
+                    <?php foreach ($datadetail as $result) {
+                        $product = $result['product'];
                         ?>
+
+                        <?php if ($i >= 1) { ?>
+                            <tr class="table-info">
+                                <td colspan="8">
+                                    <hr class="mb-0 mt-0">
+                                </td>
+                            </tr>
+                        <?php } ?>
+
                         <tr>
                             <td class="text-center"><?=$i+1;?></td>
                             <td>
-                                <input class="form-control input-sm" readonly type="text" id="iproduct<?=$i;?>" name="iproduct<?=$i;?>" value="<?= $key->i_product;?>">
-                                <input type="hidden" id="idproduct<?=$i;?>" name="idproduct<?=$i;?>" value="<?= $key->id_product;?>">
+                                <input class="form-control input-sm" readonly type="text" id="iproduct<?=$i;?>" name="iproduct<?=$i;?>" value="<?= $product->i_product;?>">
+                                <input type="hidden" id="idproduct<?=$i;?>" name="idproduct<?=$i;?>" value="<?= $product->id_product;?>">
                             </td>
-                            <td><input class="form-control input-sm" readonly type="text" id="eproduct<?=$i;?>" name="eproduct<?=$i;?>" value="<?= $key->e_product;?>"></td>
-                            <td><input readonly class="form-control input-sm" type="text" id="ecolor<?=$i;?>" name="ecolor<?=$i;?>" value="<?= $key->e_color_name;?>"></td>
-                            <td><input readonly class="form-control input-sm text-right" type="text" id="nquantity<?=$i;?>" name="nquantity<?=$i;?>" value="<?= $key->n_quantity_reff;?>"><input type="hidden" name="nquantitysisa<?=$i;?>" id="nquantitysisa<?=$i;?>" value="<?= $key->n_quantity_sisa;?>"></td>
-                            <td><input class="form-control input-sm text-right" type="text" id="npemenuhan<?=$i;?>" name="npemenuhan<?=$i;?>" value="<?= $key->n_quantity;?>" placeholder="0" onkeyup="angkahungkul(this); cekqty(<?=$i;?>);"></td>
-                            <td><input class="form-control input-sm" placeholder="Isi keterangan jika ada!" type="text" id="eremark<?=$i;?>" name="eremark<?=$i;?>" value="<?= $key->e_remark;?>"></td>
+                            <td><input class="form-control input-sm" readonly type="text" id="eproduct<?=$i;?>" name="eproduct<?=$i;?>" value="<?= $product->e_product;?>"></td>
+                            <td><input readonly class="form-control input-sm" type="text" id="ecolor<?=$i;?>" name="ecolor<?=$i;?>" value="<?= $product->e_color_name;?>"></td>
+                            <td><input readonly class="form-control input-sm text-right" type="text" id="nquantity<?=$i;?>" name="nquantity<?=$i;?>" value="<?= $product->n_quantity_reff;?>"><input type="hidden" name="nquantitysisa<?=$i;?>" id="nquantitysisa<?=$i;?>" value="<?= $product->n_quantity_sisa;?>"></td>
+                            <td><input class="form-control input-sm text-right" type="text" id="npemenuhan<?=$i;?>" name="npemenuhan<?=$i;?>" value="<?= $product->n_quantity;?>" placeholder="0" onkeyup="angkahungkul(this); cekqty(<?=$i;?>);"></td>
+                            <td><input class="form-control input-sm" placeholder="Isi keterangan jika ada!" type="text" id="eremark<?=$i;?>" name="eremark<?=$i;?>" value="<?= $product->e_remark;?>"></td>
                         </tr>
+
+                        <?php if (!empty($result['bundling'])) { ?>
+                            <tr class="th<?= $i; ?> bold table-active">
+                                <td class="text-center"><i class="fa fa-hashtag fa-lg"></i></a></td>
+                                <td colspan="7"><b>Bundling Produk</b></td>
+                            </tr>
+
+                            <?php $o = 1; ?>
+                            <?php foreach($result['bundling'] as $bundling) { ?>
+
+                            <tr>
+                                <td class="text-center"><spanx id="snum<?= $i; ?>"><?= $o; ?></spanx></td>
+                                <td><?= $bundling->i_product_base; ?></td>
+                                <td  class="d-flex justify-content-between"><span><?= $bundling->e_product_basename; ?></span></td>
+                                <td><?= $bundling->e_color_name; ?></td>
+                                <td class="text-right"><?= $bundling->n_quantity_bundling; ?></td>
+                                <td colspan="2"><?= $bundling->e_remark; ?></td>
+                            </tr>
+
+                            <?php $o++; ?>                            
+                            <?php } ?>
+                            
+                        <?php } ?>
+
                     <?php $i++; } ?>
                 </tbody>
             </table>

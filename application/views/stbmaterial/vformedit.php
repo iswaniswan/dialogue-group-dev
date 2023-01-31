@@ -37,7 +37,7 @@
                                 <input type="text" name="d_document" required="" id="d_document" class="form-control input-sm date" value="<?= $data->date_document; ?>" readonly>
                             </div>
                             <div class="col-sm-3">
-                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?>">
+                                <input type="text" readonly="" autocomplete="off" class="form-control input-sm" value="<?= $data->e_bagian_receive_name; ?> - <?= $data->company_receive_name ?>">
                             </div>
                         </div>
                         <div class="form-group row">
@@ -127,7 +127,7 @@
                                         <?= $key->e_satuan_name; ?>
                                     </td>
                                     <td class="text-right">
-                                        <?= $key->n_stock; ?>
+                                        <?= number_format($key->n_stock, 2, ".", ",") ?>
                                     </td>
                                     <td>
                                         <input value="<?= $key->n_quantity; ?>" type="number" id="n_quantity<?= $i; ?>" class="form-control text-right input-sm inputqty" autocomplete="off" name="n_quantity<?= $i; ?>" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" onkeyup="hetang(<?= $i; ?>);">
