@@ -64,7 +64,7 @@
                         <th>Kode</th>
                         <th>Nama Material</th>
                         <th>Satuan</th>
-                        <th class="text-right">Jml</th>
+                        <th class="text-right">Jml Kirim</th>
                         <th class="text-right">Jml Terima</th>
                         <th>Keterangan</th>
                     </tr>

@@ -118,9 +118,10 @@ class Cform extends CI_Controller {
     public function referensi(){
         $filter = [];
         $q = $this->input->get('q');
-        $iasal = $this->input->get('iasal');
+        $ibagian = $this->input->get('ibagian');
+        $ipengirim = $this->input->get('ipengirim');
 
-        $data   = $this->mmaster->referensi(strtoupper($q), $iasal);
+        $data   = $this->mmaster->referensi(strtoupper($q), $ibagian, $ipengirim);
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id'    => $row->id, 
@@ -133,14 +134,19 @@ class Cform extends CI_Controller {
     public function getdataitem(){
         header("Content-Type: application/json", true);
         $idreff    = $this->input->post('idreff');
-        $ipengirim = $this->input->post('ipengirim');
-        $jml = $this->mmaster->getdataitem($idreff, $ipengirim);
-        $data = array(
-            'datahead'   => $this->mmaster->getdataheader($idreff, $ipengirim)->row(),
-            'jmlitem'    => $jml->num_rows(),
-            'dataitem'   => $this->mmaster->getdataitem($idreff, $ipengirim)->result_array()
-        );
-        echo json_encode($data);
+
+        $data_head = $this->mmaster->get_data_header($idreff)->row();
+        $query_items = $this->mmaster->get_data_item($idreff);
+        $data_items = $query_items->result_array();
+        $total = $query_items->num_rows();
+
+        $result = [
+            'datahead' => $data_head,
+            'dataitem' => $data_items,
+            'jmlitem' => $total,
+        ];
+
+        echo json_encode($result);
     }
 
     public function cekkode(){
@@ -153,10 +159,9 @@ class Cform extends CI_Controller {
     }
 
     public function number(){
-        $number = "";
-        if ($this->input->post('tgl', TRUE) != '') {
-            $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))),date('Y', strtotime($this->input->post('tgl', TRUE))),$this->input->post('ibagian', TRUE));
-        }
+        $ibagian = $this->input->post('ibagian', TRUE);
+        $number = $this->mmaster->generate_nomor_dokumen($ibagian);
+        
         echo json_encode($number);
     }
 
@@ -204,7 +209,7 @@ class Cform extends CI_Controller {
                     $nquantity     = $n_quantity[$no];
                     $edesc         = $e_desc[$no];    
                     
-                    $this->mmaster->insertdetail($id, $imaterial, $nquantity, $edesc, $ireff);
+                    $this->mmaster->insertdetail($id, $imaterial, $nquantity, $edesc);
                     $no++;
                 }
                 if ($this->db->trans_status() === FALSE) {

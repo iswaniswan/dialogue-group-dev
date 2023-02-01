@@ -32,16 +32,16 @@
                         <label class="col-md-4">Tanggal Referensi</label>
                         <div class="col-sm-4">
                             <select name="ipengirim" id="ipengirim" class="form-control select2" disabled>
-                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_name_pengirim; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <select name="ireff" id="ireff" class="form-control select2" onchange="getdataitem(this.value);" disabled> 
-                                <option value="<?= $data->id_reff; ?>"><?= $data->i_reff; ?></option>
+                            <select name="ireff" id="ireff" class="form-control select2" onchange="" disabled> 
+                                <option value="<?= $data->id_referensi; ?>"><?= $data->i_document_referensi; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_reff; ?>" required="" placeholder="<?=date('d-m-Y');?>" readonly>
+                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_referensi; ?>" required="" placeholder="<?=date('d-m-Y');?>" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -74,45 +74,43 @@
                         <th width="5%" class="text-center">No</th>
                         <th width="10%">Kode Barang</th>
                         <th>Nama Barang</th>
-                        <th class="text-right" width="10%">Qty Keluar</th>
-                        <th class="text-right" width="12%">Qty Pemenuhan</th>
+                        <th width="10%">Satuan</th>
+                        <th class="text-right" width="10%">Qty Kirim</th>
+                        <!-- <th class="text-right" width="12%">Qty Pemenuhan</th> -->
                         <th class="text-right" width="10%">Qty Masuk</th>
                         <th>Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php
-                        if($datadetail){
+                <?php if($datadetail){
                         $i = 0;
                         foreach($datadetail as $row){
-                            $i++;                             
-                    ?>
-                    <tr>   
-                        <td style="text-align: center;"><?= $i;?>
-                              <input style="width:10px" type="hidden" class="form-control" readonly id="baris<?= $i;?>" name="baris[]" value="<?= $i;?>">
-                        </td> 
-                        <td>  
-                           <?= $row->i_material; ?>
-                        </td>
-                        <td>
-                           <?= $row->e_material_name; ?>
-                        </td>                            
-                        <td class="text-right">
-                            <?= $row->n_quantity_keluar; ?> 
-                        </td>
-                        <td class="text-right">
-                           <?= $row->n_quantity_sisa; ?>
-                        </td>
-                        <td class="text-right">
-                           <?= $row->n_quantity_masuk; ?>
-                        </td>                 
-                        <td>
-                            <?=$row->e_remark;?>
-                        </td>                                            
-                    </tr>                       
-                    <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                    <?}
-                    }?>       
+                            $i++; ?>
+                            <tr>   
+                                <td style="text-align: center;"><?= $i;?>
+                                    <input style="width:10px" type="hidden" class="form-control" readonly id="baris<?= $i;?>" name="baris[]" value="<?= $i;?>">
+                                </td> 
+                                <td><?= $row->i_material ?></td>
+                                <td><?= $row->e_material_name ?></td>
+                                <td><?= $row->e_satuan_name ?></td>
+                                <td class="text-right">
+                                    <?= number_format($row->n_quantity_reff_sisa, 4, ",", ".") ; ?>
+                                </td>                 
+                                <?php /*
+                                <td class="text-right">
+                                    <?= number_format($row->n_quantity_reff, 4, ",", ".") ; ?>
+                                </td>
+                                */ ?>
+                                <td class="text-right">
+                                    <?= number_format($row->n_quantity, 4, ",", ".") ; ?> 
+                                </td>
+                                <td>
+                                    <?=$row->e_remark;?>
+                                </td>                                            
+                            </tr>                       
+                            <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
+                    <?php }
+                    } ?>       
                 </tbody>
             </table>
         </div>

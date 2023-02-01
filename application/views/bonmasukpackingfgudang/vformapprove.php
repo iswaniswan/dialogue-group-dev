@@ -33,16 +33,16 @@
                         <label class="col-md-4">Tanggal Referensi</label>
                         <div class="col-sm-4">
                             <select name="ipengirim" id="ipengirim" class="form-control select2" disabled>
-                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_name_pengirim; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
                             <select name="ireff" id="ireff" class="form-control select2" onchange="getdataitem(this.value);" disabled> 
-                                <option value="<?= $data->id_reff; ?>"><?= $data->i_reff; ?></option>
+                                <option value="<?= $data->id_referensi; ?>"><?= $data->i_document_referensi; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_reff; ?>" required="" placeholder="<?=date('d-m-Y');?>" readonly>
+                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_referensi; ?>" required="" placeholder="<?=date('d-m-Y');?>" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -77,8 +77,9 @@
                         <th style="text-align:center;">No</th>
                         <th style="text-align:center;">Kode Barang</th>
                         <th style="text-align:center;">Nama Barang</th>
-                        <th style="text-align:center;">Quantity Keluar</th>
-                        <th style="text-align:center;">Quantity Pemenuhan</th>
+                        <th style="text-align:center;">Satuan</th>
+                        <th style="text-align:center;">Quantity Kirim</th>
+                        <!-- <th style="text-align:center;">Quantity Pemenuhan</th> -->
                         <th style="text-align:center;">Quantity Masuk</th>
                         <th style="text-align:center;">Keterangan</th>
                     </tr>
@@ -94,20 +95,17 @@
                         <td style="text-align: center;"><?= $i;?>
                             <input style="width:10px" type="hidden" class="form-control" readonly id="baris<?= $i;?>" name="baris[]" value="<?= $i;?>">
                         </td> 
-                        <td>  
-                           <?= $row->i_material; ?>
-                        </td>
-                        <td>
-                           <?= $row->e_material_name; ?>
-                        </td>                            
+                        <td><?= $row->i_material; ?></td>
+                        <td><?= $row->e_material_name; ?></td>
+                        <td><?= $row->e_satuan_name; ?></td>
                         <td class="text-right">
-                            <?= $row->n_quantity_keluar; ?> 
+                            <?= number_format($row->n_quantity, 4, ",", "."); ?> 
                         </td>
                         <td class="text-right">
-                           <?= $row->n_quantity_sisa; ?>
+                           <?= number_format($row->n_quantity_reff, 4, ",", "."); ?>
                         </td>
                         <td class="text-right">
-                           <?= $row->n_quantity_masuk; ?>
+                           <?= number_format($row->n_quantity_reff_sisa, 4, ",", "."); ?>
                         </td>                 
                         <td>
                             <?=$row->e_remark;?>
@@ -115,12 +113,12 @@
                         <input style="width:120px" type="hidden" class="form-control" id="idmaterial<?=$i;?>" name="idmaterial[]"value="<?= $row->id_material; ?>" readonly>
                         <input style="width:120px" type="hidden" class="form-control" id="imaterial<?=$i;?>" name="imaterial[]"value="<?= $row->i_material; ?>" readonly>
                         <input style="width:400px" type="hidden" class="form-control" id="ematerial<?=$i;?>" name="ematerial[]"value="<?= $row->e_material_name; ?>" readonly>
-                        <input style="width:100px" type="hidden" class="form-control" id="nquantitykeluar<?=$i;?>" name="nquantitykeluar[]" value="<?= $row->n_quantity_keluar; ?>" readonly> 
-                        <input style="width:100px" style="width:5%" type="hidden" class="form-control" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= $row->n_quantity_sisa; ?>" readonly> 
-                        <input style="width:100px" style="width:5%" type="hidden" class="form-control" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= $row->n_quantity_masuk; ?>" readonly>
+                        <input style="width:100px" type="hidden" class="form-control" id="nquantitykeluar<?=$i;?>" name="nquantitykeluar[]" value="<?= $row->n_quantity; ?>" readonly> 
+                        <input style="width:100px" style="width:5%" type="hidden" class="form-control" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= $row->n_quantity_reff; ?>" readonly> 
+                        <input style="width:100px" style="width:5%" type="hidden" class="form-control" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= $row->n_quantity_reff_sisa; ?>" readonly>
                         <input style="width:350px" type="hidden" class="form-control" id="edesc<?=$i;?>" name="edesc[]"value="<?=$row->e_remark;?>" readonly>
                     </tr>                       
-                    <?}
+                    <?php }
                     }?>        
                 </tbody>
             </table>

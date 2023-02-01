@@ -1083,31 +1083,27 @@ class Mmaster extends CI_Model
         $this->db->select("i_tujuan, i_bagian, id, id_company, id_company_tujuan");
         $this->db->where("id", $id);
         
-        $head = $this->db->get("tm_keluar_qc")->row();
+        $query = $this->db->get("tm_keluar_qc")->row();
         
-        $i_bagian = $head->i_bagian;
-        $default_company_tujuan = $head->id_company;
+        $i_bagian = $query->i_bagian;
+        $i_tujuan = $query->i_tujuan;
+        $id_company = $query->id_company;
+        $id_company_tujuan = $query->id_company_tujuan;
 
-        if ($head->id_company != $head->id_company_tujuan) {
-            $i_bagian = $head->i_tujuan;
-            $default_company_tujuan = $head->id_company_tujuan;
-        }
-
-        $bagian = $head->i_bagian;
         $this->db->select('max(id) AS id');
         $this->db->from('tm_memo_permintaan');
         $id = $this->db->get()->row()->id + 1;
-        $i_document = $this->runningnumber_memo($i_bagian, $default_company_tujuan);
+        $i_document = $this->runningnumber_memo($i_bagian, $id_company_tujuan);
 
         // table tr_bagian
         $this->db->select('id')
-            ->where(['i_bagian' => $i_bagian, 'id_company' => $default_company_tujuan]);
+            ->where(['i_bagian' => $i_tujuan, 'id_company' => $id_company_tujuan]);
         $query_bagian = $this->db->get("tr_bagian")->row();        
 
 
         $data_header = array(
             'id' => $id,
-            'id_company' => $default_company_tujuan,
+            'id_company' => $id_company,
             'i_document' => $i_document,
             'd_document' => date('Y-m-d'),
             'd_kirim' => date('Y-m-d'),
@@ -1118,11 +1114,13 @@ class Mmaster extends CI_Model
             'd_approve' => date('Y-m-d'),
             'e_remark' => "Memo Dari STB WIP",
             'i_tujuan' => $query_bagian->id,
+            'id_company_penerima' => $id_company_tujuan
         );
 
         $this->db->insert("tm_memo_permintaan", $data_header);
 
-        $query = $this->get_data_detail($head->id, $bagian);
+        $query = $this->get_data_detail($id, $i_bagian);
+
         if ($query->num_rows() > 0) {
             foreach ($query->result() as $key) {
                 if ($key->n_kebutuhan_material > $key->n_saldo_akhir) {

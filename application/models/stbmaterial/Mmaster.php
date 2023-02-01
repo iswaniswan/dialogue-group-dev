@@ -99,8 +99,8 @@ class Mmaster extends CI_Model
     }
 
     /*----------  BACA BAGIAN PEMBUAT  ----------*/
-
-    public function bagian($i_type = null)
+    /** default i_type adalah 03 */
+    public function bagian($i_type = '03')
     {
         $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement, cc.name
                     FROM tr_bagian a 
@@ -116,6 +116,7 @@ class Mmaster extends CI_Model
                         AND a.id_company = '$this->id_company' 
                         AND c.i_type = '$i_type'
                     ORDER BY 4, 3 ASC NULLS LAST";
+        // var_dump($sql); die();
 
         return $this->db->query($sql, false);
     }
@@ -655,7 +656,7 @@ class Mmaster extends CI_Model
                                                                                 WHERE username = '$this->username' 
                                                                             )                                                             
                                                 ) 
-                                AND (ab.id_company = '$this->id_company' OR ab.id_company_penerima = '$this->id_company')
+                                AND ab.id_company_penerima = '$this->id_company'
                             ORDER BY ab.d_document
                         ) 
                     SELECT no, id, i_bagian, i, i_product_wip, e_product_wipname, e_color_name, i_material,

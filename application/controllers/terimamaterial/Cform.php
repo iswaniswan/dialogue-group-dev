@@ -170,9 +170,16 @@ class Cform extends CI_Controller
 
     public function detail_referensi()
     {
+        $id = $this->input->post('id');
+        $ibagian = $this->input->post('i_bagian');
+
+        if (!$id) {
+            return [];
+        }
+
         header("Content-Type: application/json", true);
         $query  = array(
-            'detail' => $this->mmaster->detail_referensi($this->input->post('id', TRUE), $this->input->post('i_bagian'))->result_array()
+            'detail' => $this->mmaster->detail_referensi($id, $ibagian)->result_array()
         );
         echo json_encode($query);
     }

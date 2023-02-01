@@ -91,7 +91,7 @@
                         <th width="10%">Kode</th>
                         <th width="30%">Nama Material</th>
                         <th width="12%">Satuan</th>
-                        <th class="text-right" width="8%">Jml</th>
+                        <th class="text-right" width="8%">Jml Kirim</th>
                         <th class="text-right" width="10%">Jml Terima</th>
                         <th>Keterangan</th>
                     </tr>
@@ -180,16 +180,21 @@
                 dataType: "json",
                 success: function(data) {
                     if (data['detail'] != null) {
+                        console.log(data);
                         $('#jml').val(data['detail'].length);
                         for (let x = 0; x < data['detail'].length; x++) {
                             var cols = "";
                             var newRow = $("<tr>");
+
+                            var jmlKirim = parseFloat(data['detail'][x]['n_quantity']).toFixed(4);
+                            var jmlTerima = parseFloat(data['detail'][x]['n_quantity_sisa']).toFixed(4);
+
                             cols += '<td class="text-center">' + (x + 1) + '</td>';
                             cols += '<td><input class="form-control input-sm" readonly type="text" id="i_material' + x + '" name="i_material' + x + '" value="' + data['detail'][x]['i_material'] + '"><input type="hidden" id="id_material' + x + '" name="id_material' + x + '" value="' + data['detail'][x]['id_material'] + '"></td>';
                             cols += '<td><input class="form-control input-sm" readonly type="text" id="e_material_name' + x + '" name="e_material_name' + x + '" value="' + data['detail'][x]['e_material_name'] + '"></td>';
                             cols += '<td><input readonly class="form-control input-sm" type="text" id="e_satuan_name' + x + '" name="e_satuan_name' + x + '" value="' + data['detail'][x]['e_satuan_name'] + '"></td>';
-                            cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="n_quantity_referensi' + x + '" name="n_quantity_referensi' + x + '" value="' + data['detail'][x]['n_quantity_sisa'] + '"></td>';
-                            cols += '<td><input class="form-control input-sm text-right" type="number" id="n_quantity' + x + '" name="n_quantity' + x + '" value="' + data['detail'][x]['n_quantity_sisa'] + '" placeholder="0" onkeypress="return hanyaAngka(event);" onkeyup="ngetang(' + x + ');"></td>';
+                            cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="n_quantity_referensi' + x + '" name="n_quantity_referensi' + x + '" value="' + jmlKirim + '"></td>';
+                            cols += '<td><input class="form-control input-sm text-right" type="number" id="n_quantity' + x + '" name="n_quantity' + x + '" value="' + jmlTerima + '" placeholder="0" onkeypress="return hanyaAngka(event);" onkeyup="ngetang(' + x + ');"></td>';
                             cols += '<td><input type="text" class="form-control input-sm" placeholder="Isi keterangan jika ada!" name="e_remark_item' + x + '"></td>';
                             newRow.append(cols);
                             $("#sitabel").append(newRow);

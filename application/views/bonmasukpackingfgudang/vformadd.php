@@ -29,12 +29,12 @@
                         <div class="col-sm-4">
                             <div class="input-group">
                                 <input type="text" name="idocument" id="idocument" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="BBM-2010-000001" maxlength="15" class="form-control input-sm" value="<?= $number;?>" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
+                                <!-- <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
+                                </span> -->
                             </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
-                            <span class="notekode" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            <!-- <span class="notekode">Format : (<?= $number;?>)</span><br>
+                            <span class="notekode" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-4">
                              <input type="text" id= "ddocument" name="ddocument" class="form-control input-sm date" value="<?php echo date("d-m-Y"); ?>" required="" placeholder="<?=date('d-m-Y');?>"readonly>
@@ -88,8 +88,9 @@
                         <th width="5%" class="text-center">No</th>
                         <th width="10%">Kode Barang</th>
                         <th>Nama Barang</th>
-                        <th class="text-right" width="10%">Qty Keluar</th>
-                        <th class="text-right" width="12%">Qty Pemenuhan</th>
+                        <th width="10%">Satuan</th>
+                        <th class="text-right" width="10%">Qty Kirim</th>
+                        <!-- <th class="text-right" width="12%">Qty Pemenuhan</th> -->
                         <th class="text-right" width="10%">Qty Masuk</th>
                         <th>Keterangan</th>
                     </tr>
@@ -160,7 +161,8 @@
                 data: function (params) {
                     var query = {
                         q: params.term,
-                        iasal : $('#ipengirim').val(),
+                        ibagian: $('#ibagian').val(),
+                        ipengirim : $('#ipengirim').val(),
                     }
                     return query;
                 },
@@ -270,16 +272,20 @@
                         var idmaterial        = data['dataitem'][a]['id_material'];
                         var imaterial         = data['dataitem'][a]['i_material'];
                         var ematerial         = data['dataitem'][a]['e_material_name'];
+                        var satuan = data['dataitem'][a]['e_satuan_name'];
                         var nquantity         = data['dataitem'][a]['n_quantity'];
+                        nquantity = parseFloat(nquantity).toFixed(4);
                         var nquantitysisa     = data['dataitem'][a]['n_quantity_sisa'];
+                        nquantitysisa = parseFloat(nquantitysisa).toFixed(4);
 
                         var cols        = "";
                         var newRow = $("<tr>");
                             cols += '<td style="text-align:center;">'+no+'<input class="form-control" readonly type="hidden" id="baris'+a+'" name="baris'+a+'" value="'+no+'"></td>';     
                             cols += '<td><input readonly class="form-control input-sm" type="text" id="imaterial'+a+'" name="imaterial[]" value="'+imaterial+'"><input readonly class="form-control" type="hidden" id="idmaterial'+a+'" name="idmaterial[]" value="'+idmaterial+'"></td>';
                             cols += '<td><input readonly class="form-control input-sm" type="text" id="ematerial'+a+'" name="ematerial'+a+'" value="'+ematerial+'"></td>'; 
+                            cols += '<td><input readonly class="form-control input-sm" type="text" id="satuan'+a+'" name="satuan'+a+'" value="'+satuan+'"></td>'; 
                             cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="nquantity'+a+'" name="nquantity[]" value="'+nquantity+'"></td>';
-                            cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="nquantitysisa'+a+'" name="nquantitysisa[]" value="'+nquantitysisa+'"></td>';
+                            // cols += '<td><input readonly class="form-control input-sm text-right" type="text" id="nquantitysisa'+a+'" name="nquantitysisa[]" value="'+nquantitysisa+'"></td>';
                             cols += '<td><input type="text" id="nquantitymasuk'+a+'" class="form-control input-sm text-right inputitem" autocomplete="off" name="nquantitymasuk[]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\'value="'+nquantitysisa+'" onkeyup="ceksaldo('+a+');"></td>';
                             cols += '<td><input class="form-control input-sm" type="text" id="edesc'+a+'" name="edesc[]" value="" placeholder="Isi keterangan jika ada!"></td>';
 

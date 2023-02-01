@@ -41,16 +41,16 @@
                         <label class="col-md-4">Tanggal Referensi</label>
                         <div class="col-sm-4">
                             <select name="ipengirim" id="ipengirim" class="form-control select2">
-                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_name_pengirim; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <select name="ireff" id="ireff" class="form-control select2" onchange="getdataitem(this.value);"> 
-                                <option value="<?= $data->id_reff; ?>"><?= $data->i_reff; ?></option>
+                            <select name="ireff" id="ireff" class="form-control select2" onchange="" disabled> 
+                                <option value="<?= $data->id_referensi; ?>"><?= $data->i_document_referensi; ?></option>
                             </select>
                         </div>
                         <div class="col-sm-4">
-                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_reff; ?>" required="" readonly>
+                            <input type="text" id= "dreferensi" name="dreferensi" class="form-control input-sm" value="<?= $data->d_referensi; ?>" required="" placeholder="<?=date('d-m-Y');?>" readonly>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -91,8 +91,9 @@
                         <th width="5%" class="text-center">No</th>
                         <th width="10%">Kode Barang</th>
                         <th>Nama Barang</th>
-                        <th class="text-right" width="10%">Qty Keluar</th>
-                        <th class="text-right" width="12%">Qty Pemenuhan</th>
+                        <th width="10%">Satuan</th>
+                        <th class="text-right" width="10%">Qty Kirim</th>
+                        <!-- <th class="text-right" width="12%">Qty Pemenuhan</th> -->
                         <th class="text-right" width="10%">Qty Masuk</th>
                         <th>Keterangan</th>
                     </tr>
@@ -114,21 +115,26 @@
                         </td>
                         <td>
                             <input type="text" class="form-control input-sm" id="ematerial<?=$i;?>" name="ematerial[]"value="<?= $row->e_material_name; ?>" readonly>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control input-sm" id="satuan<?=$i;?>" name="satuan[]"value="<?= $row->e_satuan_name; ?>" readonly>
                         </td>                            
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= $row->n_quantity_keluar; ?>" readonly> 
+                            <input type="text" class="form-control input-sm text-right" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= number_format($row->n_quantity, 4, ",", "."); ?>" readonly> 
                         </td>
+                        <?php /*
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= $row->n_quantity_sisa; ?>" readonly> 
+                            <input type="text" class="form-control input-sm text-right" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= number_format($row->n_quantity_reff, 4, ",", "."); ?>" readonly> 
                         </td>
+                        */ ?>
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantitymasuk<?=$i;?>" name="nquantitymasuk[]" value="<?= $row->n_quantity_masuk; ?>" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="validasi(<?=$i;?>);">
+                            <input type="text" class="form-control input-sm text-right" id="nquantitymasuk<?=$i;?>" name="nquantitymasuk[]" value="<?= number_format($row->n_quantity_reff_sisa, 4, ",", "."); ?>" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="validasi(<?=$i;?>);">
                         </td>                 
                         <td>
                             <input type="text" class="form-control input-sm" id="edesc<?=$i;?>" name="edesc[]"value="<?=$row->e_remark;?>">
                         </td>                                            
                     </tr>                       
-                    <?}
+                    <?php }
                     }?>        
                 </tbody>         
             </table>

@@ -72,7 +72,7 @@
                         <th width="10%">Kode</th>
                         <th width="30%">Nama Material</th>
                         <th width="12%">Satuan</th>
-                        <th class="text-right" width="8%">Jml</th>
+                        <th class="text-right" width="8%">Jml Kirim</th>
                         <th class="text-right" width="10%">Jml Terima</th>
                         <th>Keterangan</th>
                     </tr>
