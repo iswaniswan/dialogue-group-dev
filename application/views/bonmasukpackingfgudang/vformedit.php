@@ -120,15 +120,15 @@
                             <input type="text" class="form-control input-sm" id="satuan<?=$i;?>" name="satuan[]"value="<?= $row->e_satuan_name; ?>" readonly>
                         </td>                            
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= number_format($row->n_quantity, 4, ",", "."); ?>" readonly> 
+                            <input type="text" class="form-control input-sm text-right" id="nquantity<?=$i;?>" name="nquantity[]" value="<?= number_format($row->n_quantity_reff, 4, ".", ","); ?>" readonly> 
                         </td>
                         <?php /*
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= number_format($row->n_quantity_reff, 4, ",", "."); ?>" readonly> 
+                            <input type="text" class="form-control input-sm text-right" id="nquantitysisa<?=$i;?>" name="nquantitysisa[]" value="<?= number_format($row->n_quantity_reff, 4, ".", ","); ?>" readonly> 
                         </td>
                         */ ?>
                         <td>
-                            <input type="text" class="form-control input-sm text-right" id="nquantitymasuk<?=$i;?>" name="nquantitymasuk[]" value="<?= number_format($row->n_quantity_reff_sisa, 4, ",", "."); ?>" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="validasi(<?=$i;?>);">
+                            <input type="text" class="form-control input-sm text-right" id="nquantitymasuk<?=$i;?>" name="nquantitymasuk[]" value="<?= number_format($row->n_quantity, 4, ".", ","); ?>" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="validasi(<?=$i;?>);">
                         </td>                 
                         <td>
                             <input type="text" class="form-control input-sm" id="edesc<?=$i;?>" name="edesc[]"value="<?=$row->e_remark;?>">

@@ -97,16 +97,18 @@
                         </td> 
                         <td><?= $row->i_material; ?></td>
                         <td><?= $row->e_material_name; ?></td>
-                        <td><?= $row->e_satuan_name; ?></td>
+                        <td><?= $row->e_satuan_name; ?></td>                        
                         <td class="text-right">
-                            <?= number_format($row->n_quantity, 4, ",", "."); ?> 
+                           <?= number_format($row->n_quantity_reff, 4, ".", ","); ?>
                         </td>
                         <td class="text-right">
-                           <?= number_format($row->n_quantity_reff, 4, ",", "."); ?>
+                            <?= number_format($row->n_quantity, 4, ".", ","); ?> 
                         </td>
+                        <?php /*
                         <td class="text-right">
-                           <?= number_format($row->n_quantity_reff_sisa, 4, ",", "."); ?>
-                        </td>                 
+                           <?= number_format($row->n_quantity_reff_sisa, 4, ".", ","); ?>
+                        </td>   
+                        */ ?>              
                         <td>
                             <?=$row->e_remark;?>
                         </td> 

@@ -172,7 +172,11 @@ class Cform extends CI_Controller {
         }
 
         $ibagian        = $this->input->post('ibagian', TRUE);
-        $idocument      = $this->input->post('idocument', TRUE);
+        
+        // $idocument      = $this->input->post('idocument', TRUE);
+        /** re-generate nomor dokumen */
+        $idocument = $this->mmaster->generate_nomor_dokumen($ibagian);
+
         $ddocument      = $this->input->post('ddocument', TRUE);
         if ($ddocument) {
             $tmp   = explode('-', $ddocument);
