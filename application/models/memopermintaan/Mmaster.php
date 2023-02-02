@@ -55,7 +55,7 @@ class Mmaster extends CI_Model
         $sql = "SELECT DISTINCT 0 AS NO,
                     a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
                     a.i_bagian, a.i_status,
-                    e.e_bagian_name,
+                    concat(e.e_bagian_name, ' - ', h.name) AS e_bagian_name,
                     concat(d.e_type_name, ' - ', h2.name),
                     a.e_remark,
                     g.i_bagian as i_tujuan,
@@ -74,10 +74,10 @@ class Mmaster extends CI_Model
                 LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
                 LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
                 LEFT JOIN tr_bagian g ON (g.id = a.i_tujuan)
-                LEFT join public.company h ON (h.id = g.id_company)
+                LEFT join public.company h ON (h.id = a.id_company)
                 LEFT join public.company h2 ON (h2.id = a.id_company_penerima)
                 WHERE a.i_status <> '5'
-                    AND a.id_company = '$this->id_company' $and $bagian
+                    AND a.id_company_penerima = '$this->id_company' $and $bagian
                 ORDER BY d_document DESC, a.i_document DESC";
                 
         // var_dump($sql); die();

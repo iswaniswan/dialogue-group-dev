@@ -727,43 +727,53 @@ class Mmaster extends CI_Model
             $and   = "";
         }
 
-        return $this->db->query("WITH CTE AS (
-            SELECT DISTINCT 0 as no, a.id, ab.i_bagian, a.id_product, c.i_product_wip, c.e_product_wipname, d.e_color_name, 
-                e.i_material, e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, 
-                ab.d_document, g.e_bagian_name, ROW_NUMBER() OVER (ORDER BY a.id) AS i, h.i_type, ab.i_tujuan, ab.d_kirim, i.e_bagian_name as tujuan_name, j.name as company_name
-            FROM tm_memo_permintaan_item a
-            INNER JOIN tm_memo_permintaan ab ON (ab.id = a.id_document)
-            INNER JOIN tr_product_wip c ON (c.id = a.id_product)
-            INNER JOIN tr_color d ON (
-                d.i_color = c.i_color AND c.id_company = d.id_company
-            )
-            INNER JOIN tr_material e ON (e.id = a.id_material)
-            INNER JOIN tr_satuan f ON (
-                f.i_satuan_code = e.i_satuan_code AND e.id_company = f.id_company
-            )
-            INNER JOIN tr_bagian g ON (
-                g.i_bagian = ab.i_bagian AND ab.id_company = g.id_company
-            )
-            INNER JOIN tr_type h ON (
-                h.id = ab.id_type_penerima
-            )
-            LEFT JOIN tr_bagian i ON (
-                i.id = ab.i_tujuan
-            )
-            left join public.company j ON (
-                j.id = i.id_company
-            )
-            WHERE ab.i_status = '6' AND a.n_quantity_sisa > 0
-            $and
-            AND g.i_type IN (
-                SELECT i_type FROM tr_bagian WHERE i_bagian IN (
-                    SELECT i_bagian FROM tr_departement_cover WHERE id_company = '$this->id_company' AND username = '$this->username'
-                ) AND id_company = '$this->id_company'
-            )
-            ORDER BY 
-            -- g.e_bagian_name, c.i_product_wip, d.e_color_name, e.i_material
-            ab.d_document)
-            SELECT DISTINCT i_product_wip, e_product_wipname||' - '||initcap(e_color_name) as e_product_wipname, id_product from CTE");
+        $sql = "WITH CTE AS (
+                            SELECT DISTINCT 0 as no, a.id, ab.i_bagian, a.id_product, c.i_product_wip, c.e_product_wipname, d.e_color_name, 
+                                e.i_material, e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, 
+                                ab.d_document, g.e_bagian_name, ROW_NUMBER() OVER (ORDER BY a.id) AS i, 
+                                h.i_type, ab.i_tujuan, ab.d_kirim, i.e_bagian_name as tujuan_name, j.name as company_name
+                            FROM tm_memo_permintaan_item a
+                            INNER JOIN tm_memo_permintaan ab ON (ab.id = a.id_document)
+                            INNER JOIN tr_product_wip c ON (c.id = a.id_product)
+                            INNER JOIN tr_color d ON (
+                                                        d.i_color = c.i_color AND c.id_company = d.id_company
+                                                    )
+                            INNER JOIN tr_material e ON e.id = a.id_material
+                            INNER JOIN tr_satuan f ON (
+                                                        f.i_satuan_code = e.i_satuan_code AND e.id_company = f.id_company
+                                                    )
+                            INNER JOIN tr_bagian g ON (
+                                                        g.i_bagian = ab.i_bagian AND ab.id_company = g.id_company
+                                                    )
+                            INNER JOIN tr_type h ON (
+                                                        h.id = ab.id_type_penerima
+                                                    )
+                            LEFT JOIN tr_bagian i ON (
+                                                        i.id = ab.i_tujuan
+                                                    )
+                            left join public.company j ON (
+                                                        j.id = i.id_company
+                                                    )
+                            WHERE ab.i_status = '6' AND a.n_quantity_sisa > 0
+                            $and
+                            -- AND g.i_type IN (
+                            --                     SELECT i_type 
+                            --                     FROM tr_bagian 
+                            --                     WHERE i_bagian IN (
+                            --                                         SELECT i_bagian 
+                            --                                         FROM tr_departement_cover 
+                            --                                         WHERE id_company = '$this->id_company' AND username = '$this->username'
+                            --                                     ) 
+                            --                         AND id_company = '$this->id_company'
+                            --                 )
+                            AND ab.id_company_penerima = '$this->id_company'
+                            ORDER BY ab.d_document
+                        )
+                SELECT DISTINCT i_product_wip, e_product_wipname||' - '||initcap(e_color_name) as e_product_wipname, id_product from CTE";
+
+            // var_dump($sql); die();
+
+            return $this->db->query($sql);
     }
 
     public function data_detail($id)

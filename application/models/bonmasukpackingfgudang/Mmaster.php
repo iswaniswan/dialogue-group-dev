@@ -378,7 +378,7 @@ class Mmaster extends CI_Model
                     AND tsm.id NOT IN (
                                         SELECT id_document_referensi
                                         FROM tm_masuk_material
-                                        WHERE i_status NOT IN ('9', '7', '6', '5')
+                                        WHERE i_status NOT IN ('9', '7', '6')
                                         )
                 ORDER BY id desc";
 
@@ -417,7 +417,7 @@ class Mmaster extends CI_Model
     public function cek_kode($kode, $ibagian)
     {
         $this->db->select("i_document");
-        $this->db->from("tm_masuk_material");
+        $this->db->from("tm_masuk_packing_fgudang");
         $this->db->where("i_document", $kode);
         $this->db->where("i_bagian", $ibagian);
         $this->db->where("id_company", $this->session->userdata("id_company"));
@@ -428,7 +428,7 @@ class Mmaster extends CI_Model
     public function cek_kodeedit($kode, $kodeold, $ibagian)
     {
         $this->db->select("i_document");
-        $this->db->from("tm_masuk_material");
+        $this->db->from("tm_masuk_packing_fgudang");
         $this->db->where("i_document", $kode);
         $this->db->where("i_document <>", $kodeold);
         $this->db->where("i_bagian", $ibagian);
@@ -488,7 +488,7 @@ class Mmaster extends CI_Model
     {
         $cek = $this->db->query("SELECT 
                 substring(i_document, 1, 3) AS kode 
-            FROM tm_masuk_material
+            FROM tm_masuk_packing_fgudang
             WHERE i_status <> '5'
             AND i_bagian = '$ibagian'
             AND id_company = '$this->id_company'
@@ -502,7 +502,7 @@ class Mmaster extends CI_Model
         $query = $this->db->query("SELECT
                 max(substring(i_document, 10, 4)) AS max
             FROM
-            tm_masuk_material
+            tm_masuk_packing_fgudang
             WHERE to_char (d_document, 'yyyy') >= '$tahun'
             AND i_status <> '5'
             AND i_bagian = '$ibagian'
@@ -743,12 +743,14 @@ class Mmaster extends CI_Model
         $datedocument,
         $ibagian,
         $ipengirim,
+        $ireff,
         $eremark
     ) {
         $data = [
             "i_document" => $idocument,
             "d_document" => $datedocument,
-            "i_bagian" => $ipengirim,
+            "i_bagian_pengirim" => $ipengirim,
+            "id_reff" => $ireff,
             "e_remark" => $eremark,
             "d_update" => current_datetime(),
         ];
@@ -756,14 +758,15 @@ class Mmaster extends CI_Model
         $this->db->where("id", $id);
         $this->db->where("id_company", $this->idcompany);
         $this->db->where("i_bagian", $ibagian);
-        $this->db->update("tm_masuk_material", $data);
+        $this->db->update("tm_masuk_packing_fgudang", $data);
     }
 
     public function deletedetail($id)
     {
-        // $sql = "DELETE FROM tm_masuk_packing_fgudang_item WHERE id_document='$id'";
-        $sql = "DELETE FROM tm_masuk_material_item WHERE id_document='$id'";
-        $this->db->query($sql);
+        $this->db->query(
+            "DELETE FROM tm_masuk_packing_fgudang_item WHERE id_document='$id'",
+            false
+        );
     }
 
     /*public function updatedetail($id, $imaterial, $nquantity, $edesc, $ireff){

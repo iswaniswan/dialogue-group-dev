@@ -41,8 +41,11 @@
                             <select name="itujuan" id="itujuan" class="form-control select2" disabled="">
                                 <?php if ($tujuan) {
                                     foreach ($tujuan as $row) : ?>
-                                        <option value="<?= $row->i_bagian; ?>" <?php if ($row->i_bagian == $data->i_tujuan) { ?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name; ?>
+                                         <?php $selected = '';  if ($row->i_bagian == $data->i_tujuan && $row->id_company == $data->id_company_tujuan) { 
+                                            $selected = 'selected';
+                                        } ?>
+                                        <option value="<?= $row->i_bagian; ?>" <?= $selected ?>>
+                                            <?= "$row->e_bagian_name - $row->name" ?>
                                         </option>
                                 <?php endforeach;
                                 } ?>

@@ -276,8 +276,9 @@ class Cform extends CI_Controller {
                 $nquantityreff = $this->input->post('nquantity'.$i, TRUE);
                 $nquantity     = $this->input->post('npemenuhan'.$i, TRUE);
                 $eremark       = $this->input->post('eremark'.$i, TRUE);
+                $id_document_reff = $this->input->post('id_document_reff'.$i);
                 if (($idproduct!='' || $idproduct!=null) && $nquantity > 0) {
-                    $this->mmaster->simpandetail($id,$ireff,$idproduct,$nquantity,$nquantityreff,$eremark);
+                    $this->mmaster->simpandetail($id,$id_document_reff,$idproduct,$nquantity,$nquantityreff,$eremark);
                 }
             } 
             

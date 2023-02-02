@@ -960,47 +960,64 @@ class Mmaster extends CI_Model
         $this->db->update('tm_keluar_qc', $data);
     }
 
-    public function runningnumber_memo($ibagian, $id_company=null)
-    {
-        if ($id_company == null) {
-            $id_company = $this->id_company;
-        }
+    // public function runningnumber_memo($ibagian, $id_company=null)
+    // {
+    //     if ($id_company == null) {
+    //         $id_company = $this->id_company;
+    //     }
 
-        $thbl = date('ym');
-        $kode = "MM";
-        $sql = "SELECT
-                    max(substring(i_document, 9, 4)) AS max
-                FROM
-                    tm_memo_permintaan
-                WHERE to_char (d_document, 'yymm') = '$thbl'
-                AND i_status <> '5'
-                AND i_bagian = '$ibagian'
-                AND substring(i_document, 1, 2) = '$kode'
-                AND substring(i_document, 4, 2) = substring('$thbl',1,2)
-                AND id_company = '$id_company'";
+    //     $thbl = date('ym');
+    //     $kode = "MM";
+    //     $sql = "SELECT
+    //                 max(substring(i_document, 9, 4)) AS max
+    //             FROM
+    //                 tm_memo_permintaan
+    //             WHERE to_char (d_document, 'yymm') = '$thbl'
+    //             AND i_status <> '5'
+    //             AND i_bagian = '$ibagian'
+    //             AND substring(i_document, 1, 2) = '$kode'
+    //             AND substring(i_document, 4, 2) = substring('$thbl',1,2)
+    //             AND id_company = '$id_company'";
 
-        // var_dump($sql); die();
+    //     // var_dump($sql); die();
+
+    //     $query = $this->db->query($sql);
+
+    //     if ($query->num_rows() > 0) {
+    //         foreach ($query->result() as $row) {
+    //             $no = $row->max;
+    //         }
+    //         $number = $no + 1;
+    //         settype($number, "string");
+    //         $n = strlen($number);
+    //         while ($n < 4) {
+    //             $number = "0" . $number;
+    //             $n = strlen($number);
+    //         }
+    //         $number = $kode . "-" . $thbl . "-" . $number;
+    //         return $number;
+    //     } else {
+    //         $number = "0001";
+    //         $nomer  = $kode . "-" . $thbl . "-" . $number;
+    //         return $nomer;
+    //     }
+    // }
+
+    public function runningnumber_memo($i_tujuan) 
+    {        
+        $prefix = 'MM';
+
+        $sql = "SELECT count(*) FROM tm_memo_permintaan tmp
+                    WHERE i_tujuan = '$i_tujuan'
+                    AND to_char(d_document, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
 
         $query = $this->db->query($sql);
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $prefix . '-' . date('ym') . '-' . sprintf('%04d', $count);
 
-        if ($query->num_rows() > 0) {
-            foreach ($query->result() as $row) {
-                $no = $row->max;
-            }
-            $number = $no + 1;
-            settype($number, "string");
-            $n = strlen($number);
-            while ($n < 4) {
-                $number = "0" . $number;
-                $n = strlen($number);
-            }
-            $number = $kode . "-" . $thbl . "-" . $number;
-            return $number;
-        } else {
-            $number = "0001";
-            $nomer  = $kode . "-" . $thbl . "-" . $number;
-            return $nomer;
-        }
+        return $generated;
     }
 
     public function get_data_detail($id, $ibagian)
@@ -1009,8 +1026,7 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query(
-            "SELECT
+        $sql = "SELECT
                     a.id_keluar_qc,
                     f.id id_product,
                     b.i_product_base,
@@ -1029,40 +1045,38 @@ class Mmaster extends CI_Model
                     round(1 / v_set * v_gelar,4) AS n_kebutuhan,
                     COALESCE (n_saldo_akhir,0) n_saldo_akhir,
                     n_quantity_product * (1 / v_set * v_gelar) AS n_kebutuhan_material
-                FROM
-                    tm_keluar_qc_item a
+                FROM tm_keluar_qc_item a
                 INNER JOIN tm_keluar_qc d ON (a.id_keluar_qc = d.id)
                 INNER JOIN tr_product_base b ON (
-                    a.id_product = b.id
-                    AND d.id_company = b.id_company
-                )
-                INNER JOIN tr_color c ON (
-                    a.id_color = c.id
-                    AND d.id_company = c.id_company
-                )
+                                                a.id_product = b.id AND d.id_company = b.id_company
+                                            )
+                INNER JOIN tr_color c ON ( 
+                                            a.id_color = c.id AND d.id_company = c.id_company
+                                        )
                 INNER JOIN (
-                    SELECT DISTINCT a.id,
-                        CASE WHEN c.n_saldo_akhir IS NULL THEN 0
-                            WHEN c.n_saldo_akhir < 0 THEN 0
-                            ELSE c.n_saldo_akhir
-                        END AS saldo_akhir,
-                        CASE WHEN c.n_saldo_akhir_repair IS NULL THEN 0
-                            WHEN c.n_saldo_akhir_repair < 0 THEN 0
-                            ELSE c.n_saldo_akhir_repair
-                        END AS saldo_akhir_repair
-                    FROM
-                        tr_product_base a
-                    INNER JOIN tr_color b ON
-                        (a.i_color = b.i_color
-                            AND a.id_company = b.id_company)
-                    LEFT JOIN (SELECT * FROM produksi.f_mutasi_wip($this->id_company,'$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')) c ON (
-                        c.id_product_base = a.id
-                            AND c.id_company = '$this->id_company'
-                    )
-                    WHERE
-                        a.id_company = '$this->id_company'
-                        AND a.f_status = 't'
-                        AND b.f_status = 't') e ON (e.id = a.id_product)
+                            SELECT DISTINCT a.id,
+                                CASE WHEN c.n_saldo_akhir IS NULL THEN 0
+                                    WHEN c.n_saldo_akhir < 0 THEN 0
+                                    ELSE c.n_saldo_akhir
+                                END AS saldo_akhir,
+                                CASE WHEN c.n_saldo_akhir_repair IS NULL THEN 0
+                                    WHEN c.n_saldo_akhir_repair < 0 THEN 0
+                                    ELSE c.n_saldo_akhir_repair
+                                END AS saldo_akhir_repair
+                            FROM tr_product_base a
+                            INNER JOIN tr_color b ON (
+                                                        a.i_color = b.i_color AND a.id_company = b.id_company
+                                                    )
+                            LEFT JOIN (
+                                        SELECT * 
+                                        FROM produksi.f_mutasi_wip($this->id_company,'$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
+                                    ) c ON (
+                                            c.id_product_base = a.id AND c.id_company = '$this->id_company'
+                                        )
+                            WHERE a.id_company = '$this->id_company'
+                                AND a.f_status = 't'
+                                AND b.f_status = 't'
+                        ) e ON (e.id = a.id_product)
                 INNER JOIN tr_product_wip f ON (f.i_product_wip = b.i_product_wip AND b.i_color = f.i_color AND f.id_company = b.id_company)
                 INNER JOIN tr_polacutting_new g ON (g.id_product_wip = f.id and g.id_marker = a.id_marker)
                 INNER JOIN tr_material h ON (h.id = g.id_material)
@@ -1074,8 +1088,11 @@ class Mmaster extends CI_Model
                     a.id_keluar_qc = '$id'
                     AND h.i_kode_group_barang = 'GRB0004'
                     AND d.id_company = '$this->id_company'
-                ORDER BY a.id_product"
-        );
+                ORDER BY a.id_product";
+
+        // die($sql);
+
+        return $this->db->query($sql);
     }
 
     public function generate_memo($id = null)
@@ -1092,14 +1109,14 @@ class Mmaster extends CI_Model
 
         $this->db->select('max(id) AS id');
         $this->db->from('tm_memo_permintaan');
-        $id = $this->db->get()->row()->id + 1;
-        $i_document = $this->runningnumber_memo($i_bagian, $id_company_tujuan);
+        $id = $this->db->get()->row()->id + 1;       
 
         // table tr_bagian
         $this->db->select('id')
             ->where(['i_bagian' => $i_tujuan, 'id_company' => $id_company_tujuan]);
-        $query_bagian = $this->db->get("tr_bagian")->row();        
-
+        $query_bagian = $this->db->get("tr_bagian")->row();       
+        
+        $i_document = $this->runningnumber_memo($query_bagian->id);
 
         $data_header = array(
             'id' => $id,
@@ -1119,7 +1136,7 @@ class Mmaster extends CI_Model
 
         $this->db->insert("tm_memo_permintaan", $data_header);
 
-        $query = $this->get_data_detail($id, $i_bagian);
+        $query = $this->get_data_detail($id, $i_bagian);        
 
         if ($query->num_rows() > 0) {
             foreach ($query->result() as $key) {

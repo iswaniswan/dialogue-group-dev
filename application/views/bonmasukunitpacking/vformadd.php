@@ -182,6 +182,7 @@
                 url: '<?= base_url($folder.'/cform/detailreferensi'); ?>',
                 dataType: "json",
                 success: function (data) {
+                    console.log(data);
                     createDetailBarang(data);
                 },
                 error: function () {
@@ -296,7 +297,7 @@
     });
 
     const createDetailBarang = (data) => {
-        console.log(data);
+        // console.log(data);
         const count = data.length;
         $('#jml').val(count);
 
@@ -308,6 +309,7 @@
             cols += `<td>
                         <input class="form-control input-sm" readonly type="text" id="iproduct${index}" name="iproduct${index}" value="${product?.i_product}">
                         <input type="hidden" id="idproduct${index}" name="idproduct${index}" value="${product?.id_product}">
+                        <input type="hidden" id="id_document_reff${index}" name="id_document_reff${index}" value="${product?.id_item}">
                     </td>`;
             cols += `<td>
                         <input class="form-control input-sm" readonly type="text" id="eproduct${index}" name="eproduct${index}" value="${product?.e_product}">

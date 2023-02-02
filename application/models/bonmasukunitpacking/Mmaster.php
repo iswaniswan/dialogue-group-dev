@@ -59,7 +59,7 @@ class Mmaster extends CI_Model
                     a.id AS id,
                     a.i_document,
                     to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                    d.e_bagian_name,
+                    concat(d.e_bagian_name, ' - ', c2.name) AS e_bagian_name,
                     a.id_document_reff,
                     CASE
                         WHEN f.i_document ISNULL AND e.i_keluar_qc NOTNULL THEN e.i_keluar_qc
@@ -76,32 +76,25 @@ class Mmaster extends CI_Model
                     '$folder' AS folder,
                     '$dfrom' AS dfrom,
                     '$dto' AS dto
-                FROM
-                    tm_masuk_unit_packing a
-                INNER JOIN tr_status_document b ON
-                    (b.i_status = a.i_status)
-                INNER JOIN tm_masuk_unit_packing_item c ON
-                    (c.id_document = a.id)
-                INNER JOIN tr_bagian d ON
-                    (d.id = a.id_bagian_pengirim)
-                LEFT JOIN tm_keluar_qc e ON
-                    (e.id = a.id_document_reff
-                    AND d.i_bagian = e.i_bagian)
-                LEFT JOIN tm_keluar_gudang_jadi f ON
-                    (f.id = a.id_document_reff
-                    AND a.id_bagian_pengirim = f.id_bagian_tujuan)                  
-                LEFT JOIN tr_menu_approve g ON
-                    (a.i_approve_urutan = g.n_urut
-                    AND g.i_menu = '$i_menu')
-                LEFT JOIN public.tr_level l ON
-                    (g.i_level = l.i_level)
-                WHERE
-                    a.i_status <> '5'
+                FROM tm_masuk_unit_packing a
+                INNER JOIN tr_status_document b ON b.i_status = a.i_status
+                INNER JOIN tm_masuk_unit_packing_item c ON c.id_document = a.id
+                INNER JOIN tr_bagian d ON d.id = a.id_bagian_pengirim
+                LEFT JOIN tm_keluar_qc e ON (
+                                                e.id = a.id_document_reff AND d.i_bagian = e.i_bagian
+                                            )
+                LEFT JOIN tm_keluar_gudang_jadi f ON (
+                                                f.id = a.id_document_reff AND a.id_bagian_pengirim = f.id_bagian_tujuan
+                                            )
+                LEFT JOIN tr_menu_approve g ON (
+                                                a.i_approve_urutan = g.n_urut AND g.i_menu = '$i_menu'
+                                            )
+                LEFT JOIN public.tr_level l ON g.i_level = l.i_level
+                LEFT JOIN public.company c2 ON c2.id = e.id_company
+                WHERE a.i_status <> '5'
                     AND a.id_company = '$this->company'
-                    $and
-                    $bagian
-                ORDER BY
-                    a.id
+                    $and $bagian
+                ORDER BY a.id
             ", FALSE
         );
 
@@ -339,7 +332,12 @@ class Mmaster extends CI_Model
                     WHERE tkq.id_company_tujuan = '$idcompany'
                         AND tkq.i_tujuan = '$ibagian'
                         AND i_status = '6'
-                        AND tkqi.n_sisa > 0 
+                        AND tkqi.n_sisa > 0
+                        AND tkq.id NOT IN (
+                                            SELECT id_document_reff
+                                            FROM tm_masuk_unit_packing
+                                            WHERE i_status NOT IN ('9', '7', '6', '5', '4')
+                                        )
                     ) AS x
                 WHERE id_bagian = '$ipengirim'
                 ORDER BY 1";
@@ -359,6 +357,7 @@ class Mmaster extends CI_Model
                 FROM (
                     SELECT
                         a.id,
+                        c.id AS id_item,
                         a.id_bagian_tujuan AS id_bagian,
                         id_product_base AS id_product,
                         i_product_base AS i_product,
@@ -381,6 +380,7 @@ class Mmaster extends CI_Model
 
                     SELECT
                         a.id,
+                        b.id AS id_item,
                         c.id AS id_bagian,
                         id_product,
                         i_product_base AS i_product,
@@ -411,9 +411,10 @@ class Mmaster extends CI_Model
         $query = $this->detailreferensi($id, $ipengirim, $ibagian);
 
         foreach ($query->result_array() as $result) {
-            $product = $result;            
+            $product = $result;  
+            $id_item = $product['id_item'];
             $id_company = $product['id_company'];
-            $bundling = $this->get_data_bundling($id, $id_company)->result_array();
+            $bundling = $this->get_data_bundling($id_item, $id_company)->result_array();
             $products[] = [
                 'product' => $product,
                 'bundling' => $bundling
@@ -488,44 +489,42 @@ class Mmaster extends CI_Model
     
     public function dataedit($id)
     {
-        return $this->db->query("SELECT
-                a.id,
-                a.i_document,
-                a.i_bagian,
-                a.id_bagian_pengirim,
-                to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                id_document_reff,
-                /* CASE
-                    WHEN f.i_document ISNULL THEN e.i_keluar_qc
-                    ELSE f.i_document
-                END AS i_referensi, */
-                CASE
-                    WHEN f.i_document ISNULL AND e.i_keluar_qc NOTNULL THEN e.i_keluar_qc
-                    WHEN f.i_document NOTNULL AND e.i_keluar_qc ISNULL THEN f.i_document
-                    ELSE 'Tanpa Referensi'
-                END AS i_referensi,
-                b.e_bagian_name,
-                d.e_bagian_name AS e_bagian_pengirim,
-                a.e_remark,
-                a.i_status,
-                a.id_jenis_barang_keluar
-            FROM
-                tm_masuk_unit_packing a
-            INNER JOIN tr_bagian b ON
-                (b.i_bagian = a.i_bagian
-                AND a.id_company = b.id_company)
-            INNER JOIN tr_bagian d ON
-                (d.id = a.id_bagian_pengirim)
-            LEFT JOIN tm_keluar_qc e ON
-                (e.id = a.id_document_reff
-                AND d.i_bagian = e.i_bagian)
-            LEFT JOIN tm_keluar_gudang_jadi f ON
-                (f.id = a.id_document_reff
-                AND a.id_bagian_pengirim = f.id_bagian_tujuan)
-            WHERE
-                a.id = '$id'",FALSE
-        );
-        return $this->db->get();
+        $sql = "SELECT
+                    a.id,
+                    a.i_document,
+                    a.i_bagian,
+                    a.id_bagian_pengirim,
+                    to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                    id_document_reff,
+                    /* CASE
+                        WHEN f.i_document ISNULL THEN e.i_keluar_qc
+                        ELSE f.i_document
+                    END AS i_referensi, */
+                    CASE
+                        WHEN f.i_document ISNULL AND e.i_keluar_qc NOTNULL THEN e.i_keluar_qc
+                        WHEN f.i_document NOTNULL AND e.i_keluar_qc ISNULL THEN f.i_document
+                        ELSE 'Tanpa Referensi'
+                    END AS i_referensi,
+                    b.e_bagian_name,
+                    concat(d.e_bagian_name, ' - ', c2.name) AS e_bagian_pengirim,
+                    a.e_remark,
+                    a.i_status,
+                    a.id_jenis_barang_keluar
+                FROM tm_masuk_unit_packing a
+                INNER JOIN tr_bagian b ON (
+                                            b.i_bagian = a.i_bagian AND a.id_company = b.id_company
+                                        )
+                INNER JOIN tr_bagian d ON d.id = a.id_bagian_pengirim
+                LEFT JOIN tm_keluar_qc e ON (
+                                            e.id = a.id_document_reff AND d.i_bagian = e.i_bagian
+                                        )
+                LEFT JOIN tm_keluar_gudang_jadi f ON (
+                                            f.id = a.id_document_reff AND a.id_bagian_pengirim = f.id_bagian_tujuan
+                                        )
+                LEFT JOIN public.company c2 ON c2.id = d.id_company
+                WHERE a.id = '$id'";
+
+        return $this->db->query($sql, FALSE);
     }
 
     /*----------  GET DATA DETAIL EDIT, VIEW DAN APPROVE  ----------*/
@@ -580,9 +579,9 @@ class Mmaster extends CI_Model
 
         foreach ($query->result() as $result) {
             $product = $result;
-            $_id = $result->id_document_reff;
+            $_id_item = $result->id_document_reff;
             $_id_company = $result->id_company;
-            $bundling = $this->get_data_bundling($_id, $_id_company)->result();
+            $bundling = $this->get_data_bundling($_id_item, $_id_company)->result();
 
             $products[] = [
                 'product' => $product,
@@ -713,11 +712,12 @@ class Mmaster extends CI_Model
 
         if ($idreff!=0) {                
                 $query = $this->db->query("SELECT 
-                    id_document_reff,
+                    -- id_document_reff,
+                    tmup.id_document_reff,
                     id_product_base,
                     n_quantity
-                FROM 
-                    tm_masuk_unit_packing_item
+                FROM tm_masuk_unit_packing_item tmupi
+                INNER JOIN tm_masuk_unit_packing tmup ON tmup.id = tmupi.id_document
                 WHERE id_document = $id
             ", FALSE);
             
@@ -811,8 +811,7 @@ class Mmaster extends CI_Model
             $id_company = $this->session->userdata('id_company');
         }
 
-        $sql = "SELECT j.*, 
-                    k.i_product_base, k.e_product_basename, l.e_color_name 
+        $sql = "SELECT j.*, k.i_product_base, k.e_product_basename, l.e_color_name 
                 FROM tm_keluar_qc_bundling j
                 INNER JOIN tm_keluar_qc_item a ON (a.id = j.id_keluar_qc_item)
                 JOIN tr_product_base k ON (
@@ -821,7 +820,7 @@ class Mmaster extends CI_Model
                 JOIN tr_color l ON (
                                     k.i_color = l.i_color AND j.id_company = l.id_company
                                 )
-                WHERE a.id_keluar_qc = '$id' 
+                WHERE j.id_keluar_qc_item = '$id' 
                     AND j.id_company = '$id_company'
                 ORDER BY j.id_product";
 
