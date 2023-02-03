@@ -205,9 +205,21 @@
                                         <td><?= $row->i_material; ?></td>
                                         <td><?= $row->e_material_name; ?></td>
                                         <td><?= $row->e_satuan_name; ?></td>
-                                        <td class="text-right"><span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j; ?>"><?= $row->n_kebutuhan; ?></span></td>
-                                        <td class="text-right"><span id="n_stock_material<?= $counter; ?>_<?= $j; ?>"><?= $row->n_saldo_akhir; ?></span></td>
-                                        <td class="text-right"><span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j; ?>"><?= $row->n_kebutuhan_material; ?></span></td>
+                                        <td class="text-right">
+                                            <span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j; ?>">
+                                                <?= number_format($row->n_kebutuhan, 4, ".", ",") ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-right">
+                                            <span id="n_stock_material<?= $counter; ?>_<?= $j; ?>">
+                                                <?= number_format($row->n_saldo_akhir, 4, ".", ",") ?>
+                                            </span>
+                                        </td>
+                                        <td class="text-right">
+                                            <span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j; ?>">
+                                                <?= number_format($row->n_kebutuhan_material, 4, ".", ",") ?>
+                                            </span>
+                                        </td>
                                     </tr>
                             <?php
                                     $j++;

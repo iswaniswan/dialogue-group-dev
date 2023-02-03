@@ -378,7 +378,7 @@ class Mmaster extends CI_Model
                     AND tsm.id NOT IN (
                                         SELECT id_document_referensi
                                         FROM tm_masuk_material
-                                        WHERE i_status NOT IN ('9', '7', '6')
+                                        WHERE i_status IN ('9', '7', '6')
                                         )
                 ORDER BY id desc";
 
@@ -578,47 +578,51 @@ class Mmaster extends CI_Model
 
     public function changestatus($id, $istatus)
     {
-        if ($istatus == '3' || $istatus == '6') {
-            $awal = $this->db->query("SELECT b.i_menu, 
+        $data = array(
+            'i_status'  => $istatus,
+        );
+        
+        $sql = "SELECT b.i_menu, 
                     a.i_approve_urutan, 
                     coalesce(max(b.n_urut),1) as n_urut 
-				FROM tm_masuk_material a
-				JOIN tr_menu_approve b on (b.i_menu = '$this->i_menu')
-				WHERE a.id = '$id'
-				GROUP BY 1,2", FALSE)->row();
-            if ($istatus == '3') {
-                if ($awal->i_approve_urutan - 1 == 0) {
-                    $data = array(
-                        'i_status'  => $istatus,
-                    );
-                } else {
-                    $data = array(
-                        'i_approve_urutan'  => $awal->i_approve_urutan - 1,
-                    );
-                }
-                $this->db->query("DELETE FROM tm_menu_approve WHERE i_menu = '$this->i_menu' AND i_level = '$this->i_level' AND i_document = '$id' ", FALSE);
-            } else if ($istatus == '6') {
-                if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
-                    $data = array(
-                        'i_status'  => $istatus,
-                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
-                        'e_approve' => $this->username,
-                        'd_approve' => date('Y-m-d'),
-                    );
-                } else {
-                    $data = array(
-                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
-                    );
-                }
-                $now = date('Y-m-d');
-                $this->db->query("INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
-					('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_masuk_material');", FALSE);
+                FROM tm_masuk_material a
+                JOIN tr_menu_approve b on (b.i_menu = '$this->i_menu')
+                WHERE a.id = '$id'
+                GROUP BY 1,2";        
+
+        $awal = $this->db->query($sql, FALSE)->row();
+
+        if ($istatus == '3') {
+            if ($awal->i_approve_urutan - 1 == 0) {
+                $data = array(
+                    'i_status'  => $istatus,
+                );
+            } else {
+                $data = array(
+                    'i_approve_urutan'  => $awal->i_approve_urutan - 1,
+                );
             }
-        } else {
-            $data = array(
-                'i_status'  => $istatus,
-            );
-        }
+            $this->db->query("DELETE FROM tm_menu_approve WHERE i_menu = '$this->i_menu' AND i_level = '$this->i_level' AND i_document = '$id' ", FALSE);
+        } 
+        
+        if ($istatus == '6') {
+            if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
+                $data = array(
+                    'i_status'  => $istatus,
+                    'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                    'e_approve' => $this->username,
+                    'd_approve' => date('Y-m-d'),
+                );
+            } else {
+                $data = array(
+                    'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                );
+            }
+            $now = date('Y-m-d');
+            $this->db->query("INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
+                ('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_masuk_material');", FALSE);
+        }        
+
         $this->db->where('id', $id);
         $this->db->update('tm_masuk_material', $data);
     }

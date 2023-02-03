@@ -264,7 +264,7 @@
         var iproduct = $('#iproduct' + counterx).val();
         count = $('#tabledatax .no').length + 1;
         if ((iproduct == '' || iproduct == null || iproduct === undefined) && (count > 1)) {
-            console.log(iproduct);
+            console.log(iproduct, counter, counterx);
             swal('Isi dulu yang masih kosong!!');
             counter = counter - 1;
             counterx = counterx - 1;
@@ -444,13 +444,17 @@
                             for (let j = 0; j < data['detail'].length; j++) {
                                 var newRow = $(`<tr class="td${id}">`);
                                 var cols = "";
+
+                                var nStokMaterial = parseFloat(data['detail'][j]['n_stock']).toFixed(4);
+                                <?php /** kebutuhan material di fungsi berhitung */ ?>
+
                                 cols += `
                                     <td class="text-center"><i class="fa fa-check-circle-o fa-lg text-info" aria-hidden="true"></i></td>
                                     <td>${data['detail'][j]['i_material']}</td>
                                     <td>${data['detail'][j]['e_material_name']}</td>
                                     <td>${data['detail'][j]['e_satuan_name']}</td>
                                     <td class="text-right"><span id="n_kebutuhan_perpcs${id}_${j}">${data['detail'][j]['n_kebutuhan']}</span></td>
-                                    <td class="text-right"><span id="n_stock_material${id}_${j}">${data['detail'][j]['n_stock']}</span></td>
+                                    <td class="text-right"><span id="n_stock_material${id}_${j}">${nStokMaterial}</span></td>
                                     <td class="text-right"><span class="reset_${id}" id="n_kebutuhan_material${id}_${j}">0</span></td>
                                     <td class="text-center"><i class="fa ${(data['detail'][j]['n_stock']) > 0 ? 'fa-thumbs-o-up fa-lg text-success' : 'fa-thumbs-o-down fa-lg text-danger'}" aria-hidden="true"></i></td>
                                 `;
@@ -510,6 +514,8 @@
     }
 
     $("#tabledatax").on("click", ".ibtnDel", function(event) {
+        counter--;
+        counterx--;
         $(this).closest("tr").remove();
         $('#jml').val(counter);
         del();
@@ -546,7 +552,12 @@
         for (let j = 0; j < $(`#tabledatax .td${i}`).length; j++) {
             var n_kebutuhan_perpcs = parseFloat($('#n_kebutuhan_perpcs' + i + '_' + j).text());
             var n_stock_material = parseFloat($('#n_stock_material' + i + '_' + j).text());
-            $('#n_kebutuhan_material' + i + '_' + j).text(n_quantity_product * n_kebutuhan_perpcs);
+
+            let nilaiMaterial = n_quantity_product * n_kebutuhan_perpcs;
+            nilaiMaterial = parseFloat(nilaiMaterial).toFixed(4);
+
+            $('#n_kebutuhan_material' + i + '_' + j).text(nilaiMaterial);
+
             var n_kebutuhan_material = parseFloat($('#n_kebutuhan_material' + i + '_' + j).text());
             if (n_kebutuhan_material > n_stock_material) {
                 ada = 1;

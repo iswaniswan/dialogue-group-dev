@@ -263,9 +263,21 @@
                                         <td><?= $row->i_material;?></td>
                                         <td><?= $row->e_material_name;?></td>
                                         <td><?= $row->e_satuan_name;?></td>
-                                        <td class="text-right"><span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j;?>"><?= $row->n_kebutuhan;?></span></td>
-                                        <td class="text-right"><span id="n_stock_material<?= $counter; ?>_<?= $j;?>"><?= $row->n_saldo_akhir;?></span></td>
-                                        <td class="text-right"><span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j;?>"><?= $row->n_kebutuhan_material;?></span></td>
+                                        <td class="text-right">
+                                            <span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j;?>">
+                                            <?= number_format($row->n_kebutuhan, 4, ".", ",")?>
+                                        </span>
+                                        </td>
+                                        <td class="text-right">
+                                            <span id="n_stock_material<?= $counter; ?>_<?= $j;?>">
+                                            <?= number_format($row->n_saldo_akhir, 4, ".", ",")?>
+                                        </span>
+                                        </td>
+                                        <td class="text-right">
+                                            <span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j;?>">
+                                            <?= number_format($row->n_kebutuhan_material, 4, ".", ",")?>
+                                        </span>
+                                        </td>
                                         <td class="text-center"><i class="fa <?= ($row->n_saldo_akhir > 0) ? 'fa-thumbs-o-up fa-lg text-success' : 'fa-thumbs-o-down fa-lg text-danger' ;?>" aria-hidden="true"></i></td>
                                     </tr>
 
@@ -755,9 +767,14 @@
         for (let j = 0; j < $(`#tabledatax .td${i}`).length; j++) {
             var n_kebutuhan_perpcs = parseFloat($('#n_kebutuhan_perpcs' + i + '_' + j).text());
             var n_stock_material = parseFloat($('#n_stock_material' + i + '_' + j).text());
-            $('#n_kebutuhan_material' + i + '_' + j).text(n_quantity_product * n_kebutuhan_perpcs);
+
+            let nilaiMaterial = n_quantity_product * n_kebutuhan_perpcs;
+            nilaiMaterial = parseFloat(nilaiMaterial).toFixed(4);
+
+            $('#n_kebutuhan_material' + i + '_' + j).text(nilaiMaterial);
             var n_kebutuhan_material = parseFloat($('#n_kebutuhan_material' + i + '_' + j).text());
             if (n_kebutuhan_material > n_stock_material) {
+                console.log(n_kebutuhan_material, n_stock_material)
                 ada = 1;
                 break;
             }
