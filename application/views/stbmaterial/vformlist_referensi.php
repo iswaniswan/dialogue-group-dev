@@ -23,7 +23,7 @@
                             <select class="form-control select2" name="i_product_wip[]" multiple data-placeholder="Semua">
                                 <option value=""></option>
                                 <?php
-                                    if ($wip->num_rows()>0) {
+                                    if ($wip->num_rows()>0) {                                        
                                     foreach ($wip->result() as $key) {
                                         $select = "";
                                         if ($i_product_wip) {

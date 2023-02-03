@@ -41,7 +41,7 @@
                             <label for="dkirim" class="col-md-3">Tanggal Kirim</label>
                             <label class="col-md-6">Keterangan</label>
                             <div class="col-sm-3">
-                                <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= $data->e_tujuan_name ?> - <?= $data->company_tujuan ?>" readonly>
+                                <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= $data->e_tujuan_name ?> - <?= $data->company ?>" readonly>
                             </div>
                             <div class="col-sm-3">
                                 <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= formatdmY($data->d_kirim) ?>" readonly>

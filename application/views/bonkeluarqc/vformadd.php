@@ -263,7 +263,8 @@
         $("#tabledatax").attr("hidden", false);
         var iproduct = $('#iproduct' + counterx).val();
         count = $('#tabledatax .no').length + 1;
-        if ((iproduct == '' || iproduct == null) && (count > 1)) {
+        if ((iproduct == '' || iproduct == null || iproduct === undefined) && (count > 1)) {
+            console.log(iproduct);
             swal('Isi dulu yang masih kosong!!');
             counter = counter - 1;
             counterx = counterx - 1;

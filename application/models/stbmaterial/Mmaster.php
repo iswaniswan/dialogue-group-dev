@@ -32,8 +32,17 @@ class Mmaster extends CI_Model
         }
         $datatables = new Datatables(new CodeigniterAdapter);
 
-        $sql = "SELECT DISTINCT 0 AS NO, a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                        g.e_bagian_name, a.i_bagian, e.e_bagian_name e_bagian_name_receive, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
+        $sql = "SELECT DISTINCT 0 AS NO, a.id AS id, 
+                        a.i_document, 
+                        to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                        g.e_bagian_name, 
+                        a.i_bagian, 
+                        concat(e.e_bagian_name, ' - ', c.name) e_bagian_name_receive, 
+                        e_status_name, 
+                        label_color, 
+                        a.i_status, 
+                        l.i_level, 
+                        l.e_level_name,
                         '$i_menu' AS i_menu, '$folder' AS folder, '$dfrom' AS dfrom,'$dto' AS dto
                     FROM
                         tm_stb_material a
@@ -42,6 +51,7 @@ class Mmaster extends CI_Model
                     INNER JOIN tr_bagian e ON (e.i_bagian = a.i_bagian_receive AND a.id_company_receive = e.id_company)
                     LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
                     LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
+                    LEFT JOIN public.company c ON c.id = a.id_company_receive
                     WHERE a.i_status <> '5' AND (a.id_company = '$this->id_company' OR a.id_company_receive = '$this->id_company') $and $bagian
                     ORDER BY a.id DESC";
         
@@ -438,6 +448,74 @@ class Mmaster extends CI_Model
         $this->db->update('tm_stb_material', $data);
     }
 
+    public function change_status_cek($id, $istatus)
+    {
+        $data = [
+            'i_status'  => $istatus
+        ];
+
+        $query = $this->db->query("SELECT b.i_menu, a.i_approve_urutan, a.i_bagian, coalesce(max(b.n_urut),1) as n_urut 
+                from tm_stb_material a
+                inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
+                where a.id = '$id'
+                group by 1,2,3", FALSE)->row();
+
+        if ($istatus == '3') {
+            $data = [
+                'i_approve_urutan'  => $query->i_approve_urutan - 1
+            ];
+            if ($query->i_approve_urutan - 1 == 0) {
+                $data = [
+                    'i_status'  => $istatus
+                ];
+            } 
+
+            $this->delete_approve($id);
+        } 
+        
+        if ($istatus == '6') {
+            $data = [
+                'i_approve_urutan'  => $query->i_approve_urutan + 1
+            ];
+
+            if ($query->i_approve_urutan + 1 > $query->n_urut) {
+                $data = [
+                    'i_status'  => $istatus,
+                    'i_approve_urutan'  => $query->i_approve_urutan + 1,
+                    'e_approve' => $this->session->userdata('username'),
+                    'd_approve' => date('Y-m-d'),
+                ];
+            } 
+
+            $now = date('Y-m-d');
+            $this->insert_approve($id, $now, $query->i_bagian);
+        }
+
+        $this->db->where('id', $id);
+        $this->db->update('tm_stb_material', $data);
+    }
+
+    public function delete_approve($i_document)
+    {
+        $sql = "DELETE 
+                FROM tm_menu_approve 
+                WHERE i_menu = '$this->i_menu' 
+                AND i_level = '$this->i_level' 
+                AND i_document = '$i_document'";
+
+        $this->db->query($sql);        
+    }
+
+    public function insert_approve($id, $now, $i_bagian)
+    {
+        $sql ="INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) 
+                VALUES ('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_stb_material')";
+
+        $this->db->query($sql, FALSE);
+
+        $this->update_sisa($id, $i_bagian);
+    }
+
     /*----------  UPDATE SISA REFERENSI  ----------*/
 
     public function update_sisa($id, $i_bagian)
@@ -630,8 +708,13 @@ class Mmaster extends CI_Model
                             SELECT DISTINCT 0 as no, 
                                 a.id, ab.i_bagian, c.i_product_wip, c.e_product_wipname, d.e_color_name, e.i_material, 
                                 e.e_material_name, f.e_satuan_name, a.n_quantity_sisa, ab.i_document, ab.d_document, 
-                                g.e_bagian_name, j2.name AS company_pembuat, ROW_NUMBER() OVER (ORDER BY a.id) AS i, 
-                                h.i_type, ab.i_tujuan, ab.d_kirim, i.i_bagian as tujuan_bagian, i.e_bagian_name as tujuan_name, i.id_company AS id_company_tujuan,
+                                g.e_bagian_name, 
+                                j2.name AS company_pembuat, 
+                                ROW_NUMBER() OVER (ORDER BY a.id) AS i, 
+                                h.i_type, ab.i_tujuan, 
+                                ab.d_kirim, i.i_bagian as tujuan_bagian, 
+                                i.e_bagian_name as tujuan_name, 
+                                i.id_company AS id_company_tujuan,
                                 j.name as company_name 
                             FROM tm_memo_permintaan_item a 
                             INNER JOIN tm_memo_permintaan ab ON (ab.id = a.id_document) 

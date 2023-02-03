@@ -1118,9 +1118,19 @@ class Mmaster extends CI_Model
         
         $i_document = $this->runningnumber_memo($query_bagian->id);
 
+        /** set pembuat sebagai memo sebagai PACKING dari sebelumnya WIP 
+         * berdasarakan tujuan  */         
+        $get_bagian_packing = $this->get_bagian_packing($id_company_tujuan);
+        if ($get_bagian_packing != null) {
+            $i_bagian = $get_bagian_packing->i_bagian;
+            $id_company_tujuan = $get_bagian_packing->id_company;
+        }
+
+        $eremark = "Memo dari STB WIP " . $this->get_company($id_company)->name;
+        
         $data_header = array(
             'id' => $id,
-            'id_company' => $id_company,
+            'id_company' => $id_company_tujuan,
             'i_document' => $i_document,
             'd_document' => date('Y-m-d'),
             'd_kirim' => date('Y-m-d'),
@@ -1129,19 +1139,26 @@ class Mmaster extends CI_Model
             'i_status' => 6,
             'e_approve' => "SYSTEM",
             'd_approve' => date('Y-m-d'),
-            'e_remark' => "Memo Dari STB WIP",
+            'e_remark' => $eremark,
             'i_tujuan' => $query_bagian->id,
-            'id_company_penerima' => $id_company_tujuan
+            /** id_company penerima masih sama dengan bagian pembuat */
+            'id_company_penerima' => $this->id_company
         );
 
         $this->db->insert("tm_memo_permintaan", $data_header);
 
-        $query = $this->get_data_detail($id, $i_bagian);        
+        $query = $this->get_data_detail($query->id, $i_bagian);    
+        
+        // var_dump($query->result());die();
 
         if ($query->num_rows() > 0) {
             foreach ($query->result() as $key) {
-                if ($key->n_kebutuhan_material > $key->n_saldo_akhir) {
-                    die;
+                
+                $kebutuhan_material = intval($key->n_kebutuhan_material);
+                $saldo_akhir = intval($key->n_saldo_akhir);
+
+                if ($kebutuhan_material > $saldo_akhir) {
+                    die('Cek kebutuhan material');
                 } else {
                     $data_detail = array(
                         "id_document" => $id,
@@ -1149,13 +1166,43 @@ class Mmaster extends CI_Model
                         "id_material" => $key->id_material,
                         "n_quantity" => $key->n_kebutuhan_material,
                         "n_quantity_sisa" => $key->n_kebutuhan_material,
-                        "e_remark" => "Generate Dari STB WIP",
+                        "e_remark" => "Generate $eremark",
                         "n_quantity_product" => $key->n_quantity_product
                     );
                     $this->db->insert("tm_memo_permintaan_item", $data_detail);
                 }
             }
         }
+    }
+
+    private function get_bagian_packing($id_company_tujuan=null)
+    {
+        if ($id_company_tujuan == null) {
+            $id_company_tujuan = $this->id_company;
+        }
+
+        $TYPE_PACKING = '12';
+
+        $sql = "SELECT * 
+                FROM tr_bagian 
+                WHERE i_type = '$TYPE_PACKING'
+                    AND f_status = 't'
+                    AND id_company = '$id_company_tujuan'";
+
+        $query = $this->db->query($sql);
+
+        return $query->row();
+    }
+
+    private function get_company($id)
+    {
+        $sql = "SELECT * 
+                FROM public.company
+                WHERE id='$id'";
+
+        $query = $this->db->query($sql);
+
+        return $query->row();
     }
 }
 /* End of file Mmaster.php */

@@ -77,7 +77,9 @@ class Mmaster extends CI_Model
                 LEFT join public.company h ON (h.id = a.id_company)
                 LEFT join public.company h2 ON (h2.id = a.id_company_penerima)
                 WHERE a.i_status <> '5'
-                    AND a.id_company_penerima = '$this->id_company' $and $bagian
+                    -- AND a.id_company_penerima = '$this->id_company' 
+                    AND g.id_company = '$this->id_company' 
+                    $and $bagian
                 ORDER BY d_document DESC, a.i_document DESC";
                 
         // var_dump($sql); die();
@@ -490,7 +492,12 @@ class Mmaster extends CI_Model
 
     public function data_header($id)
     {
-        $this->db->select("a.*, b.e_bagian_name, c.e_type_name, d.e_bagian_name as e_tujuan_name, e.name as company_tujuan, e2.name as company_penerima");
+        $this->db->select("a.*, 
+                        b.e_bagian_name, 
+                        c.e_type_name, 
+                        d.e_bagian_name as e_tujuan_name, 
+                        e.name as company, 
+                        e2.name as company_penerima");
         $this->db->from("tm_memo_permintaan a");
         $this->db->join("tr_bagian b", "b.i_bagian = a.i_bagian AND a.id_company = b.id_company");
         $this->db->join("tr_type c", "c.id = a.id_type_penerima");
