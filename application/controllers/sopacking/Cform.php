@@ -572,6 +572,7 @@ class Cform extends CI_Controller {
                     'e_color_name'      => strtoupper($spreadsheet->getActiveSheet()->getCell('E' . $n)->getValue()),
                     'qty'               => $qty,
                     'e_remark'          => $spreadsheet->getActiveSheet()->getCell('G' . $n)->getValue(),
+                    'company'           => $spreadsheet->getActiveSheet()->getCell('H' . $n)->getValue(),
                 );
             }
         }

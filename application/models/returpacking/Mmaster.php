@@ -279,7 +279,7 @@ class Mmaster extends CI_Model {
         $idcompany  = $this->session->userdata('id_company');
 
         if ($itujuan != null) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $idcompany = $query->row()->id_company;
         }
 
@@ -300,12 +300,15 @@ class Mmaster extends CI_Model {
                                         (upper(a.i_product_base) LIKE '%$cari%'
                                         OR upper(a.e_product_basename) LIKE '%$cari%') ", FALSE);
     }
-    public function getproduct($eproduct, $ibagian) {
-        $idcompany = $this->session->userdata('id_company');
+
+    public function getproduct($eproduct, $ibagian, $itujuan=null) {
+        $id_company  = $this->session->userdata('id_company');
+
         $today = date('Y-m-d');
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d',strtotime("-1 days"));
         $periode = date('Ym');
+
         $sql = "SELECT 
                 a.id as id_product, 
                 a.i_product_base,
@@ -320,12 +323,12 @@ class Mmaster extends CI_Model {
                             )
             LEFT JOIN (
                         SELECT * 
-                        FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
-                    ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
-            WHERE a.id_company = '$idcompany'
+                        FROM produksi.f_mutasi_packing($id_company, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
+                    ) c ON (c.id_product_base = a.id AND c.id_company = '$id_company')
+            WHERE a.id_company = '$id_company'
             AND a.id = '$eproduct'";
 
-            // var_dump($sql); die();
+            // var_dump($sql); 
 
         return $this->db->query($sql);
     }
@@ -419,10 +422,10 @@ class Mmaster extends CI_Model {
         $this->db->query("DELETE FROM tm_retur_produksi_gdjd_item WHERE id_document='$id' AND id_company = '$idcompany'");
     }
 
-    public function get_company_by_id_bagian($id_bagian) {
+    public function get_bagian_by_id($id) {
         $this->db->select();
         $this->db->from('tr_bagian');
-        $this->db->where('id', $id_bagian);
+        $this->db->where('id', $id);
         return $this->db->get();
     }
 }

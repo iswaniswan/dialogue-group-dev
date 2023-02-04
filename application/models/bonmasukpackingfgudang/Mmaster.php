@@ -752,25 +752,20 @@ class Mmaster extends CI_Model
     ) {
         $data = [
             "i_document" => $idocument,
-            "d_document" => $datedocument,
-            "i_bagian_pengirim" => $ipengirim,
-            "id_reff" => $ireff,
+            // "d_document" => $datedocument,
             "e_remark" => $eremark,
             "d_update" => current_datetime(),
         ];
 
         $this->db->where("id", $id);
-        $this->db->where("id_company", $this->idcompany);
-        $this->db->where("i_bagian", $ibagian);
-        $this->db->update("tm_masuk_packing_fgudang", $data);
+        $this->db->update("tm_masuk_material", $data);
     }
 
     public function deletedetail($id)
     {
-        $this->db->query(
-            "DELETE FROM tm_masuk_packing_fgudang_item WHERE id_document='$id'",
-            false
-        );
+        $sql = "DELETE FROM tm_masuk_material_item WHERE id_document='$id'";
+
+        $this->db->query($sql);
     }
 
     /*public function updatedetail($id, $imaterial, $nquantity, $edesc, $ireff){

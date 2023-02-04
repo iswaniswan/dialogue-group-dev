@@ -158,7 +158,11 @@ class Cform extends CI_Controller {
 
     public function getproduct(){
         header("Content-Type: application/json", true);
-        $data = $this->mmaster->getproduct($this->input->post('eproduct'),$this->input->post('ibagian'));
+        $eproduct = $this->input->post('eproduct');
+        $ibagian = $this->input->post('ibagian');        
+        $itujuan = $this->input->post('itujuan');
+
+        $data = $this->mmaster->getproduct($eproduct, $ibagian, $itujuan);
 
         echo json_encode($data->result_array());
     }

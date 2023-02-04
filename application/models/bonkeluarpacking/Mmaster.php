@@ -369,7 +369,7 @@ class Mmaster extends CI_Model
         $idcompany  = $this->session->userdata('id_company');
 
         if ($itujuan != null) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $idcompany = $query->row()->id_company;
         }
 
@@ -462,7 +462,7 @@ class Mmaster extends CI_Model
     {
         $idcompany = $this->session->userdata('id_company');
         if ($itujuan != null) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $idcompany = $query->row()->id_company;
             $ibagian = $query->row()->i_bagian;
         }
@@ -504,7 +504,7 @@ class Mmaster extends CI_Model
         $id_company_tujuan = $idcompany;
 
         if (intval($itujuan) >= 1) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $itujuan = $query->row()->i_bagian;
             $id_company_tujuan = $query->row()->id_company;
         }
@@ -643,7 +643,7 @@ class Mmaster extends CI_Model
         $id_company_tujuan = $idcompany;
 
         if (intval($itujuan) >= 1) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $itujuan = $query->row()->i_bagian;
             $id_company_tujuan = $query->row()->id_company;
         }
@@ -685,7 +685,7 @@ class Mmaster extends CI_Model
         return $this->db->get();
     }
 
-    public function get_company_by_id_bagian($id_bagian) {
+    public function get_bagian_by_id($id_bagian) {
         $this->db->select();
         $this->db->from('tr_bagian');
         $this->db->where('id', $id_bagian);
@@ -697,7 +697,7 @@ class Mmaster extends CI_Model
         $id_company_tujuan = $id_company;
 
         if (intval($itujuan) >= 1) {
-            $query = $this->get_company_by_id_bagian($itujuan);
+            $query = $this->get_bagian_by_id($itujuan);
             $itujuan = $query->row()->i_bagian;
             $id_company_tujuan = $query->row()->id_company;
         }    

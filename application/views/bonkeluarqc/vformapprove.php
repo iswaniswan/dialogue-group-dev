@@ -249,11 +249,15 @@
         var ada = 0;
         // console.log($(`#tabledatax .td${i}`).length);
         for (let j = 0; j < $(`#tabledatax .td${i}`).length; j++) {
-            var n_kebutuhan_perpcs = parseFloat($('#n_kebutuhan_perpcs' + i + '_' + j).text());
-            var n_stock_material = parseFloat($('#n_stock_material' + i + '_' + j).text());
+            var elementKebutuhan = $('#n_kebutuhan_perpcs' + i + '_' + j);
+            var n_kebutuhan_perpcs = parseFloat(elementKebutuhan.text());
+
+            var elementStockMaterial = $('#n_stock_material' + i + '_' + j);
+            var n_stock_material = parseFloat(elementStockMaterial.text().replace(/[^\d\.]/g,''));
             $('#n_kebutuhan_material' + i + '_' + j).text(n_quantity_product * n_kebutuhan_perpcs);
             var n_kebutuhan_material = parseFloat($('#n_kebutuhan_material' + i + '_' + j).text());
             if (n_kebutuhan_material > n_stock_material) {
+                console.log(n_kebutuhan_material, n_stock_material);
                 ada = 1;
                 break;
             }

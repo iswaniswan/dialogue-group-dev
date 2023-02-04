@@ -135,8 +135,14 @@
                                         <input value="<?= $key->n_quantity; ?>" type="hidden" id="n_quantity_kebutuhan<?= $i; ?>" class="form-control text-right input-sm" autocomplete="off" name="n_quantity_kebutuhan<?= $i; ?>" readonly>
                                         <input value="<?= $key->n_quantity_sisa; ?>" type="hidden" id="n_quantity_sisa<?= $i; ?>" class="form-control text-right input-sm" autocomplete="off" name="n_quantity_sisa<?= $i; ?>" readonly>
                                     </td>
-                                    <td>
-                                        <input value="<?= $key->n_sisa; ?>" type="number" id="n_quantity<?= $i; ?>" class="form-control text-right input-sm inputqty" autocomplete="off" name="n_quantity<?= $i; ?>" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" onkeyup="hetang(<?= $i; ?>);">
+                                    <td>                                        
+                                        <input value="<?= number_format($key->n_sisa, 4, ".", ",") ?>" type="number" id="n_quantity<?= $i; ?>" 
+                                                class="form-control text-right input-sm inputqty" 
+                                                autocomplete="off" 
+                                                name="n_quantity<?= $i; ?>" 
+                                                onblur="if(this.value==''){this.value='0';}" 
+                                                onfocus="if(this.value=='0'){this.value='';}" 
+                                                onkeyup="hetang(<?= $i; ?>);">
                                         <input value="<?= $key->n_stock; ?>" type="hidden" id="n_stock<?= $i; ?>" name="n_stock<?= $i; ?>">
                                     </td>
                                     <td>

@@ -489,6 +489,7 @@ class Mmaster extends CI_Model
 
             $now = date('Y-m-d');
             $this->insert_approve($id, $now, $query->i_bagian);
+            $this->update_sisa($id, $query->i_bagian);
         }
 
         $this->db->where('id', $id);
@@ -512,8 +513,7 @@ class Mmaster extends CI_Model
                 VALUES ('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_stb_material')";
 
         $this->db->query($sql, FALSE);
-
-        $this->update_sisa($id, $i_bagian);
+        
     }
 
     /*----------  UPDATE SISA REFERENSI  ----------*/
