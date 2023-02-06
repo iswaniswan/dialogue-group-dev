@@ -157,7 +157,7 @@
                                         <input type="text" readonly class="form-control text-right input-sm" id="stok<?=$i;?>" name="stok<?=$i;?>" value="<?= $row->saldo_akhir?>">
                                     </td>
                                     <td>
-                                        <input type="text" value="<?= $row->n_quantity_product;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="angkahungkul(this); validasi();">
+                                        <input type="number" value="<?= $row->n_quantity_product;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onblur='if(this.value==""){this.value="0";}' onfocus='if(this.value=="0"){this.value="";}' onkeyup="angkahungkul(this); validasi();">
                                     </td>
                                     <td>
                                         <input type="text" id="edesc<?=$i;?>" class="form-control input-sm" value="<?= $row->e_remark;?>" name="edesc[]">

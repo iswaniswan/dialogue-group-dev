@@ -18,7 +18,7 @@
                             <select name="ibagian" id="ibagian" class="form-control select2" required="">
                                 <?php if ($bagian) {
                                     foreach ($bagian as $row):?>
-                                <option value="<?= $row->i_bagian;?>">
+                                <option value="<?= $row->id;?>">
                                     <?= $row->e_bagian_name;?>
                                 </option>
                                 <?php endforeach; 
@@ -111,6 +111,7 @@ $(document).ready(function () {
 });
 
 $('#ibagian, #ddocument').change(function (event) {
+    // $('#ipengirim').val(null).trigger('change');
     number();
 });
 
@@ -149,6 +150,7 @@ $(document).ready(function () {
             data: function (params) {
                 var query = {
                     q: params.term,
+                    ibagian: $('#ibagian').val()
                 }
                 return query;
             },

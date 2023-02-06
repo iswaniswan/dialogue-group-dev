@@ -40,8 +40,8 @@
                             <select name="itujuan" id="itujuan" class="form-control input-sm select2" disabled="">
                                 <?php if ($tujuan) {
                                     foreach ($tujuan as $row):?>
-                                        <option value="<?= $row->i_bagian;?>" <?php if ($row->i_bagian==$data->i_tujuan) {?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name;?>
+                                        <option value="<?= $row->id_bagian;?>" <?php if ($row->id_bagian==$data->id_bagian_tujuan) {?> selected <?php } ?>>
+                                            <?= $row->e_bagian_name ?> - <?= $row->name ?>
                                         </option>
                                     <?php endforeach; 
                                 } ?>

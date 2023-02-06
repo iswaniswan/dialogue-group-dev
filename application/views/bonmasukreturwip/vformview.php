@@ -35,7 +35,9 @@
                         <label class="col-md-4">Tanggal Referensi</label>
                         <div class="col-sm-4">
                             <select name="ipengirim" id="ipengirim" class="form-control select2" disabled>
-                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                                <option value="<?= $data->i_bagian_pengirim; ?>">
+                                    <?= $data->e_bagian_pengirim ?> - <?= $data->name ?>
+                                </option>
                             </select>
                         </div>
                         <div class="col-sm-4">
@@ -110,7 +112,7 @@
                         </td>                                                      
                     </tr>                       
                     <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                    <?}
+                    <?php }
                     }else{
                         $i=0;
                         $read = "disabled";

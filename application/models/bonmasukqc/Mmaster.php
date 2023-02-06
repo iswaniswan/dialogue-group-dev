@@ -196,16 +196,22 @@ class Mmaster extends CI_Model
         $this->db->where('a.id_company', $this->session->userdata('id_company'));
         $this->db->order_by('e_bagian_name');
         return $this->db->get(); */
-        return $this->db->query("SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement FROM tr_bagian a 
-			INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
-			LEFT JOIN tr_type c on (a.i_type = c.i_type)
-			LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
-			WHERE a.f_status = 't' AND b.i_departement = '$this->i_departement' AND username = '$this->username' AND a.id_company = '$this->id_company' 
-			ORDER BY 4, 3 ASC NULLS LAST
-        ", false);
+
+        $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement 
+                FROM tr_bagian a 
+                INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
+                LEFT JOIN tr_type c on (a.i_type = c.i_type)
+                LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
+                WHERE a.f_status = 't' 
+                    AND b.i_departement = '$this->i_departement' 
+                    AND username = '$this->username' 
+                    AND a.id_company = '$this->id_company' 
+                ORDER BY 4, 3 ASC NULLS LAST";
+
+        return $this->db->query($sql, false);
     }
 
-    public function bagianpengirim($cari,$ibagian)
+    public function bagianpengirim($cari, $id_bagian)
     {
         $cari = str_replace("'", "", $cari);
         /* return $this->db->query(
@@ -224,21 +230,22 @@ class Mmaster extends CI_Model
                 b.e_bagian_name
         ", FALSE); */
 
-        $sql = "SELECT
-                    DISTINCT b.id, b.i_bagian, b.id_company, b.e_bagian_name, c.name as company_name
-                FROM
-                    tm_keluar_jahit a
-                INNER JOIN tm_keluar_jahit_item ab ON (ab.id_keluar_jahit = a.id)
-                INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
-                INNER JOIN public.company c ON (c.id = b.id_company)
-                WHERE a.id_company_bagian = '$this->idcompany' AND a.i_tujuan = '$ibagian'
-                AND (b.i_bagian ILIKE '%$cari%'
-                    OR b.e_bagian_name ILIKE '%$cari%') AND a.i_status = '6'
-                    AND ab.n_quantity_product <> 0
-                    AND ab.n_sisa <> 0
-                ORDER BY 5, 4";
-
-        // var_dump($sql); die();
+        $sql = "SELECT DISTINCT b.id,
+                        b.i_bagian,
+                        b.id_company,
+                        b.e_bagian_name,
+                        c.name AS company_name
+                    FROM tm_keluar_jahit a
+                    INNER JOIN tm_keluar_jahit_item ab ON	(ab.id_keluar_jahit = a.id)
+                    INNER JOIN tr_bagian b ON	(b.i_bagian = a.i_bagian		AND a.id_company = b.id_company)
+                    INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company_bagian 
+                    INNER JOIN public.company c ON	(c.id = b.id_company)
+                    WHERE b2.id = '$id_bagian'
+                        AND (b.i_bagian ILIKE '%%'
+                            OR b.e_bagian_name ILIKE '%%')
+                        AND a.i_status = '6'
+                        AND ab.n_quantity_product <> 0
+                        AND ab.n_sisa <> 0";           
 
         return $this->db->query($sql);
     }
@@ -249,29 +256,24 @@ class Mmaster extends CI_Model
         $id_company = $split[1];
         $i_bagian = $split[0];
         $cari = str_replace("'", "", $cari);
-        return $this->db->query(
-            "SELECT DISTINCT
-                a.id,
-                a.i_keluar_jahit as i_document,
-                to_char(a.d_keluar_jahit, 'dd-mm-yyyy') AS d_document,
-                c.e_jenis_name
-            FROM
-                tm_keluar_jahit a
-            LEFT JOIN tm_keluar_jahit_item b
-                on (a.id = b.id_keluar_jahit)
-            LEFT JOIN tr_jenis_barang_keluar c
-                on (c.id = a.id_jenis_barang_keluar)
-            WHERE
-                a.i_bagian = '$i_bagian'
-                AND a.i_status = '6'
-                AND a.id_company = '$id_company'
-                AND b.n_quantity_product <> 0
-                AND b.n_sisa <> 0
-                AND a.i_keluar_jahit ILIKE '%$cari%'
-            ORDER BY
-                i_document,
-                d_document
-        ", FALSE);
+
+        $sql = "SELECT DISTINCT
+                    a.id,
+                    a.i_keluar_jahit as i_document,
+                    to_char(a.d_keluar_jahit, 'dd-mm-yyyy') AS d_document,
+                    c.e_jenis_name
+                FROM tm_keluar_jahit a
+                LEFT JOIN tm_keluar_jahit_item b ON (a.id = b.id_keluar_jahit)
+                LEFT JOIN tr_jenis_barang_keluar c ON (c.id = a.id_jenis_barang_keluar)
+                WHERE a.i_bagian = '$i_bagian'
+                    AND a.i_status = '6'
+                    AND a.id_company = '$id_company'
+                    AND b.n_quantity_product <> 0
+                    AND b.n_sisa <> 0
+                    AND a.i_keluar_jahit ILIKE '%$cari%'
+                ORDER BY i_document, d_document";
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_kode($kode,$ibagian)

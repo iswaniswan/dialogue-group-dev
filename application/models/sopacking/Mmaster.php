@@ -536,16 +536,15 @@ class Mmaster extends CI_Model
                 x.i_color, 
                 c.e_color_name,
                 a.id_company,
+                c2.name,
                 a.n_quantity,
                 a.e_remark 
-            FROM 
-                tm_stockopname_unitpacking_item a
-            INNER JOIN 
-                tr_product_base x ON
-                (a.id_product_base = x.id)
-            INNER JOIN 
-                tr_color c ON 
-                (c.id_company = x.id_company AND x.i_color = c.i_color) 
+            FROM tm_stockopname_unitpacking_item a
+            INNER JOIN tr_product_base x ON a.id_product_base = x.id
+            INNER JOIN tr_color c ON (
+                                    c.id_company = x.id_company AND x.i_color = c.i_color
+                                ) 
+            LEFT JOIN public.company c2 ON c2.id = x.id_company
             WHERE a.id_document = '$id' 
             ORDER BY 3 ASC
         ", FALSE);

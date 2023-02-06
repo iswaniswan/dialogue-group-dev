@@ -92,7 +92,7 @@ class Cform extends CI_Controller
     {
         $filter = [];
             $cari = replace_kutip($this->input->get('q'));
-        $ibagian = $this->input->get('ibagian');
+            $ibagian = $this->input->get('ibagian');
             $data = $this->mmaster->bagianpengirim($cari, $ibagian);
             if ($data->num_rows()>0) {
                 $group   = [];

@@ -63,15 +63,16 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="3%;">No</th>
-                        <th>Kode Barang</th>
-                        <th>Nama Barang</th>
-                        <th>Warna</th>
-                        <th class="text-right">Jumlah SO</th>
-                        <th>Keterangan</th>
+                        <th width="20%">Asal</th>
+                        <th width="15%">Kode Barang</th>
+                        <th width="25%">Nama Barang</th>
+                        <th width="5%">Warna</th>
+                        <th class="text-right" width="5%;">Jumlah SO</th>
+                        <th width="auto">Keterangan</th>
                         <!-- <th class="col-1">Action</th> -->
                     </tr>
                     <tr>
-                        <th colspan="4" class="text-center">Total</th>
+                        <th colspan="5" class="text-center">Total</th>
                         <th class="text-right" id="total">
                             <?php $total = 0;
                             foreach ($datadetail as $rowtotal) {
@@ -90,6 +91,7 @@
                             <td class="text-center">
                                 <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
                             </td>
+                            <td><?= $key['name']; ?></td>
                             <td><?= $key['i_product_wip']; ?></td>
                             <td><?= $key['e_product_wipname']; ?></td>
                             <td><?= $key['e_color_name']; ?></td>

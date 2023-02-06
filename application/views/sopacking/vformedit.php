@@ -64,15 +64,16 @@
             <table id="tabledatay" class="table color-table table_fixed success-table table-bordered" cellpadding="8" cellspacing="1" width="100%">
                 <thead>
                     <tr>
-                        <th class="text-center" width="3%;">No</th>
-                        <th width="40%">Nama Barang</th>
-                        <th width="10%">Warna</th>
-                        <th class="text-center" width="5%;">Jumlah SO</th>
-                        <th>Keterangan</th>
+                    <th class="text-center" width="3%;">No</th>
+                        <th width="25%">Asal</th>
+                        <th width="25%">Nama Barang</th>
+                        <th width="5%">Warna</th>
+                        <th class="text-right" width="5%;">Jumlah SO</th>
+                        <th width="auto">Keterangan</th>
                         <th class="text-center" width="3%" ;>Act</th>
                     </tr>
                     <tr>
-                        <th colspan="3" class="text-center">TOTAL</th>
+                        <th colspan="4" class="text-center">TOTAL</th>
                         <th class="text-right" width="3%;" id="total">
                             <?php $total = 0;
                             foreach ($datadetail as $rowtotal) {
@@ -91,11 +92,20 @@
                             <td class="text-center">
                                 <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
                             </td>
+                            <td class="text-center">
+                                <input type="hidden" class="form-control input-sm" id="id_company<?= $i ?>" value="<?= $key['id_company'] ?>" readonly>
+                                <input type="text" class="form-control input-sm" value="<?= $key['name'] ?>" readonly>
+                            </td>
                             <td><select data-nourut="<?= $i; ?>" id="idmaterial<?= $i; ?>" class="form-control input-sm" name="idmaterial<?= $i; ?>">
                                     <option value="<?= $key['id'] . '|' . $key['e_color_name']; ?>" selected><?= $key['i_product_wip'] . ' - ' . $key['e_product_wipname'] . ' (' . $key['e_color_name'] . ')'; ?></option>
                                 </select></td>
                             <td><input type="text" id="e_satuan<?= $i; ?>" class="form-control input-sm" autocomplete="off" name="e_satuan<?= $i; ?>" readonly value="<?= $key['e_color_name']; ?>"></td>
-                            <td class="text-center"><input type="text" data-qty="<?= $i; ?>" id="nquantity<?= $i; ?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity<?= $i; ?>" onblur="if(this.value==''){this.value=0;}" onfocus="if(this.value=='0'){this.value=0;}" value="<?= $key["n_quantity"]; ?>" onkeyup="angkahungkul(this); sumi();"></td>
+                            <td class="text-center">
+                                <input type="number" 
+                                    data-qty="<?= $i; ?>" id="nquantity<?= $i; ?>" class="form-control text-right input-sm inputitem" autocomplete="off" 
+                                    name="nquantity<?= $i; ?>"
+                                    value="<?= $key["n_quantity"]; ?>" onkeyup="sumo();">
+                            </td>
                             <td><input type="text" class="form-control input-sm" name="eremark<?= $i; ?>" id="eremark<?= $i; ?>" placeholder="Isi keterangan jika ada!" value="<?= $key["e_remark"]; ?>" /></td>
                             <td><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
                         </tr>
@@ -128,7 +138,7 @@
         }
 
         $(function() {
-            buildTable($table)
+            // buildTable($table)
         })
         /* $(".table_fixed").freezeTable({
             'columnNum': 3,
@@ -191,6 +201,14 @@
         $("#send").click(function(event) {
             statuschange('<?= $folder; ?>', $('#id').val(), '2', '<?= $dfrom . "','" . $dto; ?>');
         });
+
+        $('#cancel').click(function(event) {
+            statuschange('<?= $folder; ?>', $('#id').val(), '1', '<?= $dfrom . "','" . $dto; ?>');
+        });
+
+        $('#hapus').click(function(event) {
+            statuschange('<?= $folder; ?>', $('#id').val(), '5', '<?= $dfrom . "','" . $dto; ?>');
+        });
     });
 
     $("#submit").click(function(event) {
@@ -236,6 +254,10 @@
         var newRow = $("<tr>");
         var cols = "";
         cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;
+        cols += `<td>
+                    <input type="hidden" id="id_company${i}" class="form-control input-sm" value="">
+                    <input type="text" id="e_company${i}" class="form-control input-sm" value="" readonly>
+                </td>`;
         cols += `<td><select data-nourut="${i}" id="idmaterial${i}" class="form-control input-sm" name="idmaterial${i}" ></select></td>`;
         cols += `<td><input type="text" id="e_satuan${i}" class="form-control input-sm inputitem" autocomplete="off" name="e_satuan${i}" readonly></td>`;
         cols += `<td class="text-center"><input type="text" id="nquantity${i}" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity${i}" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeyup="angkahungkul(this); sumo();"></td>`;
@@ -293,30 +315,34 @@
             } else {
                 $('#nquantity' + z).focus();
             }
+
+            const index = ($(this).attr('data-index'));
+            const id_product =kode[0];
+            applyCompany(index, id_product);
         });
     });
 
 
 
-    function sumo() {
-        // var qty = $("#nquantity"+id).val();
-        var jml = $("#jml").val();
-        var sumqty = 0;
-        var qty = 0;
-        for (n = 1; n <= jml; n++) {
-            // alert($("#nquantity" + n).val());
-            if (typeof $("#nquantity" + n).val() !== "undefined") {
-                if ($("#nquantity" + n).val() !== '') {
-                    qty = parseFloat($("#nquantity" + n).val());
-                } else {
-                    qty = 0;
-                }
-            } else {
-                qty = 0;
+    function sumo(){
+        
+        let total = 0;
+
+        let allQuantity = $('html .inputitem');
+
+        allQuantity.each(function() {
+            let value = $(this).val();
+
+            if (isNaN(value) || value == '' || value === undefined) {
+                value = 0;
             }
-            sumqty += qty
-        }
-        $("#total").html(sumqty);
+
+            total += parseFloat(value);
+        })
+        
+        console.log(total);
+
+        $('#total').text(total);
     }
 
     /**
@@ -333,4 +359,10 @@
         });
         sumo();
     });
+
+    async function applyCompany(index, id_product) {
+        const data = await getCompany(id_product);
+        $(`#e_company${index}`).val(data?.data?.name)
+        $(`#id_company${index}`).val(data?.data?.id_company)
+    }
 </script>

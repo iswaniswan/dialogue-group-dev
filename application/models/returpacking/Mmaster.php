@@ -57,7 +57,7 @@ class Mmaster extends CI_Model {
                         to_char(a.d_document, 'dd-mm-yyyy') as d_document,
                         b.id as id_bagian_tujuan,
                         bc.e_bagian_name pembuat,
-                        b.e_bagian_name,
+                        concat(b.e_bagian_name, ' - ', c2.name) AS e_bagian_name,
                         a.e_remark,
                         a.id_company,
                         a.i_status,
@@ -80,6 +80,7 @@ class Mmaster extends CI_Model {
                                                 a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
                                                 )
                     LEFT JOIN public.tr_level l ON f.i_level = l.i_level
+                    LEFT JOIN public.company c2 ON c2.id = b.id_company
                     WHERE a.id_company = '$idcompany'
                         AND a.i_status <> '5'
                     $where $bagian
@@ -283,22 +284,21 @@ class Mmaster extends CI_Model {
             $idcompany = $query->row()->id_company;
         }
 
-        return $this->db->query("    
-                                    SELECT  
-                                        a.id,
-                                        a.i_product_base,
-                                        a.e_product_basename,
-                                        a.i_color,
-                                        b.e_color_name
-                                    FROM
-                                        tr_product_base a
-                                    INNER JOIN tr_color b ON
-                                        (b.i_color = a.i_color AND a.id_company = b.id_company)
-                                    WHERE
-                                        a.id_company = '$idcompany'
-                                    AND
-                                        (upper(a.i_product_base) LIKE '%$cari%'
-                                        OR upper(a.e_product_basename) LIKE '%$cari%') ", FALSE);
+        $sql = "SELECT  
+                    a.id,
+                    a.i_product_base,
+                    a.e_product_basename,
+                    a.i_color,
+                    b.e_color_name
+                FROM tr_product_base a
+                INNER JOIN tr_color b ON (b.i_color = a.i_color AND a.id_company = b.id_company)
+                WHERE a.id_company = '$idcompany'
+                    AND (
+                        upper(a.i_product_base) LIKE '%$cari%' 
+                        OR upper(a.e_product_basename) LIKE '%$cari%'
+                    )";
+
+        return $this->db->query($sql);
     }
 
     public function getproduct($eproduct, $ibagian, $itujuan=null) {
@@ -325,8 +325,8 @@ class Mmaster extends CI_Model {
                         SELECT * 
                         FROM produksi.f_mutasi_packing($id_company, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
                     ) c ON (c.id_product_base = a.id AND c.id_company = '$id_company')
-            WHERE a.id_company = '$id_company'
-            AND a.id = '$eproduct'";
+            WHERE 
+                /*a.id_company = '$id_company' AND*/ a.id = '$eproduct'";
 
             // var_dump($sql); 
 
@@ -357,6 +357,7 @@ class Mmaster extends CI_Model {
             'id_document' => $id, 'id_product' => $iproduct, 'n_quantity' => $nqtyproduct, 'n_sisa_retur' => $nqtyproduct, 'id_company' => $idcompany, 'e_remark' => $edesc,));
         $this->db->insert('tm_retur_produksi_gdjd_item');
     }
+
     function cek_data($id, $idcompany) {
         $this->db->select(" a.id,
                             a.i_document as i_retur,
@@ -372,42 +373,30 @@ class Mmaster extends CI_Model {
                             ORDER BY d_document asc", false);
         return $this->db->get();
     }
+
     public function dataeditdetail($id,$ibagian) {
         $today = date('Y-m-d');
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d',strtotime("-1 days"));
         $periode = date('Ym');
         $idcompany = $this->session->userdata('id_company');
-        return $this->db->query("SELECT
-                a.id_document as i_retur,
-                a.id_product,
-                b.i_product_base,
-                b.e_product_basename,
-                c.id as id_color,
-                b.i_color,
-                c.e_color_name,
-                a.n_quantity,
-                a.e_remark,
-                coalesce(n_saldo_akhir,0) n_saldo_akhir
-            FROM
-                tm_retur_produksi_gdjd_item a 
-            JOIN
-                tm_retur_produksi_gdjd d 
-                ON a.id_document = d.id 
-            JOIN
-                tr_product_base b 
-                ON a.id_product = b.id 
-                AND d.id_company = b.id_company 
-            JOIN
-                tr_color c 
-                ON b.i_color = c.i_color 
-                AND d.id_company = c.id_company 
-            LEFT JOIN (SELECT * FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')) e ON
-                (e.id_product_base = a.id_product AND e.id_company = a.id_company)
-            WHERE
-                a.id_document = '$id' 
-                AND d.id_company = '$idcompany'
-        ", FALSE);
+        $sql = "SELECT a.id_document as i_retur, a.id_product,
+                    b.i_product_base, b.e_product_basename, c.id as id_color,
+                    b.i_color, c.e_color_name, a.n_quantity,
+                    a.e_remark, coalesce(n_saldo_akhir,0) n_saldo_akhir
+                FROM tm_retur_produksi_gdjd_item a 
+                JOIN tm_retur_produksi_gdjd d ON a.id_document = d.id 
+                JOIN tr_product_base b ON a.id_product = b.id /*AND d.id_company = b.id_company */
+                JOIN tr_color c ON b.i_color = c.i_color AND d.id_company = c.id_company 
+                LEFT JOIN (
+                            SELECT * 
+                            FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
+                        ) e ON (e.id_product_base = a.id_product AND e.id_company = a.id_company)
+                WHERE a.id_document = '$id'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
     function updateheader($id, $iretur, $dateretur, $ibagian, $itujuan, $eremarkh) {
         $idcompany = $this->session->userdata('id_company');

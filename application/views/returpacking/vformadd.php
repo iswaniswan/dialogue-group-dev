@@ -293,7 +293,7 @@
                 type: "post",
                 data: {
                     'eproduct'  : eproduct,
-                    // 'ibagian' : $('#ibagian').val(),
+                    'ibagian' : $('#ibagian').val(),
                     'itujuan': getItujuan()
                 },
                 url: '<?= base_url($folder.'/cform/getproduct'); ?>',

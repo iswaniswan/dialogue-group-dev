@@ -145,7 +145,7 @@
                                     <input type="number" id="nquantity_stok<?=$i;?>" value="<?= $row->n_saldo_akhir;?>" class="form-control input-sm" readonly>                                    
                                 </td>
                                 <td>
-                                <input type="text" value="<?= $row->n_quantity;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);hetang(<?=$i;?>);">
+                                <input type="number" value="<?= $row->n_quantity;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);hetang(<?=$i;?>);">
                                 </td>
                                 <td>
                                     <input type="text" id="edesc<?=$i;?>" class="form-control input-sm" value="<?= $row->e_remark;?>" name="edesc[]">

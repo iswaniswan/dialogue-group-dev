@@ -72,7 +72,10 @@ class Cform extends CI_Controller
     public function bagianpengirim()
     {
         $filter = [];
-        $data   = $this->mmaster->bagianpengirim(strtoupper($this->input->get('q')));
+        $q = strtoupper($this->input->get('q'));
+        $ibagian = $this->input->get('ibagian');
+
+        $data   = $this->mmaster->bagianpengirim($q, $ibagian);
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id' => $row->id,
@@ -161,6 +164,13 @@ class Cform extends CI_Controller
 
         $ibonm        = $this->input->post('idocument', TRUE);
         $ikodemaster  = $this->input->post('ibagian', TRUE);
+
+        /** konversi dari id bagian ke ibagian */
+        if (intval($ikodemaster) >= 0) {
+            $query_bagian = $this->get_bagian_by_id(($ikodemaster));
+            $ikodemaster = $query_bagian->i_bagian;
+        }
+
         $dbonm        = $this->input->post('ddocument', TRUE);
         if ($dbonm) {
             $tmp   = explode('-', $dbonm);
@@ -376,6 +386,13 @@ class Cform extends CI_Controller
         $this->Logger->write('Membuka Menu View ' . $this->global['title']);
 
         $this->load->view($this->global['folder'] . '/vformapprove', $data);
+    }
+
+    public function get_bagian_by_id($id_bagian)
+    {
+        $query = $this->mmaster->get_bagian_by_id($id_bagian);
+
+        return $query->row();
     }
     
 }

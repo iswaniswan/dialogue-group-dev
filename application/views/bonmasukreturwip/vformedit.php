@@ -39,12 +39,14 @@
                   <label class="col-md-4">Nomor Referensi</label>
                   <label class="col-md-4">Tanggal Referensi</label>
                   <div class="col-sm-4">
-                     <select name="ipengirim" id="ipengirim" class="form-control select2" >
-                        <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_pengirim; ?></option>
+                     <select name="ipengirim" id="ipengirim" class="form-control select2">
+                        <option value="<?= $data->id_bagian_pengirim; ?>">
+                            <?= $data->e_bagian_pengirim; ?>
+                        </option>
                      </select>
                   </div>
                   <div class="col-sm-4">
-                     <select name="ireff" id="ireff" class="form-control select2" onchange="getdataitem(this.value);" >
+                     <select name="ireff" id="ireff" class="form-control select2">
                         <option value="<?= $data->id_reff; ?>"><?= $data->i_reff; ?></option>
                      </select>
                   </div>
@@ -61,7 +63,7 @@
                <div class="form-group">
                   <div class="col-sm-12">
                      <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7' || $data->i_status == '6') {?>
-                     <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Update</button>
+                     <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2"><i class="fa fa-save mr-2" ></i>Update</button>
                      <?php } ?>
                      <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
                      <?php if ($data->i_status == '1') {?>
@@ -125,7 +127,7 @@
                   </td>
                </tr>
                <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-               <?}
+               <?php }
                   }?>        
             </tbody>
          </table>
@@ -143,58 +145,68 @@ $(document).ready(function () {
     $('#idocument').mask('SSS-0000-000000S');
     //memanggil function untuk penomoran dokumen
     //number();
+    // $('#ipengirim').select2({
+    //     placeholder: 'Pilih Bagian Pengirim',
+    //     allowClear: false,
+        // ajax: {
+        //     url: '<?= base_url($folder.' / cform / bagianpengirim '); ?>',
+        //     dataType: 'json',
+        //     delay: 250,
+        //     data: function (params) {
+        //         var query = {
+        //             q: params.term,
+        //         }
+        //         return query;
+        //     },
+        //     processResults: function (data) {
+        //         return {
+        //             results: data
+        //         };
+        //     },
+        //     cache: false
+        // }
+    // }).change(function (event) {
+    //     $("#tabledatax tr:gt(0)").remove();
+    //     $("#jml").val(0);
+    //     $("#ireff").val("");
+    //     $("#ireff").html("");
+    // });
+
     $('#ipengirim').select2({
         placeholder: 'Pilih Bagian Pengirim',
-        allowClear: true,
-        ajax: {
-            url: '<?= base_url($folder.' / cform / bagianpengirim '); ?>',
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                var query = {
-                    q: params.term,
-                }
-                return query;
-            },
-            processResults: function (data) {
-                return {
-                    results: data
-                };
-            },
-            cache: false
-        }
-    }).change(function (event) {
-        $("#tabledatax tr:gt(0)").remove();
-        $("#jml").val(0);
-        $("#ireff").val("");
-        $("#ireff").html("");
-    });
+        allowClear: false,
+    })
 
     $('#ireff').select2({
         placeholder: 'Pilih Referensi',
-        allowClear: true,
-        ajax: {
-            url: '<?= base_url($folder.' / cform / referensi '); ?>',
-            dataType: 'json',
-            delay: 250,
-            data: function (params) {
-                var query = {
-                    q: params.term,
-                    iasal: $('#ipengirim').val(),
-                }
-                return query;
-            },
-            processResults: function (data) {
-                return {
-                    results: data
-                };
-            },
-            cache: false
-        }
-    }).change(function (event) {
-        $("#tabledatax tr:gt(0)").remove();
-        $("#jml").val(0);
-    });
+        allowClear: false,
+    })
+
+    // $('#ireff').select2({
+    //     placeholder: 'Pilih Referensi',
+    //     allowClear: false,
+        // ajax: {
+        //     url: '<?= base_url($folder.' / cform / referensi '); ?>',
+        //     dataType: 'json',
+        //     delay: 250,
+        //     data: function (params) {
+        //         var query = {
+        //             q: params.term,
+        //             iasal: $('#ipengirim').val(),
+        //         }
+        //         return query;
+        //     },
+        //     processResults: function (data) {
+        //         return {
+        //             results: data
+        //         };
+        //     },
+        //     cache: false
+        // }
+    // }).change(function (event) {
+    //     $("#tabledatax tr:gt(0)").remove();
+    //     $("#jml").val(0);
+    // });
 });
 
 $("#idocument").keyup(function () {

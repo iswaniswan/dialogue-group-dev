@@ -565,6 +565,9 @@ class Cform extends CI_Controller {
             $id_product = strtoupper($spreadsheet->getActiveSheet()->getCell('B' . $n)->getValue());
             $qty        = (int)$spreadsheet->getActiveSheet()->getCell('F' . $n)->getValue();
             if (($qty > 0) && $id_product != "") {
+
+                $company = $this->mmaster->get_company_by_product($id_product)->row();
+
                 $aray[] = array(
                     'id'                => $id_product,
                     'i_product_wip'     => strtoupper($spreadsheet->getActiveSheet()->getCell('C' . $n)->getValue()),
@@ -573,6 +576,7 @@ class Cform extends CI_Controller {
                     'qty'               => $qty,
                     'e_remark'          => $spreadsheet->getActiveSheet()->getCell('G' . $n)->getValue(),
                     'company'           => $spreadsheet->getActiveSheet()->getCell('H' . $n)->getValue(),
+                    'id_company' => $company->id_company,
                 );
             }
         }

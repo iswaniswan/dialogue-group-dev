@@ -89,6 +89,7 @@
                                 <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
                             </td>
                             <td class="text-center">
+                                <input type="hidden" class="form-control input-sm" id="id_company<?= $i ?>" value="<?= $row['id_company'] ?>" readonly>
                                 <input type="text" class="form-control input-sm" value="<?= $row['company'] ?>" readonly>
                             </td>
                             <td>
@@ -252,12 +253,19 @@
         var cols = "";
         cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;        
         cols += `<td>
-                    <input type="text" id="e_company${i}" class="form-control input-sm inputitem" value="${getCompanyName()}" readonly>
+                    <input type="hidden" id="id_company${i}" class="form-control input-sm" value="">
+                    <input type="text" id="e_company${i}" class="form-control input-sm" value="" readonly>
                 </td>`;
-        cols += `<td><select data-nourut="${i}" id="idmaterial${i}" class="form-control input-sm" name="idmaterial${i}" ></select></td>`;
+        cols += `<td><select data-nourut="${i}" id="idmaterial${i}" class="form-control input-sm" name="idmaterial${i}" data-index="${i}"></select></td>`;
         cols += `<td><input type="text" id="e_color${i}" class="form-control input-sm inputitem" autocomplete="off" name="e_color${i}" readonly></td>`;
-        cols += `<td class="text-center"><input type="text" id="nquantity${i}" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity${i}" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeyup="angkahungkul(this); sumo();"></td>`;
-        cols += `<td><input type="text" class="form-control input-sm" name="eremark${i}" id="eremark${i}" placeholder="Isi keterangan jika ada!"/></td>`;
+        cols += `<td class="text-center">
+                    <input type="number" id="nquantity${i}" 
+                            class="form-control text-right input-sm inputitem" autocomplete="off" 
+                            name="nquantity${i}" value="0" onkeyup="sumo();">
+                </td>`;
+        cols += `<td>
+                    <input type="text" class="form-control input-sm" name="eremark${i}" id="eremark${i}" placeholder="Isi keterangan jika ada!"/>
+                </td>`;
         cols += `<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger text-center"><i class="ti-close"></i></button></td></tr>`;
         newRow.append(cols);
         $("#tabledatay").append(newRow);
@@ -312,9 +320,17 @@
                 $('#nquantity' + z).focus();
             }
 
-            getCompany(kode[0]);
+            const index = ($(this).attr('data-index'));
+            const id_product =kode[0];
+            applyCompany(index, id_product);
         });
     });
+
+    async function applyCompany(index, id_product) {
+        const data = await getCompany(id_product);
+        $(`#e_company${index}`).val(data?.data?.name)
+        $(`#id_company${index}`).val(data?.data?.id_company)
+    }
 
 
 
@@ -375,13 +391,13 @@
         sumo();
     });
 
-    function getCompany(idProduct) {
-        $.ajax({
+    async function getCompany(idProduct) {
+        return $.ajax({
             url: '<?= base_url($folder . '/cform/get_company_by_product?id_product='); ?>' + idProduct,
             type: 'GET',
             dataType: 'json',
             success: function(result) {
-                console.log(result);
+                // console.log(result);
                 return result;
             }
         })

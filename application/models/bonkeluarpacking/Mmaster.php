@@ -56,54 +56,41 @@ class Mmaster extends CI_Model
             }
         }
 
-        $datatables->query("SELECT DISTINCT
-                             0 as no,
-                             a.id,
-                             a.i_keluar_qc,
-                             to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
-                             a.i_tujuan,
-                             ab.e_bagian_name,
-                             b.e_bagian_name e_bagian_tujuan,
-                             cc.e_jenis_name,
-                             a.e_remark,
-                             a.id_company,
-                             a.i_status,
-                             c.e_status_name,
-                             a.i_bagian,
-                             c.label_color,
-                                f.i_level,
-                                l.e_level_name,
-                             '$dfrom' AS dfrom,
-                             '$dto' AS dto,
-                             '$i_menu' as i_menu,
-                             '$folder' AS folder
-                          FROM
-                             tm_keluar_qc a 
-                             JOIN
-                                tr_bagian b 
-                                ON (a.i_tujuan = b.i_bagian AND a.id_company = b.id_company) 
-                             JOIN
-                                tr_bagian ab 
-                                ON (ab.i_bagian = a.i_bagian AND a.id_company = b.id_company AND ab.i_type = '12') 
-                             JOIN
-                                tr_status_document c 
-                                ON (a.i_status = c.i_status)   
-                             JOIN
-                             tr_jenis_barang_keluar cc 
-                                ON (cc.id = a.id_jenis_barang_keluar)                         
-                            LEFT JOIN tr_menu_approve f ON
-                                (a.i_approve_urutan = f.n_urut
-                                AND f.i_menu = '$i_menu')
-                            LEFT JOIN public.tr_level l ON
-                                (f.i_level = l.i_level)
-                             WHERE 
-                                a.id_company = '$idcompany'
-                             AND
-                                a.i_status <> '5'
-                          $where
-                          $bagian
-                          ORDER BY
-                             a.i_keluar_qc asc", false);
+        $sql = "SELECT DISTINCT
+                    0 as no,
+                    a.id,
+                    a.i_keluar_qc,
+                    to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
+                    a.i_tujuan,
+                    ab.e_bagian_name,
+                    concat (b.e_bagian_name, ' - ', c2.name) e_bagian_tujuan,
+                    cc.e_jenis_name,
+                    a.e_remark,
+                    a.id_company,
+                    a.i_status,
+                    c.e_status_name,
+                    a.i_bagian,
+                    c.label_color,
+                    f.i_level,
+                    l.e_level_name,
+                    '$dfrom' AS dfrom,
+                    '$dto' AS dto,
+                    '$i_menu' as i_menu,
+                    '$folder' AS folder
+                FROM tm_keluar_qc a 
+                JOIN tr_bagian b ON (a.i_tujuan = b.i_bagian AND a.id_company = b.id_company) 
+                JOIN tr_bagian ab ON (ab.i_bagian = a.i_bagian AND a.id_company = b.id_company AND ab.i_type = '12') 
+                JOIN tr_status_document c ON (a.i_status = c.i_status)   
+                JOIN tr_jenis_barang_keluar cc ON (cc.id = a.id_jenis_barang_keluar)     
+                LEFT JOIN public.company c2 ON c2.id = a.id_company_tujuan                    
+                LEFT JOIN tr_menu_approve f ON (a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu')
+                LEFT JOIN public.tr_level l ON (f.i_level = l.i_level)
+                    WHERE a.id_company = '$idcompany'
+                        AND a.i_status <> '5'
+                    $where $bagian
+                ORDER BY a.i_keluar_qc asc";
+
+        $datatables->query($sql, false);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -461,11 +448,11 @@ class Mmaster extends CI_Model
     public function getstok($idproduct, $ibagian, $itujuan=null)
     {
         $idcompany = $this->session->userdata('id_company');
-        if ($itujuan != null) {
-            $query = $this->get_bagian_by_id($itujuan);
-            $idcompany = $query->row()->id_company;
-            $ibagian = $query->row()->i_bagian;
-        }
+        // if ($itujuan != null) {
+        //     $query = $this->get_bagian_by_id($itujuan);
+        //     $idcompany = $query->row()->id_company;
+        //     $ibagian = $query->row()->i_bagian;
+        // }
 
         $today = date('Y-m-d');
         $jangkaawal = date('Y-m-01');
@@ -488,7 +475,7 @@ class Mmaster extends CI_Model
                                                         )
                         ) c ON (c.id_product_base = a.id AND c.id_company = '$idcompany')
                 WHERE a.id = '$idproduct'
-                    AND a.id_company = '$idcompany'
+                    -- AND a.id_company = '$idcompany'
                     AND a.f_status = 't'
                     AND b.f_status = 't'
                 ORDER BY a.id ASC";
@@ -555,21 +542,21 @@ class Mmaster extends CI_Model
 
     public function cek_data($id, $idcompany)
     {
-        return $this->db->query(" 
-                                    SELECT
-                                        a.id,
-                                        a.i_keluar_qc,
-                                        to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
-                                        a.i_bagian,
-                                        tb.id AS i_tujuan,
-                                        a.i_status,
-                                        a.e_remark,
-                                        a.id_jenis_barang_keluar
-                                    FROM tm_keluar_qc a
-                                    LEFT JOIN tr_bagian tb ON tb.i_bagian = a.i_tujuan AND tb.id_company = a.id_company_tujuan
-                                    WHERE a.id = '$id'
-                                    AND a.id_company = '$idcompany' 
-                                ", FALSE);
+        $sql = "SELECT
+                    a.id,
+                    a.i_keluar_qc,
+                    to_char(a.d_keluar_qc, 'dd-mm-yyyy') as d_keluar_qc,
+                    a.i_bagian,
+                    tb.id AS i_tujuan,
+                    a.i_status,
+                    a.e_remark,
+                    a.id_jenis_barang_keluar
+                FROM tm_keluar_qc a
+                LEFT JOIN tr_bagian tb ON tb.i_bagian = a.i_tujuan AND tb.id_company = a.id_company_tujuan
+                WHERE a.id = '$id'
+                AND a.id_company = '$idcompany' ";
+        
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_datadetail($id, $idcompany)

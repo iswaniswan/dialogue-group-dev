@@ -65,7 +65,7 @@ class Mmaster extends CI_Model
                 a.i_document,
                 to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
                 a.i_bagian,
-                b.e_bagian_name,
+                concat(b.e_bagian_name, ' - ', c2.name) AS e_bagian_name,
                 c.i_document as i_reff,
                 a.e_remark,
                 a.i_status,
@@ -77,29 +77,18 @@ class Mmaster extends CI_Model
                 '$folder' AS folder,
                 '$dfrom' AS dfrom,
                 '$dto' AS dto
-            FROM
-                tm_masuk_retur_wip a
-            INNER JOIN tr_bagian b
-                ON (a.id_bagian_pengirim = b.id)
-            LEFT JOIN tm_retur_produksi_gdjd c
-                ON (a.id_document_reff = c.id)
-            INNER JOIN tr_status_document d
-                ON (a.i_status = d.i_status)                    
-            LEFT JOIN tr_menu_approve f ON
-                (a.i_approve_urutan = f.n_urut
-                AND f.i_menu = '$i_menu')
-            LEFT JOIN public.tr_level l ON
-                (f.i_level = l.i_level)
-            WHERE
-                a.i_status <> '5'
-            AND 
-                a.id_company = '$idcompany'
-            $where
-            $bagian
-            ORDER BY 
-                a.i_document,
-                a.d_document
-            ";
+            FROM tm_masuk_retur_wip a
+            INNER JOIN tr_bagian b ON (a.id_bagian_pengirim = b.id)
+            LEFT JOIN tm_retur_produksi_gdjd c ON (a.id_document_reff = c.id)
+            INNER JOIN tr_status_document d ON (a.i_status = d.i_status)                    
+            LEFT JOIN tr_menu_approve f ON (a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu')
+            LEFT JOIN public.tr_level l ON (f.i_level = l.i_level)
+            LEFT JOIN public.company c2 ON c2.id = b.id_company
+            WHERE a.i_status <> '5'
+                AND a.id_company = '$idcompany'
+                $where
+                $bagian
+            ORDER BY a.i_document, a.d_document";
 
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query($sql, FALSE
@@ -170,52 +159,65 @@ class Mmaster extends CI_Model
         ", false);
     }
 
-    public function bagianpengirim($cari)
+    public function bagianpengirim($cari, $ibagian)
     {
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("SELECT
-                b.id,
-                a.i_bagian,
-                b.e_bagian_name,
-                c.name
-            FROM tr_tujuan_menu a
-            JOIN tr_bagian b ON (
-                    a.i_bagian = b.i_bagian AND a.id_company = b.id_company
-                    )
-            JOIN public.company c ON c.id = b.id_company                    
-            WHERE a.i_menu = '$this->i_menu'
-                AND a.i_bagian ILIKE '%$cari%'
-                AND b.e_bagian_name ILIKE '%$cari%'
-            ORDER BY b.e_bagian_name
-        ", FALSE);
+
+        // $sql = "SELECT
+        //             b.id,
+        //             a.i_bagian,
+        //             b.e_bagian_name,
+        //             c.name
+        //         FROM tr_tujuan_menu a
+        //         JOIN tr_bagian b ON (
+        //                 a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+        //                 )
+        //         JOIN public.company c ON c.id = b.id_company                    
+        //         WHERE a.i_menu = '$this->i_menu'
+        //             AND a.i_bagian ILIKE '%$cari%'
+        //             AND b.e_bagian_name ILIKE '%$cari%'
+        //         ORDER BY b.e_bagian_name";
+
+        $sql = "SELECT DISTINCT tb.id, trpg.i_bagian, tb.e_bagian_name, c.name 
+                FROM tm_retur_produksi_gdjd trpg  
+                INNER JOIN tr_bagian tb ON tb.i_bagian = trpg.i_bagian  AND tb.id_company = trpg.id_company
+                INNER JOIN public.company c ON c.id = trpg.id_company 
+                WHERE trpg.id_bagian_tujuan = '$ibagian'
+                    AND trpg.i_status = '6'
+                    AND (trpg.d_document >= '2023-02-01' AND  trpg.d_document <= '2023-02-28')
+                    AND trpg.i_document ILIKE '%$cari%'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
-    public function referensi($cari,$iasal)
+    public function referensi($cari, $iasal)
     {
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("SELECT
-                DISTINCT a.id,
-                a.i_document,
-                to_char(a.d_document, 'dd-mm-yyyy') AS d_document
-            FROM
-                tm_retur_produksi_gdjd a
-            LEFT JOIN tm_retur_produksi_gdjd_item b ON
-                (a.id = b.id_document
-                    AND a.id_company = b.id_company)
-            INNER JOIN tr_bagian tb ON (
-                                        tb.i_bagian = a.i_bagian AND tb.id_company = a.id_company
-                                    )       
-            WHERE
-                tb.id = '$iasal'
-                AND a.i_status = '6'
-                AND a.id_company = '$this->id_company'
-                AND b.n_quantity <> 0
-                AND b.n_sisa_retur <> 0
-                AND a.i_document ILIKE '%$cari%'
-            ORDER BY
-                i_document,
-                d_document
-        ", FALSE);
+
+        $sql = "SELECT DISTINCT a.id,
+                    a.i_document,
+                    to_char(a.d_document, 'dd-mm-yyyy') AS d_document
+                FROM tm_retur_produksi_gdjd a
+                LEFT JOIN tm_retur_produksi_gdjd_item b ON (a.id = b.id_document
+                        AND a.id_company = b.id_company)
+                INNER JOIN tr_bagian tb ON (
+                                            tb.i_bagian = a.i_bagian AND tb.id_company = a.id_company
+                                        )                       
+                WHERE tb.id = '$iasal'
+                    AND a.i_status = '6'
+                    AND a.i_document ILIKE '%$cari%'
+                    AND a.id NOT IN (
+                                    SELECT id_document_reff 
+                                    FROM tm_masuk_retur_wip 
+                                    WHERE i_status NOT IN ('5', '6', '7', '9')
+                                )
+                ORDER BY i_document, d_document";       
+                
+        // var_dump($sql);
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_kode($kode,$ibagian)
@@ -370,40 +372,33 @@ class Mmaster extends CI_Model
         }
     }
 
-    public function cek_data($id, $ibagian)
+    public function cek_data($id, $ibagian=null)
     {
-        return $this->db->query("SELECT
-                a.id,
-                a.i_document,
-                to_char(a.d_document, 'dd-mm-yyyy') as d_document,
-                a.id_document_reff AS id_reff,
-                d.i_document as i_reff,
-                to_char(d.d_document, 'dd-mm-yyyy') as d_reff,
-                a.i_bagian,
-                b.e_bagian_name,
-                c.i_bagian AS i_bagian_pengirim,
-                c.e_bagian_name as e_bagian_pengirim,
-                a.e_remark,
-                a.i_status 
-            FROM
-                tm_masuk_retur_wip a 
-            INNER JOIN
-                tm_retur_produksi_gdjd d 
-                ON (a.id_document_reff = d.id 
-                AND a.id_company = d.id_company) 
-            INNER JOIN
-                tr_bagian b 
-                ON (a.i_bagian = b.i_bagian 
-                AND a.id_company = b.id_company) 
-            INNER JOIN
-                tr_bagian c 
-                ON (a.id_bagian_pengirim = c.id 
-                AND a.id_company = b.id_company) 
-            WHERE 
-                a.id  = '$id'
-                AND a.i_bagian = '$ibagian'
-                AND a.id_company = '$this->idcompany'
-        ", FALSE);
+        $sql = "SELECT
+                    a.id,
+                    a.i_document,
+                    to_char(a.d_document, 'dd-mm-yyyy') as d_document,
+                    a.id_document_reff AS id_reff,
+                    d.i_document as i_reff,
+                    to_char(d.d_document, 'dd-mm-yyyy') as d_reff,
+                    a.i_bagian,
+                    b.e_bagian_name,
+                    c.i_bagian AS i_bagian_pengirim,
+                    c.e_bagian_name as e_bagian_pengirim,
+                    a.id_bagian_pengirim,
+                    c2.name,
+                    a.e_remark,
+                    a.i_status 
+                FROM tm_masuk_retur_wip a 
+                INNER JOIN tm_retur_produksi_gdjd d ON (a.id_document_reff = d.id) 
+                INNER JOIN tr_bagian b ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company) 
+                INNER JOIN tr_bagian c ON (a.id_bagian_pengirim = c.id) 
+                LEFT JOIN public.company c2 ON c2.id = c.id_company
+                WHERE a.id  = '$id'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function cek_datadetail($id, $ibagian){
@@ -428,13 +423,12 @@ class Mmaster extends CI_Model
     }
 
     public function updateheader($id, $ikodemaster, $ibonm, $datebonm, $eremark, $iasal, $ireff)
-    {
-        $id_bagian_pengirim = $this->db->query("SELECT id FROM tr_bagian WHERE i_bagian = '$iasal' AND id_company = '$this->id_company' ")->row()->id;
+    {        
         $data = array(
             'i_document'          => $ibonm,
             'i_bagian'            => $ikodemaster,
             'd_document'          => $datebonm,
-            'id_bagian_pengirim'  => $id_bagian_pengirim,
+            'id_bagian_pengirim'  => $iasal,
             'id_document_reff'    => $ireff,
             'e_remark'            => $eremark,
             'd_update'            => current_datetime(),
@@ -550,6 +544,13 @@ class Mmaster extends CI_Model
         $this->db->from('tr_status_document');
         $this->db->where('i_status',$istatus);
         return $this->db->get()->row()->e_status_name;
+    }
+
+    public function get_bagian_by_id($id_bagian)
+    {
+        $sql = "SELECT * FROM tr_bagian WHERE id='$id_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */
