@@ -603,5 +603,15 @@ class Mmaster extends CI_Model
         // var_dump($sql); die();
         return $this->db->query($sql);;
     }
+
+    public function get_company_by_product($id_product)
+    {
+        $sql = "SELECT tpb.id, tpb.i_product_base, tpb.e_product_basename, c.id as id_company, c.name  
+                FROM tr_product_base tpb 
+                INNER JOIN public.company c ON c.id = tpb.id_company 
+                WHERE tpb.id = '$id_product'";
+
+        return $this->db->query($sql);
+    }
 }
 /* End of file Mmaster.php */

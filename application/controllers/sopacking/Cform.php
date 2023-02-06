@@ -591,5 +591,19 @@ class Cform extends CI_Controller {
         $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
         $this->load->view($this->global['folder'] . '/vforminput', $data);
     }
+
+    public function get_company_by_product()
+    {
+        $id_product = $this->input->get('id_product');
+
+        $result = [];
+
+        $query = $this->mmaster->get_company_by_product($id_product);
+        if ($query->row() != null) {
+            $result['data'] = $query->row();
+        }
+
+        echo json_encode($result);
+    }
 }
 /* End of file Cform.php */

@@ -76,7 +76,7 @@
                     </tr>
                     <tr>
                         <th colspan="4" class="text-center">TOTAL</th>
-                        <th class="text-right" width="3%;" id="total"><?= 0; ?></th>
+                        <th class="text-right" width="3%;" id="total" data-id="total"><?= 0; ?></th>
                         <th colspan="2"></th>
                     </tr>
                 </thead>
@@ -105,10 +105,8 @@
                                         class="form-control text-right input-sm inputitem" 
                                         autocomplete="off" 
                                         name="nquantity<?= $i; ?>" 
-                                        onblur="if(this.value==''){this.value=0;}" 
-                                        onfocus="if(this.value=='0'){this.value=0;}" 
                                         value="<?= $row['qty']; ?>" 
-                                        onkeyup="angkahungkul(this); sumo(<?= $i; ?>);">
+                                        onkeyup="sumo(<?= $i; ?>);">
                             </td>
                             <td><input type="text" class="form-control input-sm" name="eremark<?= $i; ?>" id="eremark<?= $i; ?>" placeholder="Isi keterangan jika ada!" value="<?= $row['e_remark']; ?>"/></td>
                             <td><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
@@ -148,8 +146,9 @@
         }
 
         $(function() {
-            buildTable($table)
+            // buildTable($table)
         })
+
         for (var i = 1; i <= $('#jml').val(); i++) {
             $('#idmaterial' + i).select2({
                 placeholder: 'Cari Kode / Nama Barang',
@@ -251,7 +250,10 @@
         var no = $('#tabledatay tbody tr').length + 1;
         var newRow = $("<tr>");
         var cols = "";
-        cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;
+        cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;        
+        cols += `<td>
+                    <input type="text" id="e_company${i}" class="form-control input-sm inputitem" value="${getCompanyName()}" readonly>
+                </td>`;
         cols += `<td><select data-nourut="${i}" id="idmaterial${i}" class="form-control input-sm" name="idmaterial${i}" ></select></td>`;
         cols += `<td><input type="text" id="e_color${i}" class="form-control input-sm inputitem" autocomplete="off" name="e_color${i}" readonly></td>`;
         cols += `<td class="text-center"><input type="text" id="nquantity${i}" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity${i}" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeyup="angkahungkul(this); sumo();"></td>`;
@@ -309,6 +311,8 @@
             } else {
                 $('#nquantity' + z).focus();
             }
+
+            getCompany(kode[0]);
         });
     });
 
@@ -353,11 +357,9 @@
         
         console.log(total);
 
-        // $('#total').text(total);
-        /** shadow element of total */
-        $('#tabledatay > thead > tr:nth-child(2) > th.text-right > div.th-inner').text(total);
+        $('#total').text(total);
     }
-
+    
     /**
      * Hapus Detail Item
      */
@@ -372,4 +374,17 @@
         });
         sumo();
     });
+
+    function getCompany(idProduct) {
+        $.ajax({
+            url: '<?= base_url($folder . '/cform/get_company_by_product?id_product='); ?>' + idProduct,
+            type: 'GET',
+            dataType: 'json',
+            success: function(result) {
+                console.log(result);
+                return result;
+            }
+        })
+    }
+
 </script>
