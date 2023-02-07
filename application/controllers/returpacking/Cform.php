@@ -158,13 +158,19 @@ class Cform extends CI_Controller {
 
     public function getproduct(){
         header("Content-Type: application/json", true);
+
+        $data = [];
+
         $eproduct = $this->input->post('eproduct');
         $ibagian = $this->input->post('ibagian');        
         $itujuan = $this->input->post('itujuan');
 
-        $data = $this->mmaster->getproduct($eproduct, $ibagian, $itujuan);
+        if (!empty($eproduct) and $eproduct != '') {
+            $query = $this->mmaster->getproduct($eproduct, $ibagian, $itujuan);
+            $data = $query->result_array();
+        }        
 
-        echo json_encode($data->result_array());
+        echo json_encode($data);
     }
 
     public function simpan(){

@@ -30,13 +30,9 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <input type="hidden" name="id" id="id" value="<?= $id;?>">
-                                <input type="hidden" name="ibonkold" id="ibonkold" value="<?= $data->i_keluar_qc;?>">
-                                <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="17" class="form-control input-sm" value="<?= $data->i_keluar_qc;?>" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
-                                    <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
+                                <input type="hidden" name="ibonkold" id="ibonkold" value="<?= $data->i_keluar_qc ?>">
+                                <input type="text" name="ibonk" id="dokumenbon" readonly class="form-control input-sm" value="<?= $data->i_keluar_qc ?>">
                             </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-3">
@@ -239,7 +235,7 @@
 <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
 <script>
    $(document).ready(function () {
-        $('#dokumenbon').mask('SSS-0000-000000S');
+        // $('#dokumenbon').mask('SSS-0000-000000S');
         $('.select2').select2({
             width : '100%',
         });
@@ -276,40 +272,40 @@
 
     
     
-    $( "#dokumenbon" ).keyup(function() {
-        $.ajax({
-            type: "post",
-            data: {
-                'kode' : $(this).val(),
-                'ibagian' : $('#ibagian').val(),
-            },
-            url: '<?= base_url($folder.'/cform/cekkode'); ?>',
-            dataType: "json",
-            success: function (data) {
-                if (data==1 && ($('#dokumenbon').val()!=$('#ibonkold').val())) {
-                    $("#ada").attr("hidden", false);
-                    $("#submit").attr("disabled", true);
-                }else{
-                    $("#ada").attr("hidden", true);
-                    $("#submit").attr("disabled", false);
-                }
-            },
-            error: function () {
-                swal('Error :)');
-            }
-        });
-    });
+    // $( "#dokumenbon" ).keyup(function() {
+    //     $.ajax({
+    //         type: "post",
+    //         data: {
+    //             'kode' : $(this).val(),
+    //             'ibagian' : $('#ibagian').val(),
+    //         },
+    //         url: '<?= base_url($folder.'/cform/cekkode'); ?>',
+    //         dataType: "json",
+    //         success: function (data) {
+    //             if (data==1 && ($('#dokumenbon').val()!=$('#ibonkold').val())) {
+    //                 $("#ada").attr("hidden", false);
+    //                 $("#submit").attr("disabled", true);
+    //             }else{
+    //                 $("#ada").attr("hidden", true);
+    //                 $("#submit").attr("disabled", false);
+    //             }
+    //         },
+    //         error: function () {
+    //             swal('Error :)');
+    //         }
+    //     });
+    // });
 
-    $('#ceklis').click(function(event) {
-        if($('#ceklis').is(':checked')){
-            $("#dokumenbon").attr("readonly", false);
-        }else{
-            $("#dokumenbon").attr("readonly", true);
-            $("#ada").attr("hidden", true);
-            $("#dokumenbon").val($("#ibonkold").val());
-            /*number();*/
-        }
-    });
+    // $('#ceklis').click(function(event) {
+    //     if($('#ceklis').is(':checked')){
+    //         $("#dokumenbon").attr("readonly", false);
+    //     }else{
+    //         $("#dokumenbon").attr("readonly", true);
+    //         $("#ada").attr("hidden", true);
+    //         $("#dokumenbon").val($("#ibonkold").val());
+    //         /*number();*/
+    //     }
+    // });
 
     function number() {
         $.ajax({

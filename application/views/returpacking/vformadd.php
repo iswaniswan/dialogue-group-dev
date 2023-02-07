@@ -142,8 +142,9 @@
                     $("#submit").attr("disabled", false);
                 }
             },
-            error: function () {
-                swal('Error :)');
+            error: function (error) {
+                console.log('error ' + error);
+                // swal('Error :)');
             }
         });
     });
@@ -201,12 +202,19 @@
         $("#tabledatax").attr("hidden", false);
         var iproduct = $('#iproduct'+counterx).val();
         count=$('#tabledatax tr').length;
-        if ((iproduct==''||iproduct==null)&&(count>1)) {
-            swal('Isi dulu yang masih kosong!!');
-            counter = counter-1;
-            counterx = counterx-1;
+        // console.log(iproduct + '||' + count);
+        // if ((iproduct=='' || iproduct==null || iproduct === undefined) && (count>1)) {
+        //     swal('Isi dulu yang masih kosong!!');
+        //     counter = counter-1;
+        //     counterx = counterx-1;
+        //     return false;
+        // }
+
+        let valid = isDataValid();
+        if (!valid) {
             return false;
         }
+
         $('#jml').val(counter);
         var newRow = $("<tr>");
         var cols = "";
@@ -271,21 +279,42 @@
 
     function formatSelection(val) {
         return val.name;
-    }
+    }  
 
     function getproduct(id){
         ada=false;
-        var a = $('#eproduct'+id).val();
-        var x = $('#jml').val();
-        for(i=1;i<=x;i++){
-            if((a == $('#eproduct'+i).val()) && (i!=x)){
-                swal ("Kode Barang sudah ada !!!!!");            
-                ada=true;            
-                break;        
-            }else{            
-                ada=false;             
+        // var a = $('#eproduct'+id).val();
+        // var x = $('#jml').val();
+        // console.log(id);
+        // console.log(x);
+        // for(i=1;i<=x;i++){
+        //     if((a == $('#eproduct'+i).val()) && (i!=x)){
+        //         swal ("Kode Barang sudah ada !!!!!");            
+        //         ada=true;            
+        //         break;        
+        //     }else{            
+        //         ada=false;             
+        //     }
+        // }        
+        const ids = new Set();
+
+        let items = $('#tabledatax').find('.form-control.select2');
+
+        items.each(function() {
+            let value = $(this).val();
+
+            if (value == null || value === undefined || value == '') {
+                return false;
             }
-        }
+
+            if (ids.has(value)) {
+                swal ("Kode Barang sudah ada !!!!!");            
+                ada=true;
+                return false;
+            }            
+
+            ids.add(value);
+        })
 
         if(!ada){
             var eproduct = $('#eproduct'+id).val();
@@ -300,7 +329,7 @@
                 dataType: "json",
                 success: function (data) {
                     if (!data[0]?.id_product) {
-                        swal('Tidak ada data');
+                        // swal('Tidak ada data');
                         return false;
                     }
                     $('#idproduct'+id).val(data[0].id_product);
@@ -329,6 +358,8 @@
     }
 
     $("#tabledatax").on("click", ".ibtnDel", function (event) {    
+        counter--;
+        counterx--;
         $(this).closest("tr").remove();
         $('#jml').val(counter);
         del();
@@ -343,6 +374,11 @@
     }
 
     function konfirm() {
+        let valid = isDataValid();
+        if (!valid) {
+            return false;
+        }
+
         var jml = $('#jml').val();
         if (($('#ibagian').val()!='' || $('#ibagian').val()) && ($('#itujuan').val()!='' || $('#itujuan').val())) {
             if(jml==0){
@@ -378,5 +414,52 @@
     function getItujuan() {
         return $('#itujuan').val()
     }
+
+    function cekBarisKosong() {
+        let kosong = false;
+
+        let items = $('#tabledatax').find('.form-control.select2');
+
+        items.each(function() {
+            let value = $(this).val();
+
+            if (value == null || value === undefined || value == '') {
+                swal('Isi dulu yang masih kosong!!');
+                kosong = true;
+            }
+        });
+
+        return kosong;
+    }
+
+    function cekQuantityKosong() {
+        let zeroQty = false;
+
+        let qtys = $('#tabledatax').find('input[name="nquantity[]"]');
+
+        qtys.each(function() {
+            let value = $(this).val();            
+
+            if (value === '' || parseFloat(value) <= 0) {
+                swal('Quantity tidak valid !!');
+                zeroQty = true;
+            }
+        })
+
+        return zeroQty;
+    }
+
+    function isDataValid() {   
+        let valid = true;
+        if (cekBarisKosong()) {
+            valid = false;
+        }
+
+        if (cekQuantityKosong()) {
+            valid = false;
+        }
+        return valid;
+    }
+
 
 </script>

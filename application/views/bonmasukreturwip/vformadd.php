@@ -63,7 +63,7 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-12">
-                            <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Simpan</button>
+                            <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2"><i class="fa fa-save mr-2" ></i>Simpan</button>
                             <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="ti-arrow-circle-left mr-2"></i>Kembali</button>
                             <button type="button" hidden="true" id="send" onclick="changestatus('<?= $folder;?>',$('#kode').val(),'2');" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
                         </div>
@@ -85,11 +85,11 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="3%;">No</th>
-                        <th width="12%;">Kode Barang</th>
-                        <th width="25%;">Nama Barang</th>
-                        <th class="text-right" width="12%;">Quantity</th>
-                        <th class="text-right" width="12%;">Quantity Retur</th>
-                        <th>Keterangan</th>
+                        <th class="text-center" width="12%;">Kode Barang</th>
+                        <th class="text-center" width="25%;">Nama Barang</th>
+                        <th class="text-center" width="12%;">Quantity Kirim</th>
+                        <th class="text-center" width="12%;">Quantity Terima</th>
+                        <th class="text-center">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -180,6 +180,7 @@ $(document).ready(function () {
                 var query = {
                     q: params.term,
                     iasal: $('#ipengirim').val(),
+                    itujuan: $('#ibagian').val()
                 }
                 return query;
             },
@@ -204,7 +205,7 @@ function number() {
             'tgl': $('#ddocument').val(),
             'ibagian': $('#ibagian').val(),
         },
-        url: '<?= base_url($folder.'/cform/number'); ?>',
+        url: '<?= base_url($folder.'/cform/generate_nomor_dokumen'); ?>',
         dataType: "json",
         success: function (data) {
             $('#i_document_retur').val(data);

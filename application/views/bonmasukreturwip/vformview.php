@@ -76,11 +76,11 @@
                 <thead> 
                     <tr>
                         <th class="text-center" width="3%;">No</th>
-                        <th>Kode Barang</th>
-                        <th>Nama Barang</th>
-                        <th class="text-right">Quantity</th>
-                        <th class="text-right">Quantity Retur</th>
-                        <th>Keterangan</th>
+                        <th class="text-center" width="12%;">Kode Barang</th>
+                        <th class="text-center" width="25%;">Nama Barang</th>
+                        <th class="text-center" width="12%;">Quantity Kirim</th>
+                        <th class="text-center" width="12%;">Quantity Terima</th>
+                        <th class="text-center">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>

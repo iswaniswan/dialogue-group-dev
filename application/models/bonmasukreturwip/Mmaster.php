@@ -150,13 +150,21 @@ class Mmaster extends CI_Model
         $this->db->where('a.id_company', $this->session->userdata('id_company'));
         $this->db->order_by('e_bagian_name');
         return $this->db->get(); */
-        return $this->db->query("SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement FROM tr_bagian a 
-			INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
-			LEFT JOIN tr_type c on (a.i_type = c.i_type)
-			LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
-			WHERE a.f_status = 't' AND b.i_departement = '$this->i_departement' AND username = '$this->username' AND a.id_company = '$this->id_company' 
-			ORDER BY 4, 3 ASC NULLS LAST
-        ", false);
+
+        $sql = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, d.i_departement 
+                FROM tr_bagian a 
+                INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company 
+                LEFT JOIN tr_type c on (a.i_type = c.i_type)
+                LEFT JOIN public.tm_menu d on (d.i_menu = '$this->i_menu' and c.i_departement  = d.i_departement)
+                WHERE a.f_status = 't' 
+                    AND b.i_departement = '$this->i_departement' 
+                    AND username = '$this->username' 
+                    AND a.id_company = '$this->id_company' 
+                ORDER BY 4, 3 ASC NULLS LAST";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, false);
     }
 
     public function bagianpengirim($cari, $ibagian)
@@ -190,9 +198,9 @@ class Mmaster extends CI_Model
         // var_dump($sql); die();
 
         return $this->db->query($sql, FALSE);
-    }
+    }    
 
-    public function referensi($cari, $iasal)
+    public function referensi($cari, $iasal, $itujuan=null)
     {
         $cari = str_replace("'", "", $cari);
 
@@ -200,18 +208,22 @@ class Mmaster extends CI_Model
                     a.i_document,
                     to_char(a.d_document, 'dd-mm-yyyy') AS d_document
                 FROM tm_retur_produksi_gdjd a
-                LEFT JOIN tm_retur_produksi_gdjd_item b ON (a.id = b.id_document
-                        AND a.id_company = b.id_company)
+                LEFT JOIN tm_retur_produksi_gdjd_item b ON (
+                                                            a.id = b.id_document 
+                                                            AND a.id_company = b.id_company
+                                                            )
                 INNER JOIN tr_bagian tb ON (
-                                            tb.i_bagian = a.i_bagian AND tb.id_company = a.id_company
-                                        )                       
+                                            tb.i_bagian = a.i_bagian 
+                                            AND tb.id_company = a.id_company
+                                            )
                 WHERE tb.id = '$iasal'
+                    AND a.i_tujuan = '$itujuan'
                     AND a.i_status = '6'
                     AND a.i_document ILIKE '%$cari%'
                     AND a.id NOT IN (
                                     SELECT id_document_reff 
                                     FROM tm_masuk_retur_wip 
-                                    WHERE i_status NOT IN ('5', '6', '7', '9')
+                                    WHERE i_status IN ('1', '2', '3', '6', '8')
                                 )
                 ORDER BY i_document, d_document";       
                 
@@ -338,6 +350,26 @@ class Mmaster extends CI_Model
         }
     } 
 
+    public function generate_nomor_dokumen($id_bagian) {
+
+        $kode = 'BBMR';
+
+        $sql = "SELECT count(*) 
+                FROM tm_masuk_retur_wip tmrw
+                INNER JOIN tr_bagian tb ON tb.i_bagian = tmrw.i_bagian AND tb.id_company = tmrw.id_company
+                WHERE tb.id = '$id_bagian'
+                    AND to_char(d_document, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
+
+        $query = $this->db->query($sql);
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
+
+        return $generated;
+    }
+    
+
     public function insertheader($id, $ibonm, $datebonm, $ikodemaster, $iasal, $ireff, $eremark)
     {
 //        $id_bagian_pengirim = $this->db->query("SELECT id FROM tr_bagian WHERE i_bagian = '$iasal' AND id_company = '$this->id_company' ")->row()->id;
@@ -358,7 +390,19 @@ class Mmaster extends CI_Model
     public function insertdetail($id, $ireff, $ibonm, $idproduct, $idcolor, $nquantity, $nquantitymasuk, $edesc)
     {
         if($nquantitymasuk>0){
-            $id_product_wip = $this->db->query("SELECT a.id FROM tr_product_wip a, tr_product_base b WHERE a.i_product_wip = b.i_product_wip AND b.i_color = a.i_color AND b.id_company = a.id_company AND a.id_company = '$this->id_company' AND b.id = '$idproduct' ", FALSE)->row()->id;
+
+            $sql = "SELECT a.id 
+                    FROM tr_product_wip a, tr_product_base b 
+                    WHERE a.i_product_wip = b.i_product_wip 
+                        AND b.i_color = a.i_color 
+                        AND b.id_company = a.id_company 
+                        AND a.id_company = '$this->id_company' 
+                        AND b.id = '$idproduct'";
+
+            $query = $this->db->query($sql);
+
+            $id_product_wip = $query->row()->id;
+            
             $data = array(
                 'id_company'        => $this->idcompany,
                 'id_document'       => $id,

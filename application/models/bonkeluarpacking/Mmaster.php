@@ -592,8 +592,8 @@ class Mmaster extends CI_Model
                     END) END AS saldo_akhir
             FROM tm_keluar_qc_item a 
                 JOIN tm_keluar_qc d ON a.id_keluar_qc = d.id 
-                JOIN tr_product_base b ON a.id_product = b.id AND d.id_company = b.id_company 
-                JOIN tr_color c ON a.id_color = c.id AND d.id_company = c.id_company 
+                JOIN tr_product_base b ON a.id_product = b.id
+                JOIN tr_color c ON a.id_color = c.id
                 LEFT JOIN (
                         SELECT * 
                         FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '')

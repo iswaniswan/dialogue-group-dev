@@ -17,23 +17,22 @@
                         <label class="col-md-3">Tujuan</label>    
                         <div class="col-sm-3">
                             <select name="ibagian" id="ibagian" class="form-control select2" disabled="">
-                                <?php if ($bagian) {
-                                    foreach ($bagian as $row):?>
-                                        <option value="<?= $row->i_bagian;?>" <?php if ($row->i_bagian==$data->i_bagian) {?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name;?>
-                                        </option>
-                                    <?php endforeach; 
-                                } ?>
+                                <?php foreach ($bagian as $row) { ?>
+                                    <?php $selected = ($row->i_bagian == $data->i_bagian) ? 'selected' : ''; ?>
+                                    <option value="<?= $row->i_bagian ?>" <?= $selected ?>>
+                                        <?= $row->e_bagian_name ?>
+                                    </option>
+                                <?php } ?>
                             </select>
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <input type="hidden" name="id" id="id" value="<?= $id;?>">
-                                <input type="text" name="ibonk" id="dokumenbon" value="<?= $data->i_keluar_qc;?>" class="form-control input-sm" readonly>                                
+                                <input type="hidden" name="id" id="id" value="<?= $id ?>">
+                                <input type="text" value="<?= $data->i_keluar_qc ?>" class="form-control input-sm" disabled>                                
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm"  required="" readonly value="<?= $data->d_keluar_qc;?>">
+                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm" disabled value="<?= $data->d_keluar_qc;?>">
                         </div>
                         <div class="col-sm-3">
                             <select name="itujuan" id="itujuan" class="form-control select2" disabled="">
@@ -171,7 +170,7 @@
     </div>
 </div>
 </form>
-<script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
+
 <script>
    $(document).ready(function () {
         $('.select2').select2({

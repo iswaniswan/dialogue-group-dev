@@ -214,22 +214,28 @@
         $("#tabledatax").attr("hidden", false);
         var iproduct = $('#iproduct'+counterx).val();
         count=$('#tabledatax tr').length;  
-        if ((iproduct==''||iproduct==null)&&(count>1)) {
-            swal('Isi dulu yang masih kosong!!');
-            counter = counter-1;
-            counterx = counterx-1;
+        // if ((iproduct==''||iproduct==null)&&(count>1)) {
+        //     swal('Isi dulu yang masih kosong!!');
+        //     counter = counter-1;
+        //     counterx = counterx-1;
+        //     return false;
+        // }
+
+        let valid = isDataValid();
+        if (!valid) {
             return false;
         }
+
         $('#jml').val(counter);
         var newRow = $("<tr class='no tr" + counter + "'>");
         var cols = "";
 
         cols += '<td class="text-center"><spanx id="snum'+counter+'">'+count+'</spanx></td>';
         cols += '<td><input type="hidden" readonly id="idproduct'+ counter + '" class="form-control" name="idproduct[]"><input type="text" readonly id="iproduct'+ counter + '" class="form-control input-sm" name="iproduct' + counter + '"></td>';
-        cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +'); "><option value=""></option></select></td>';
+        cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control select2" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +'); "><option value=""></option></select></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
         cols += '<td><input type="text" readonly class="form-control input-sm text-right" id="stok'+ counter +'" name="stok'+ counter +'"></td>';
-        cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control input-sm text-right inputitem" name="nquantity[]" value="0" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' onkeyup="validasi('+counter+')"></td>';
+        cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control input-sm text-right inputitem" name="nquantity[]" value="0" onkeyup="hetang('+counter+')"></td>';
         cols += '<td><input type="text" id="edesc'+ counter + '" class="form-control input-sm" placeholder="Keterangan..." name="edesc[]"></td>';
         cols += '<td class="text-center"><button data-urut="' + counter + '" type="button" onclick="tambah_material(' + counter + ');" title="Tambah List" class="btn btn-sm btn-circle btn-info"><i data-urut="' + counter + '" id="addlist' + counter + '"  class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button><button type="button" data-i = "' + counter + '" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 
@@ -328,17 +334,37 @@
 
     function getproduct(id){
         ada=false;
-        var a = $('#eproduct'+id).val();
-        var x = $('#jml').val();
-        for(i=1;i<=x;i++){
-            if((a == $('#eproduct'+i).val()) && (i!=x)){
-                swal ("Kode Barang sudah ada !!!!!");            
-                ada=true;            
-                break;        
-            }else{            
-                ada=false;             
+        // var a = $('#eproduct'+id).val();
+        // var x = $('#jml').val();
+        // for(i=1;i<=x;i++){
+        //     if((a == $('#eproduct'+i).val()) && (i!=x)){
+        //         swal ("Kode Barang sudah ada !!!!!");            
+        //         ada=true;            
+        //         break;        
+        //     }else{            
+        //         ada=false;             
+        //     }
+        // }
+
+        const ids = new Set();
+
+        let items = $('#tabledatax').find('.form-control.select2');
+
+        items.each(function() {
+            let value = $(this).val();
+
+            if (value == null || value === undefined || value == '') {
+                return false;
             }
-        }
+
+            if (ids.has(value)) {
+                swal ("Kode Barang sudah ada !!!!!");            
+                ada=true;
+                return false;
+            }            
+
+            ids.add(value);
+        })
 
         if(!ada){
             var eproduct = $('#eproduct'+id).val();            
@@ -424,6 +450,15 @@
         });
     }
 
+    function hetang(params) {
+        var qty = parseFloat($('#nquantity'+params).val());
+        var stok = parseFloat($('#stok'+params).val());
+        if (qty > stok) {
+            swal("Maaf :(", "Quantity Kirim tidak boleh lebih besar dari Stok = "+stok,"error");
+            $('#nquantity'+params).val(stok);
+        }
+    }
+
     function validasiStockBundle(element, target){
         const stock = $(target).val();
         const request = $(element).val();
@@ -479,6 +514,11 @@
     }
 
     function konfirm() {
+        let valid = isDataValid();
+        if (!valid) {
+            return false;
+        }
+
         var jml = $('#jml').val();
         ada = false;
         if(jml==0){
@@ -527,6 +567,52 @@
         setTimeout(() => {
             $('#idproduct' + counter).val(value);
         }, 300)        
+    }
+
+    function cekBarisKosong() {
+        let kosong = false;
+
+        let items = $('#tabledatax').find('.form-control.select2');
+
+        items.each(function() {
+            let value = $(this).val();
+
+            if (value == null || value === undefined || value == '') {
+                swal('Isi dulu yang masih kosong!!');
+                kosong = true;
+            }
+        });
+
+        return kosong;
+    }
+
+    function cekQuantityKosong() {
+        let zeroQty = false;
+
+        let qtys = $('#tabledatax').find('input[name="nquantity[]"]');
+
+        qtys.each(function() {
+            let value = $(this).val();            
+
+            if (value === '' || parseFloat(value) <= 0) {
+                swal('Quantity tidak valid !!');
+                zeroQty = true;
+            }
+        })
+
+        return zeroQty;
+    }
+
+    function isDataValid() {   
+        let valid = true;
+        if (cekBarisKosong()) {
+            valid = false;
+        }
+
+        if (cekQuantityKosong()) {
+            valid = false;
+        }
+        return valid;
     }
     
 </script>

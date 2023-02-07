@@ -387,7 +387,7 @@ class Mmaster extends CI_Model {
                 FROM tm_retur_produksi_gdjd_item a 
                 JOIN tm_retur_produksi_gdjd d ON a.id_document = d.id 
                 JOIN tr_product_base b ON a.id_product = b.id /*AND d.id_company = b.id_company */
-                JOIN tr_color c ON b.i_color = c.i_color AND d.id_company = c.id_company 
+                JOIN tr_color c ON c.i_color = b.i_color AND c.id_company = b.id_company 
                 LEFT JOIN (
                             SELECT * 
                             FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')

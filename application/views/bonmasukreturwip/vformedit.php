@@ -22,13 +22,8 @@
                   </div>
                   <div class="col-sm-4">
                      <div class="input-group">
-                        <input type="text" name="idocument" id="idocument" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="BONM-2010-000001" maxlength="15" class="form-control input-sm" value="<?=$data->i_document;?>" aria-label="Text input with dropdown button">
-                        <span class="input-group-addon">
-                        <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                        </span>
+                        <input type="text" name="idocument" id="idocument" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="BONM-2010-000001" maxlength="15" class="form-control input-sm" value="<?=$data->i_document;?>" aria-label="Text input with dropdown button">                        
                      </div>
-                     <span class="notekode">Format : (<?= $data->i_document;?>)</span><br>
-                     <span class="notekode" hidden="true"><b> * No. Sudah Ada!</b></span>
                   </div>
                   <div class="col-sm-4">
                      <input type="text" id= "ddocument" name="ddocument" class="form-control input-sm date" value="<?= $data->d_document; ?>" placeholder="<?=date('d-m-Y');?>" readonly>
@@ -92,8 +87,8 @@
                   <th class="text-center" width="3%;">No</th>
                   <th class="text-center" width="12%;">Kode Barang</th>
                   <th class="text-center" width="25%;">Nama Barang</th>
-                  <th class="text-center" width="12%;">Quantity</th>
-                  <th class="text-center" width="12%;">Quantity Retur</th>
+                  <th class="text-center" width="12%;">Quantity Kirim</th>
+                  <th class="text-center" width="12%;">Quantity Terima</th>
                   <th class="text-center">Keterangan</th>
                </tr>
             </thead>

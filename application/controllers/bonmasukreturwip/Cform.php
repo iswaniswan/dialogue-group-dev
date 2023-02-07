@@ -90,7 +90,12 @@ class Cform extends CI_Controller
     public function referensi()
     {
         $filter = [];
-        $data   = $this->mmaster->referensi(strtoupper($this->input->get('q')),$this->input->get('iasal'));
+        $q = $this->input->get('q');
+        $iasal = $this->input->get('iasal');
+        $itujuan = $this->input->get('itujuan');        
+
+        $data   = $this->mmaster->referensi(strtoupper($q), $iasal, $itujuan);
+
         foreach ($data->result() as $row) {
             $filter[] = array(
                 'id'    => $row->id, 
@@ -152,6 +157,18 @@ class Cform extends CI_Controller
         if ($this->input->post('tgl', TRUE) != '') {
             $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))),date('Y', strtotime($this->input->post('tgl', TRUE))),$this->input->post('ibagian', TRUE));
         }
+        echo json_encode($number);
+    }
+
+    public function generate_nomor_dokumen()
+    {
+        $number = "";
+
+        if ($this->input->post('tgl', TRUE) != '') {
+            $id_bagian = $this->input->post('ibagian');
+            $number = $this->mmaster->generate_nomor_dokumen($id_bagian);
+        }
+
         echo json_encode($number);
     }
 
