@@ -30,14 +30,7 @@
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <!-- <span class="input-group-addon">
-                                    <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span> -->
-                            </div>
-                            <span class="notekode">Format : (<?= $number; ?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">                            
                         </div>
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?php echo date("d-m-Y"); ?>">

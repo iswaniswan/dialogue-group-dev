@@ -52,7 +52,7 @@ class Mmaster extends CI_Model
                     LEFT JOIN public.tr_menu_approve f on (a.i_approve_urutan = f.n_urut and f.i_menu = '$i_menu')
                     LEFT JOIN public.tr_level l on (f.i_level = l.i_level)
                     LEFT JOIN public.company c ON c.id = a.id_company_receive
-                    WHERE a.i_status <> '5' AND (a.id_company = '$this->id_company' OR a.id_company_receive = '$this->id_company') $and $bagian
+                    WHERE a.i_status <> '5' AND (a.id_company = '$this->id_company') $and $bagian
                     ORDER BY a.id DESC";
         
         $datatables->query($sql);

@@ -121,7 +121,7 @@
                                         <td><?= $key->i_material; ?></td>
                                         <td><?= $key->e_material_name; ?></td>
                                         <td><?= $key->e_satuan_name; ?></td>
-                                        <td class="text-right"><?= number_format($key->n_quantity_sisa, 4, ".", ",") ?></td>
+                                        <td><?= number_format($key->n_quantity_sisa, 4, ".", ",") ?></td>
                                         <td><?= $key->i_document; ?></td>
                                         <td><?= trim($key->d_document); ?></td>
                                         <td><?= $key->e_bagian_name ?> - <?= $key->company_pembuat ?></td>

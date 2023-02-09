@@ -25,7 +25,7 @@
                             <input type="text" class="form-control input-sm" value="<?= $data->d_document; ?>" readonly>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" readonly="" class="form-control input-sm" value="<?= $data->e_bagian_pengirim; ?>">
+                            <input type="text" readonly="" class="form-control input-sm" value="<?= $data->e_bagian_pengirim ?> - <?= $data->name ?>">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -76,7 +76,7 @@ if ($datadetail) { ?>
                             <th width="10%">Kode</th>
                             <th width="30%">Nama Barang</th>
                             <th width="12%">Warna</th>
-                            <th class="text-right">Qty</th>
+                            <th class="text-right">Qty Kirim</th>
                             <th class="text-right">Qty Terima</th>
                             <th class="text-center">Keterangan</th>
                         </tr>

@@ -54,16 +54,22 @@ class Mmaster extends CI_Model
             }
         }
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("SELECT
-                    DISTINCT 0 AS NO,
+
+        $sql = "SELECT DISTINCT 0 AS NO,
                     a.id AS id,
                     a.i_document,
                     to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                    d.e_bagian_name,
+                    concat(d.e_bagian_name, ' - ', c2.name) AS e_bagian_name,
                     a.id_document_reff,
                     CASE
-                        WHEN f.i_document ISNULL AND e.i_keluar_qc NOTNULL THEN case when d.i_type = '12' then '[PCK] ' when d.i_type = '23' then '[WIP] ' else '' end || e.i_keluar_qc
-                        WHEN f.i_document NOTNULL AND e.i_keluar_qc ISNULL THEN f.i_document
+                        WHEN f.i_document ISNULL AND e.i_keluar_qc NOTNULL 
+                            THEN CASE WHEN d.i_type = '12' 
+                                THEN '[PCK] ' 
+                                WHEN d.i_type = '23' 
+                                    THEN '[WIP] ' 
+                                    ELSE '' END || e.i_keluar_qc
+                        WHEN f.i_document NOTNULL AND e.i_keluar_qc ISNULL 
+                            THEN f.i_document
                         ELSE 'Tanpa Referensi'
                     END AS i_referensi,
                     a.e_remark,
@@ -76,35 +82,23 @@ class Mmaster extends CI_Model
                     '$folder' AS folder,
                     '$dfrom' AS dfrom,
                     '$dto' AS dto
-                FROM
-                    tm_masuk_gudang_jadi a
-                INNER JOIN tr_status_document b ON
-                    (b.i_status = a.i_status)
-                INNER JOIN tm_masuk_gudang_jadi_item c ON
-                    (c.id_document = a.id)
-                INNER JOIN tr_bagian d ON
-                    (d.id = a.id_bagian_pengirim)
-                LEFT JOIN tm_keluar_qc e ON
-                    (e.id = a.id_document_reff
-                    AND d.i_bagian = e.i_bagian)
-                LEFT JOIN tm_keluar_gudang_jadi f ON
-                    (f.id = a.id_document_reff
-                    AND a.id_bagian_pengirim = f.id_bagian_tujuan)                  
-                LEFT JOIN tr_menu_approve g ON
-                    (a.i_approve_urutan = g.n_urut
-                    AND g.i_menu = '$i_menu')
-                LEFT JOIN public.tr_level l ON
-                    (g.i_level = l.i_level)
-                inner join tr_type t on (t.i_type = d.i_type)
-                WHERE
-                    a.i_status <> '5'
+                FROM tm_masuk_gudang_jadi a
+                INNER JOIN tr_status_document b ON (b.i_status = a.i_status)
+                INNER JOIN tm_masuk_gudang_jadi_item c ON (c.id_document = a.id)
+                INNER JOIN tr_bagian d ON (d.id = a.id_bagian_pengirim)
+                LEFT JOIN public.company c2 ON c2.id = d.id_company
+                LEFT JOIN tm_keluar_qc e ON (e.id = a.id_document_reff AND d.i_bagian = e.i_bagian)
+                LEFT JOIN tm_keluar_gudang_jadi f ON (f.id = a.id_document_reff AND a.id_bagian_pengirim = f.id_bagian_tujuan)                  
+                LEFT JOIN tr_menu_approve g ON (a.i_approve_urutan = g.n_urut AND g.i_menu = '$i_menu')
+                LEFT JOIN public.tr_level l ON (g.i_level = l.i_level)
+                INNER JOIN tr_type t on (t.i_type = d.i_type)                
+                WHERE a.i_status <> '5'
                     AND a.id_company = '$this->company'
                     $and
                     $bagian
-                ORDER BY
-                    a.id
-            ", FALSE
-        );
+                ORDER BY a.id DESC";
+
+        $datatables->query($sql);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -318,6 +312,11 @@ class Mmaster extends CI_Model
                                         AND a.i_status = '6'
                                         AND c.n_quantity_sisa > 0";
 
+        /** ambil data yg sudah masuk untuk pengecualian */
+        $sql_masuk_gudang_jadi = "SELECT id_document_reff  
+                                    FROM tm_masuk_gudang_jadi tmgj
+                                    WHERE tmgj.i_status IN ('1', '2', '3', '6', '8')";
+
         $sql_keluar_qc = "SELECT DISTINCT
                                 a.id,
                                 case 
@@ -333,8 +332,10 @@ class Mmaster extends CI_Model
                             WHERE a.id_company_tujuan = '$idcompany'
                                 AND i_status = '6'
                                 AND b.n_sisa > 0 
-                                AND a.i_tujuan = '$ibagian'
-                                /* AND a.id_jenis_barang_keluar <> '3' */ ";
+                                AND a.i_tujuan = '$ibagian'                                
+                                AND a.id NOT IN (
+                                    $sql_masuk_gudang_jadi
+                                )";        
 
         $sql = "SELECT id, i_document, id_bagian
                 FROM ( 
@@ -379,7 +380,9 @@ class Mmaster extends CI_Model
         //             ) AS x
         //         WHERE id_bagian = '$ipengirim' AND id = '$id'";
 
-        $sql = "SELECT * FROM tm_keluar_qc WHERE id = '$id'";
+        $sql = "SELECT tkq.*, tjbk.e_jenis_name FROM tm_keluar_qc tkq
+                INNER JOIN tr_jenis_barang_keluar tjbk ON tjbk.id = tkq.id_jenis_barang_keluar
+                WHERE tkq.id = '$id'";
         
         // var_dump($sql); die();
 
@@ -557,22 +560,16 @@ class Mmaster extends CI_Model
                 a.e_remark,
                 a.i_status,
                 a.id_jenis_barang_keluar,
-                g.e_jenis_name
-            FROM
-                tm_masuk_gudang_jadi a
-            INNER JOIN tr_bagian b ON
-                (b.i_bagian = a.i_bagian
-                AND a.id_company = b.id_company)
-            INNER JOIN tr_bagian d ON
-                (d.id = a.id_bagian_pengirim)
-            LEFT JOIN tm_keluar_qc e ON
-                (e.id = a.id_document_reff
-                AND d.i_bagian = e.i_bagian)
-            LEFT JOIN tm_keluar_gudang_jadi f ON
-                (f.id = a.id_document_reff
-                AND a.id_bagian_pengirim = f.id_bagian_tujuan)
+                g.e_jenis_name,
+                c2.name
+            FROM tm_masuk_gudang_jadi a
+            INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
+            INNER JOIN tr_bagian d ON (d.id = a.id_bagian_pengirim)
+            LEFT JOIN public.company c2 ON c2.id = d.id_company
+            LEFT JOIN tm_keluar_qc e ON (e.id = a.id_document_reff AND d.i_bagian = e.i_bagian)
+            LEFT JOIN tm_keluar_gudang_jadi f ON (f.id = a.id_document_reff AND a.id_bagian_pengirim = f.id_bagian_tujuan)
             LEFT JOIN tr_jenis_barang_keluar g ON (g.id = a.id_jenis_barang_keluar)
-            inner join tr_type h on (h.i_type = d.i_type)
+            INNER JOIN tr_type h on (h.i_type = d.i_type)
             WHERE
                 a.id = '$id'",FALSE
         );

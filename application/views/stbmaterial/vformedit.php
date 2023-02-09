@@ -93,7 +93,8 @@
                             <th>Nama Material</th>
                             <th>Satuan</th>
                             <th class="text-right" width="8%;">Stock</span></th>
-                            <th class="text-right" width="8%;"><span class="mr-4">Qty&nbsp;</span></th>
+                            <th class="text-right" width="8%;">Kebutuhan</th>
+                            <th class="text-right" width="8%;"><span class="mr-4">Kirim&nbsp;</span></th>
                             <th width="15%;">Keterangan</th>
                         </tr>
                     </thead>
@@ -128,10 +129,17 @@
                                     </td>
                                     <td class="text-right">
                                         <?= number_format($key->n_stock, 2, ".", ",") ?>
+                                        <input value="<?= $key->n_stock; ?>" type="hidden" id="n_stock<?= $i; ?>" name="n_stock<?= $i; ?>">
+                                    </td>
+                                    <td class="text-right">
+                                        <?= number_format($key->n_sisa, 4, ".", ",") ?>
+                                        <input type="hidden" value="<?= number_format($key->n_sisa, 4, ".", ",") ?>" id="n_quantity_kebutuhan<?= $i ?>" readonly>
                                     </td>
                                     <td>
-                                        <input value="<?= $key->n_quantity; ?>" type="number" id="n_quantity<?= $i; ?>" class="form-control text-right input-sm inputqty" autocomplete="off" name="n_quantity<?= $i; ?>" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" onkeyup="hetang(<?= $i; ?>);">
-                                        <input value="<?= $key->n_stock; ?>" type="hidden" id="n_stock<?= $i; ?>" name="n_stock<?= $i; ?>">
+                                        <input value="<?= $key->n_quantity; ?>" type="number" id="n_quantity<?= $i; ?>" 
+                                                class="form-control text-right input-sm inputqty" autocomplete="off" 
+                                                name="n_quantity<?= $i ?>" 
+                                                onkeyup="hetang(<?= $i ?>);">
                                     </td>
                                     <td>
                                         <input value="" type="text" class="form-control input-sm" name="e_remark_item<?= $i; ?>" id="e_remark_item<?= $i; ?>" placeholder="Isi keterangan jika ada!" />
@@ -408,11 +416,33 @@
     }
 
     function hetang(i) {
-        var qty = parseFloat($('#n_quantity' + i).val());
-        var stock = parseFloat($('#n_stock' + i).val());
+        let qty = extractNumber($('#n_quantity' + i));
+        let stock = extractNumber($('#n_stock' + i));
+        let qty_kebutuhan = extractNumber($('#n_quantity_kebutuhan' + i));
+
+        if (qty > qty_kebutuhan) {
+            swal("Maaf :(", "Jumlah = " + qty + ", tidak boleh lebih dari kebutuhan = " + qty_kebutuhan + "", "error");
+            $('#n_quantity' + i).val(0);
+        }
+
         if (qty > stock) {
             swal("Maaf :(", "Jumlah = " + qty + ", tidak boleh lebih dari stock = " + stock + "", "error");
-            //$('#n_quantity' + i).val(0);
+            $('#n_quantity' + i).val(0);
         }
     }
+
+    const extractNumber = (elemen) => {
+        let number = elemen.val()
+                .replace(/^\s+|\s+$/g, '')
+                .replace(/,/g, '')
+
+        return parseFloat(number);
+    }
+    
+    
+    
+    
+    
+    
+    
 </script>

@@ -94,7 +94,7 @@ class Mmaster extends CI_Model
                 WHERE a.i_status <> '5'
                     AND a.id_company = '$this->company'
                     $and $bagian
-                ORDER BY a.id
+                ORDER BY a.id DESC
             ", FALSE
         );
 

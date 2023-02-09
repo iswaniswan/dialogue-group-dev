@@ -419,12 +419,28 @@
     }
 
     function hetang(i) {
-        var qty = parseFloat($('#n_quantity' + i).val());
-        var qty_sisa = parseFloat($('#n_quantity_sisa' + i).val());
-        var stock = parseFloat($('#n_stock' + i).val());
+        let qty = extractNumber($('#n_quantity' + i));
+        let qty_sisa = extractNumber($('#n_quantity_sisa' + i));
+        let stock = extractNumber($('#n_stock' + i));
+        let qty_kebutuhan = extractNumber($('#n_quantity_kebutuhan' + i));
+
+        if (qty > qty_kebutuhan) {
+            swal("Maaf :(", "Jumlah = " + qty + ", tidak boleh lebih dari kebutuhan = " + qty_kebutuhan + "", "error");
+            $('#n_quantity' + i).val(0);
+        }
+
         if (qty > stock) {
             swal("Maaf :(", "Jumlah = " + qty + ", tidak boleh lebih dari stock = " + stock + "", "error");
             $('#n_quantity' + i).val(0);
         }
     }
+
+    const extractNumber = (elemen) => {
+        let number = elemen.val()
+                .replace(/^\s+|\s+$/g, '')
+                .replace(/,/g, '')
+
+        return parseFloat(number);
+    }
+
 </script>

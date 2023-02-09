@@ -22,14 +22,14 @@
                             <input type="hidden" id="idocumentold" name="idocumentold" class="form-control" value="<?= $data->i_document;?>">
                         </div>
                         <div class="col-sm-4">
-                            <div class="input-group">
-                                <input type="text" name="idocument" id="idocument" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="BONM-2010-000001" maxlength="15" class="form-control input-sm" value="<?=$data->i_document;?>" aria-label="Text input with dropdown button">
+                            <input type="text" name="idocument" id="idocument" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="BONM-2010-000001" maxlength="15" class="form-control input-sm" value="<?=$data->i_document;?>" aria-label="Text input with dropdown button">
+                            <!-- <div class="input-group">
                                 <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
                                 </span>
                             </div>
                             <span class="notekode">Format : (<?= $data->i_document;?>)</span><br>
-                            <span class="notekode" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            <span class="notekode" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-4">
                              <input type="text" id= "ddocument" name="ddocument" class="form-control input-sm date" value="<?= $data->d_document; ?>" placeholder="<?=date('d-m-Y');?>" readonly>
@@ -59,19 +59,27 @@
                             <textarea id= "eremark" name="eremark" class="form-control" placeholder="Isi keterangan jika ada!"><?= $data->e_remark; ?></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-sm-12">
-                            <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7' || $data->i_status == '6') {?>
-                                <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Update</button>
-                            <?php } ?>
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <?php if ($data->i_status == '1') {?>
-                                <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
-                                <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
-                            <?php }elseif($data->i_status=='2') {?>
-                                <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
-                            <?php } ?>
-                        </div>           
+                    <div class="form-group row">
+                        <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7' || $data->i_status == '6') {?>
+                            <div class="col">
+                                <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Update</button>
+                            </div>
+                        <?php } ?>
+                            <div class="col">
+                                <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
+                            </div>
+                        <?php if ($data->i_status == '1') {?>
+                            <div class="col">
+                                <button type="button" id="send" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                            </div>
+                            <div class="col">
+                                <button type="button" id="hapus" class="btn btn-danger btn-block btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
+                            </div>
+                        <?php }elseif($data->i_status=='2') {?>
+                            <div class="col">
+                                <button type="button" id="cancel" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
+                            </div>
+                        <?php } ?>       
                     </div>
                 </div>
             </div>
@@ -169,7 +177,8 @@
                     }
                     return query;
                 },
-                processResults: function (data) {
+                processResults: function (result) {
+                    const data = mergeLabel(result);
                     return {
                         results: data
                     };
@@ -391,4 +400,15 @@
             }
         }
     }
+
+    const mergeLabel = (array) => {
+            let indexes = [];
+            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+                if (indexes.includes(id) == false) {
+                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+                }
+                indexes.push(id);
+                return obj;
+            }, {}));
+        }
 </script>

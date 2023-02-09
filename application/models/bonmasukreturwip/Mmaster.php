@@ -217,7 +217,7 @@ class Mmaster extends CI_Model
                                             AND tb.id_company = a.id_company
                                             )
                 WHERE tb.id = '$iasal'
-                    AND a.i_tujuan = '$itujuan'
+                    AND a.id_bagian_tujuan = '$itujuan'
                     AND a.i_status = '6'
                     AND a.i_document ILIKE '%$cari%'
                     AND a.id NOT IN (
@@ -256,12 +256,11 @@ class Mmaster extends CI_Model
 //    }
 
     public function getdataheader($idreff, $ipengirim){
-        return $this->db->query("SELECT
-            to_char(d_document, 'dd-mm-yyyy') as d_document
-            FROM 
-                tm_retur_produksi_gdjd
-            WHERE
-                id = '$idreff'", FALSE);
+        $sql = "SELECT to_char(d_document, 'dd-mm-yyyy') as d_document
+                FROM  tm_retur_produksi_gdjd
+                WHERE id = '$idreff'";
+
+        return $this->db->query($sql, FALSE);
     }
 
 //    public function getdataitem($idreff, $ipengirim)
@@ -284,20 +283,14 @@ class Mmaster extends CI_Model
 
     public function getdataitem($idreff, $ipengirim)
     {
-        return $this->db->query("SELECT
-                a.*,
-                b.i_product_base,
-                b.e_product_basename
-            FROM
-                tm_retur_produksi_gdjd_item a
-            INNER JOIN tr_product_base b ON
-                (b.id = a.id_product)
-            INNER JOIN tm_retur_produksi_gdjd c ON
-                (c.id = a.id_document )
-            WHERE
-                c.id = '$idreff'
-            ORDER BY
-                a.id", FALSE);
+        $sql = "SELECT a.*, b.i_product_base, b.e_product_basename
+                FROM tm_retur_produksi_gdjd_item a
+                INNER JOIN tr_product_base b ON (b.id = a.id_product)
+                INNER JOIN tm_retur_produksi_gdjd c ON (c.id = a.id_document )
+                WHERE c.id = '$idreff'
+                ORDER BY a.id";
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function runningid(){
@@ -445,25 +438,20 @@ class Mmaster extends CI_Model
         return $this->db->query($sql, FALSE);
     }
 
-    public function cek_datadetail($id, $ibagian){
-        return $this->db->query("SELECT
-                a.*,
-                c.id AS id_product,
-                c.i_product_base,
-                c.e_product_basename
-            FROM
-                tm_masuk_retur_wip_item a
-            INNER JOIN tr_product_wip b ON
-                (b.id = a.id_product_wip)
-            INNER JOIN tr_product_base c ON
-                (c.i_product_wip = b.i_product_wip
-                    AND b.i_color = c.i_color
-                    AND c.id_company = b.id_company)
-            WHERE
-                a.id_document = '$id'
-            ORDER BY
-                a.id
-        ", FALSE);
+    public function cek_datadetail($id, $ibagian)
+    {
+        $sql = "SELECT a.*, c.id AS id_product, c.i_product_base, c.e_product_basename
+                FROM tm_masuk_retur_wip_item a
+                INNER JOIN tr_product_wip b ON (b.id = a.id_product_wip)
+                INNER JOIN tr_product_base c ON (
+                                                c.i_product_wip = b.i_product_wip
+                                                AND b.i_color = c.i_color
+                                                AND c.id_company = b.id_company
+                                                )
+                WHERE a.id_document = '$id'
+                ORDER BY a.id";
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function updateheader($id, $ikodemaster, $ibonm, $datebonm, $eremark, $iasal, $ireff)

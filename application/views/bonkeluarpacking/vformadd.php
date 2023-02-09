@@ -27,14 +27,14 @@
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <!-- <span class="input-group-addon">
+                            <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
+                            <!-- <div class="input-group">
+                                <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span> -->
-                            </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                                </span>
+                            </div> -->
+                            <!-- <span class="notekode">Format : (<?= $number;?>)</span><br>
+                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date"  required="" readonly value="<?= date("d-m-Y");?>">
@@ -76,11 +76,17 @@
                         </div>
                     </div>                   
                     <div class="form-group row">
-                        <div class="col-sm-12">
-                            <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Simpan</button>
-                            <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>              
-                            <button type="button" id="send" hidden="true" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                        <div class="col">
+                            <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Simpan</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>              
+                        </div>
+                        <div class="col">
+                            <button type="button" id="send" hidden="true" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>                        
                         </div>
                     </div>
                 </div>
@@ -235,7 +241,7 @@
         cols += '<td><select type="text" data-placeholder="Pilih Barang" id="eproduct'+ counter + '" class="form-control select2" name="eproduct'+ counter + '" onchange="getproduct('+ counter + '); getstok('+ counter +'); "><option value=""></option></select></td>';
         cols += '<td><input type="hidden" id="idcolorproduct'+ counter + '" name="idcolorproduct[]"><input type="text" readonly id="ecolorproduct'+ counter + '" class="form-control input-sm" name="ecolorproduct'+ counter + '"></td>';
         cols += '<td><input type="text" readonly class="form-control input-sm text-right" id="stok'+ counter +'" name="stok'+ counter +'"></td>';
-        cols += '<td><input type="text" id="nquantity'+ counter + '" class="form-control input-sm text-right inputitem" name="nquantity[]" value="0" onkeyup="hetang('+counter+')"></td>';
+        cols += '<td><input type="number" id="nquantity'+ counter + '" class="form-control input-sm text-right inputitem" name="nquantity[]" value="0" onkeyup="hetang('+counter+')"></td>';
         cols += '<td><input type="text" id="edesc'+ counter + '" class="form-control input-sm" placeholder="Keterangan..." name="edesc[]"></td>';
         cols += '<td class="text-center"><button data-urut="' + counter + '" type="button" onclick="tambah_material(' + counter + ');" title="Tambah List" class="btn btn-sm btn-circle btn-info"><i data-urut="' + counter + '" id="addlist' + counter + '"  class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button><button type="button" data-i = "' + counter + '" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
 

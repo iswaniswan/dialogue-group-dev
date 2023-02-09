@@ -37,21 +37,26 @@ class Mmaster extends CI_Model
 
         $cek = $this->db->query($sql, FALSE);
 
-        if ($i_departement == '1') {
-            $bagian = "";
-        } else {
+        $bagian = "";
+        if ($i_departement != '1') {            
+            $session_i_departement = $this->session->userdata('i_departement');
+            $session_id_company = $this->session->userdata('id_company');
+            $session_username = $this->session->userdata('username');
+            $bagian = "AND a.i_bagian IN (
+                                            SELECT i_bagian
+                                            FROM tr_departement_cover 
+                                            WHERE i_departement = '$session_i_departement'
+                                                AND id_company = '$session_id_company' 
+                                                AND username = '$session_username'
+                                        )";
+
             if ($cek->num_rows() > 0) {
                 $i_bagian = $cek->row()->i_bagian;
                 $bagian = "AND a.i_bagian = '$i_bagian' ";
-            } else {
-                $bagian = "AND a.i_bagian IN (
-                                                SELECT i_bagian
-                                                FROM tr_departement_cover 
-                                                WHERE i_departement = '" . $this->session->userdata('i_departement') . "'
-                                                    AND id_company = '" . $this->session->userdata('id_company') . "' 
-                                                    AND username = '" . $this->session->userdata('username') . "')";
-            }
+            }                                                
         }
+
+        $TYPE_WIP = '23';
 
         $sql = "SELECT DISTINCT 0 as no,
                                 a.id,
@@ -75,26 +80,18 @@ class Mmaster extends CI_Model
                                 '$folder' AS folder
                     FROM tm_keluar_qc a 
                     JOIN tr_bagian b ON (
-                            a.i_tujuan = b.i_bagian /*AND a.id_company = b.id_company*/
+                            a.i_tujuan = b.i_bagian AND a.id_company_tujuan = b.id_company
                         ) 
                     JOIN tr_bagian ab ON (
-                            ab.i_bagian = a.i_bagian /*AND a.id_company = b.id_company*/ AND ab.i_type = '23'
+                            ab.i_bagian = a.i_bagian AND a.id_company = ab.id_company AND ab.i_type = '$TYPE_WIP'
                         ) 
-                    JOIN tr_status_document c ON (
-                            a.i_status = c.i_status
-                        )   
-                    JOIN tr_jenis_barang_keluar cc ON (
-                            cc.id = a.id_jenis_barang_keluar
-                        )                        
+                    JOIN tr_status_document c ON a.i_status = c.i_status
+                    JOIN tr_jenis_barang_keluar cc ON cc.id = a.id_jenis_barang_keluar
                     LEFT JOIN tr_menu_approve f ON (
                             a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu'
                         )
-                    LEFT JOIN public.tr_level l ON (
-                            f.i_level = l.i_level
-                        )
-                    LEFT JOIN public.company c2 ON (
-                            c2.id = a.id_company_tujuan
-                        )
+                    LEFT JOIN public.tr_level l ON f.i_level = l.i_level
+                    LEFT JOIN public.company c2 ON c2.id = a.id_company_tujuan
                     WHERE a.id_company = '$id_company'
                         AND a.i_status <> '5' $where $bagian
                     ORDER BY a.id DESC";
@@ -342,8 +339,11 @@ class Mmaster extends CI_Model
                         a.i_menu = '$i_menu'
                         AND NOT a.id_company = '$idcompany'
                         AND b.i_type = '$PACKING'
-                ";
-
+                        AND (
+                                SELECT array_agg(id) 
+                                FROM tr_type_makloon
+                                WHERE e_type_makloon_name ILIKE '%makloon packing%'
+                            ) && b.id_type_makloon";
 
         $sql = "$sql_company_internal UNION $sql_company_external ORDER BY 1 ASC";        
 
@@ -696,9 +696,12 @@ class Mmaster extends CI_Model
                 inner join tr_product_base m ON (m.id = l.id_product and m.id_company = l.id_company)
                 inner join tr_color n ON (n.id = a.id_color and l.id_company = n.id_company) */
                 WHERE
-                    a.id_keluar_qc = '$id'
-                    AND h.i_kode_group_barang = 'GRB0004'
-                    AND d.id_company = '$this->id_company' OR (g.f_jahit = 't' AND g.f_packing = 't')
+                    a.id_keluar_qc = '$id'                    
+                    AND d.id_company = '$this->id_company'
+                    AND (
+                        h.i_kode_group_barang = 'GRB0004'
+                        OR (g.f_jahit = 't' AND g.f_packing = 't')
+                    ) 
                 ORDER BY a.id_product/* , l.id_product */"
         );
     }
@@ -747,7 +750,7 @@ class Mmaster extends CI_Model
         //     ORDER BY id_product
         // ", FALSE);
 
-        return $this->db->query("SELECT
+        $sql = "SELECT
             a.id,
             a.id_keluar_qc,
             a.id_product,
@@ -800,8 +803,15 @@ class Mmaster extends CI_Model
         WHERE
             a.id_keluar_qc = '$id' 
             AND d.id_company = '$idcompany'
-            AND g.i_kode_group_barang = 'GRB0004' OR (f.f_jahit = 't' AND f.f_packing = 't')
-        ORDER BY a.id_product/* , j.id_product */", FALSE);
+            AND (
+                g.i_kode_group_barang = 'GRB0004'
+                OR (f.f_jahit = 't' AND f.f_packing = 't')
+            ) 
+        ORDER BY a.id_product/* , j.id_product */";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     public function view_databundling($id, $company)

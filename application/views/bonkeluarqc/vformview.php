@@ -32,7 +32,9 @@
                         <div class="col-sm-3">
                             <div class="input-group">
                                 <input type="hidden" name="id" id="id" value="<?= $id; ?>">
-                                <input type="text" name="ibonk" id="dokumenbon" value="<?= $data->i_keluar_qc; ?>" class="form-control input-sm" readonly>
+                                <input type="text" name="ibonk" id="dokumenbon" 
+                                        value="<?= $data->i_keluar_qc ?>" 
+                                        class="form-control input-sm" readonly>
                             </div>
                         </div>
                         <div class="col-sm-3">

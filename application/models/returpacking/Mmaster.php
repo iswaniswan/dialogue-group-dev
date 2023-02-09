@@ -84,7 +84,7 @@ class Mmaster extends CI_Model {
                     WHERE a.id_company = '$idcompany'
                         AND a.i_status <> '5'
                     $where $bagian
-                    ORDER BY a.i_document asc";
+                    ORDER BY a.id DESC";
 
         // var_dump($sql); die();                            
 

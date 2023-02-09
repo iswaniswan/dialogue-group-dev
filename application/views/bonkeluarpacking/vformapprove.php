@@ -65,11 +65,17 @@
                         </div>
                     </div>    
                     <div class="form-group row">
-                        <div class="col-sm-12">
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <button type="button" class="btn btn-warning btn-rounded btn-sm mr-2" onclick="statuschange('<?= $folder."','".$data->id;?>','1','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-pencil-square-o mr-2"></i>Change Requested</button>
-                            <button type="button" class="btn btn-danger btn-rounded btn-sm mr-2"  onclick="statuschange('<?= $folder."','".$data->id;?>','4','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-times mr-2"></i>Reject</button>
-                            <button type="button" id="approve" class="btn btn-success btn-rounded btn-sm mr-2"> <i class="fa fa-check-square-o mr-2"></i>Approve</button>
+                        <div class="col">
+                            <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-warning btn-block btn-sm mr-2" onclick="statuschange('<?= $folder."','".$data->id;?>','1','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-pencil-square-o mr-2"></i>Change Requested</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-danger btn-block btn-sm mr-2"  onclick="statuschange('<?= $folder."','".$data->id;?>','4','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-times mr-2"></i>Reject</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" id="approve" class="btn btn-success btn-block btn-sm mr-2"> <i class="fa fa-check-square-o mr-2"></i>Approve</button>                        
                         </div>
                     </div>
                 </div>

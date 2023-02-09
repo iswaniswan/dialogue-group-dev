@@ -69,23 +69,35 @@
                         </div>
                     </div>                   
                     <div class="row">
-                        <div class="col-sm-12">
-                            <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') {?>
-                                <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Update</button>
-                            <?php } ?>
-                            <?php if($data->i_status == '2'){?>
-                                <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <?php }else{?>
-                                <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <?php } ?>
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <?php if ($data->i_status == '1') {?>
-                                <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
-                                <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
-                            <?php }elseif($data->i_status=='2') {?>
+                        <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') {?>
+                            <div class="col">
+                                <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Update</button>
+                            </div>
+                        <?php } ?>
+                        <?php if($data->i_status == '2'){?>
+                            <div class="col">
+                                <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
+                            </div>
+                        <?php }else{?>
+                            <div class="col">
+                                <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
+                            </div>
+                        <?php } ?>
+                            <div class="col">
+                                <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
+                            </div>
+                        <?php if ($data->i_status == '1') {?>
+                            <div class="col">
+                                <button type="button" id="send" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                            </div>
+                            <div class="col">
+                                <button type="button" id="hapus" class="btn btn-danger btn-block btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
+                            </div>
+                        <?php }elseif($data->i_status=='2') {?>
+                            <div class="col">
                                 <button type="button" id="cancel" class="btn btn-primary btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
-                            <?php } ?>
-                        </div>
+                            </div>
+                        <?php } ?>                        
                     </div>
                 </div>
             </div>

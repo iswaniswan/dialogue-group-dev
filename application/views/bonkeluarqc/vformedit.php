@@ -35,12 +35,12 @@
                                 <input type="hidden" name="id" id="id" value="<?= $id; ?>">
                                 <input type="hidden" name="ibonkold" id="ibonkold" value="<?= $data->i_keluar_qc; ?>">
                                 <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value="<?= $data->i_keluar_qc; ?>" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
+                                <!-- <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
+                                </span> -->
                             </div>
-                            <span class="notekode">Format : (<?= $number; ?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            <!-- <span class="notekode">Format : (<?= $number; ?>)</span><br>
+                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?= $data->d_keluar_qc; ?>">
@@ -101,24 +101,36 @@
                             <textarea id="eremark" name="eremark" placeholder="Isi Keterangan Jika Ada!!!" class="form-control"><?= $data->e_remark; ?></textarea>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
-                                <button type="submit" id="submit" class="btn btn-success btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2"></i>Update</button>
-                            <?php } ?>
-                            <?php if ($data->i_status == '2') { ?>
-                                <button type="button" id="addrow" class="btn btn-info btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <?php } else { ?>
-                                <button type="button" id="addrow" class="btn btn-info btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <?php } ?>
-                            <button type="button" class="btn btn-inverse btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <?php if ($data->i_status == '1') { ?>
-                                <button type="button" id="send" class="btn btn-primary btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
-                                <button type="button" id="hapus" class="btn btn-danger btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
-                            <?php } elseif ($data->i_status == '2') { ?>
-                                <button type="button" id="cancel" class="btn btn-primary btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
-                            <?php } ?>
-                        </div>
+                    <div class="row">                        
+                        <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
+                            <div class="col">
+                                <button type="submit" id="submit" class="btn btn-success btn-sm btn-block mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2"></i>Update</button>
+                            </div>
+                        <?php } ?>
+                        <?php if ($data->i_status == '2') { ?>
+                            <div class="col d-none">
+                                <button type="button" id="addrow" class="btn btn-info btn-sm btn-block mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
+                            </div>
+                        <?php } else { ?>
+                            <div class="col">
+                                <button type="button" id="addrow" class="btn btn-info btn-sm btn-block mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
+                            </div>
+                        <?php } ?>
+                            <div class="col">
+                                <button type="button" class="btn btn-inverse btn-sm btn-block mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
+                            </div>
+                        <?php if ($data->i_status == '1') { ?>
+                            <div class="col">
+                                <button type="button" id="send" class="btn btn-primary btn-sm btn-block mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                            </div>
+                            <div class="col">
+                                <button type="button" id="hapus" class="btn btn-danger btn-sm btn-block mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
+                            </div>
+                        <?php } elseif ($data->i_status == '2') { ?>
+                            <div class="col">
+                                <button type="button" id="cancel" class="btn btn-primary btn-sm btn-block mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
+                            </div>
+                        <?php } ?>                        
                     </div>
                 </div>
             </div>
@@ -131,9 +143,11 @@
             <div class="col-sm-11">
                 <h3 class="box-title m-b-0">Detail Barang</h3>
             </div>
+            <?php /*
             <div class="col-sm-1" style="text-align: right;">
                 <?= $doc; ?>
             </div>
+            */ ?>
         </div>
         <div class="row">
             <div class="col-sm-12">
@@ -187,7 +201,7 @@
                                                 <input type="hidden" id="stok<?= $counter; ?>" name="stok<?= $counter; ?>" value="<?= $saldo_akhir; ?>">
                                             </td>
                                             <td><input type="hidden" value="<?= $row->id_color; ?>" id="idcolorproduct<?= $counter; ?>" name="idcolorproduct[]"><input type="text" value="<?= $row->e_color_name; ?>" readonly id="ecolorproduct<?= $counter; ?>" class="form-control input-sm" name="ecolorproduct<?= $counter; ?>"></td>
-                                            <td><input type="text" value="<?= $row->n_quantity_product; ?>" id="nquantity<?= $counter; ?>" class="form-control input-sm text-right inputitem" name="nquantity[]" onblur="if(this.value=='' ){this.value='0' ;}" onfocus="if(this.value=='0' ){this.value='' ;}" onkeyup="angkahungkul(this);validasi(<?= $counter; ?>);berhitung(<?= $counter; ?>)"></td>
+                                            <td><input type="number" value="<?= $row->n_quantity_product; ?>" id="nquantity<?= $counter; ?>" class="form-control input-sm text-right inputitem" name="nquantity[]" onblur="if(this.value=='' ){this.value='0' ;}" onfocus="if(this.value=='0' ){this.value='' ;}" onkeyup="angkahungkul(this);validasi(<?= $counter; ?>);berhitung(<?= $counter; ?>)"></td>
                                             <td colspan="2"><input value="<?= $row->e_remark; ?>" type="text" id="edesc<?= $counter; ?>" class="form-control input-sm" placeholder="Keterangan..." name="edesc[]"></td>
                                             <td class="text-center"><button data-urut="<?= $counter ?>" type="button" onclick="tambah_material(<?= $counter ?>);" title="Tambah List" class="btn btn-sm btn-circle btn-info"><i data-urut="<?= $counter ?>" id="addlist<?= $counter ?>"  class="fa fa-plus-circle fa-lg" aria-hidden="true"></i></button><button type="button" data-i="<?= $counter; ?>" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
                                         </tr>
@@ -264,17 +278,17 @@
                                         <td><?= $row->e_material_name;?></td>
                                         <td><?= $row->e_satuan_name;?></td>
                                         <td class="text-right">
-                                            <span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j;?>">
+                                            <span id="n_kebutuhan_perpcs<?= $counter; ?>_<?= $j ?>">
                                             <?= number_format($row->n_kebutuhan, 4, ".", ",")?>
                                         </span>
                                         </td>
                                         <td class="text-right">
-                                            <span id="n_stock_material<?= $counter; ?>_<?= $j;?>">
+                                            <span id="n_stock_material<?= $counter ?>_<?= $j ?>">
                                             <?= number_format($row->n_saldo_akhir, 4, ".", ",")?>
                                         </span>
                                         </td>
                                         <td class="text-right">
-                                            <span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j;?>">
+                                            <span class="reset_<?= $counter; ?>" id="n_kebutuhan_material<?= $counter; ?>_<?= $j ?>">
                                             <?= number_format($row->n_kebutuhan_material, 4, ".", ",")?>
                                         </span>
                                         </td>
@@ -327,7 +341,7 @@
 <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#dokumenbon').mask('SSS-0000-0000S');
+        // $('#dokumenbon').mask('SSS-0000-0000S');
         $('#itujuan').select2();
         $('.select2_product').select2({
             width: '70%',
@@ -765,8 +779,11 @@
         var ada = 0;
         // console.log($(`#tabledatax .td${i}`).length);
         for (let j = 0; j < $(`#tabledatax .td${i}`).length; j++) {
-            var n_kebutuhan_perpcs = parseFloat($('#n_kebutuhan_perpcs' + i + '_' + j).text());
-            var n_stock_material = parseFloat($('#n_stock_material' + i + '_' + j).text());
+
+            let n_kebutuhan_perpcs = extractNumber($('#n_kebutuhan_perpcs' + i + '_' + j));
+            let n_stock_material = extractNumber($('#n_stock_material' + i + '_' + j));
+
+            // console.log("stok: " + n_stock_material);
 
             let nilaiMaterial = n_quantity_product * n_kebutuhan_perpcs;
             nilaiMaterial = parseFloat(nilaiMaterial).toFixed(4);
@@ -779,7 +796,7 @@
                 break;
             }
         }
-        console.log(ada);
+        // console.log(ada);
 
         if (ada > 0) {
             swal("Maaf :(", "Jumlah kebutuhan material tidak boleh melebihi stok, mohon untuk dicek kembali :)", "error");
@@ -894,5 +911,13 @@
                 return false;
             }
         }
+    }
+
+    const extractNumber = (elemen) => {
+        let number = elemen.text()
+                .replace(/^\s+|\s+$/g, '')
+                .replace(/,/g, '')
+
+        return parseFloat(number);
     }
 </script>

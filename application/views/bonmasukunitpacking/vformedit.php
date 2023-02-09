@@ -26,16 +26,16 @@
                             <input type="hidden" id="ibagianold" value="<?= $data->i_bagian;?>">
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="hidden" id="id" name="id" value="<?= $data->id;?>">
-                                <input type="hidden" id="ibbmold" value="<?= $data->i_document;?>">  
-                                <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="16" class="form-control input-sm" value="<?= $data->i_document;?>" aria-label="Text input with dropdown button">
+                            <input type="hidden" id="id" name="id" value="<?= $data->id;?>">
+                            <input type="hidden" id="ibbmold" value="<?= $data->i_document;?>">  
+                            <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="16" class="form-control input-sm" value="<?= $data->i_document;?>" aria-label="Text input with dropdown button">
+                            <!-- <div class="input-group">
                                 <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
                                 </span>
-                            </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            </div> -->
+                            <!-- <span class="notekode">Format : (<?= $number;?>)</span><br>
+                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-3">
                             <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= $data->d_document;?>" readonly>
@@ -71,18 +71,26 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-sm-12">
-                            <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') {?>
-                                <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm"><i class="fa fa-save" ></i>&nbsp;&nbsp;Update</button>&nbsp;
-                            <?php } ?>
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
-                            <?php if ($data->i_status == '1') {?>
-                                <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm"><i class="fa fa-paper-plane-o"></i>&nbsp;&nbsp;Send</button>&nbsp;
-                                <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</button>&nbsp;
-                            <?php }elseif($data->i_status=='2') {?>
-                                <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm"><i class="fa fa-refresh"></i>&nbsp;&nbsp;Cancel</button>&nbsp;
-                            <?php } ?>
+                        <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') {?>
+                            <div class="col">
+                                <button type="submit" id="submit" class="btn btn-success btn-block btn-sm"><i class="fa fa-save" ></i>&nbsp;&nbsp;Update</button>&nbsp;
+                            </div>
+                        <?php } ?>
+                        <div class="col">
+                            <button type="button" class="btn btn-inverse btn-block btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
                         </div>
+                        <?php if ($data->i_status == '1') { ?>
+                            <div class="col">
+                                <button type="button" id="send" class="btn btn-primary btn-block btn-sm"><i class="fa fa-paper-plane-o"></i>&nbsp;&nbsp;Send</button>&nbsp;
+                            </div>
+                            <div class="col">
+                                <button type="button" id="hapus" class="btn btn-danger btn-block btn-sm"><i class="fa fa-trash"></i>&nbsp;&nbsp;Delete</button>&nbsp;
+                            </div>
+                        <?php } elseif ($data->i_status=='2') { ?>
+                            <div class="col-sm-6">
+                                <button type="button" id="cancel" class="btn btn-primary btn-block btn-sm"><i class="fa fa-refresh"></i>&nbsp;&nbsp;Cancel</button>&nbsp;
+                            </div>
+                        <?php } ?>
                     </div>
                 </div>           
             </div>
@@ -103,7 +111,7 @@
                         <th class="text-center" width="10%">Kode</th>
                         <th class="text-center" width="30%">Nama Barang</th>
                         <th class="text-center" width="12%">Warna</th>
-                        <th class="text-center" width="8%">Qty</th>
+                        <th class="text-center" width="8%">Qty Kirim</th>
                         <th class="text-center" width="10%">Qty Terima</th>
                         <th class="text-center">Keterangan</th>
                     </tr>
@@ -273,7 +281,7 @@
 
     function cekqty(x) {
         if (parseInt($('#npemenuhan'+x).val()) > parseInt($('#nquantitysisa'+x).val())) {
-            swal('Yaah :(','Qty Terima Tidak Boleh Lebih Dari Qty Sisa = '+$('#nquantitysisa'+x).val()+'!','error');
+            swal('Yaah :(','Qty Terima Tidak Boleh Lebih Dari Qty Kirim = '+$('#nquantitysisa'+x).val()+'!','error');
             $('#npemenuhan'+x).val($('#nquantitysisa'+x).val());
         }
     }

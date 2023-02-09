@@ -93,12 +93,17 @@
     });
 
     $("#submit").click(function(event) {
-        if ($("#formclose input:checkbox:checked").length > 0) {
+        if ($("#.listitem input:checkbox:checked").not(":disabled").length > 0) {
             return true;
         } else {
             swal('Maaf :(', 'Pilih data minimal satu!', 'error');
             return false;
         }
+
+        // console.log($(".listitem input:checkbox:checked").not(":disabled").length);
+        // return false
+
+        //$('input[type="checkbox"]').not(":disabled").length
     });
 
     $('#prosessupplier').click(function() {

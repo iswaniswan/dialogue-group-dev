@@ -88,7 +88,7 @@ class Mmaster extends CI_Model
                     WHERE a.id_company = '$idcompany'
                         AND a.i_status <> '5'
                     $where $bagian
-                ORDER BY a.i_keluar_qc asc";
+                ORDER BY a.id DESC";
 
         $datatables->query($sql, false);
 

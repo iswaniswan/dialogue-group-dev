@@ -34,7 +34,7 @@ class Mmaster extends CI_Model
                     a.id AS id,
                     a.i_document,
                     to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                    d.e_bagian_name,
+                    concat(b2.e_bagian_name, ' - ', c.name),
                     e.i_document document_referensi,
                     a.e_remark,
                     e_status_name,
@@ -52,13 +52,15 @@ class Mmaster extends CI_Model
                                             d.i_bagian = a.i_bagian AND a.id_company = d.id_company
                                         )
                 LEFT JOIN tm_stb_material e ON e.id = a.id_document_referensi
+                LEFT JOIN tr_bagian b2 ON (b2.i_bagian = e.i_bagian AND b2.id_company = e.id_company)
+                LEFT JOIN public.company c ON (c.id = b2.id_company)
                 LEFT JOIN tr_menu_approve g ON (
                                                 a.i_approve_urutan = g.n_urut AND g.i_menu = '$i_menu'
                                             )
                 LEFT JOIN public.tr_level l ON (g.i_level = l.i_level)
                 WHERE a.i_status <> '5'
                     AND a.id_company = '$this->id_company' $and $bagian
-                ORDER BY a.id";
+                ORDER BY a.id DESC";
 
         // var_dump($sql); die();
 
@@ -378,7 +380,8 @@ class Mmaster extends CI_Model
                     AND tsm.id NOT IN (
                                         SELECT id_document_referensi
                                         FROM tm_masuk_material
-                                        WHERE i_status IN ('9', '7', '6')
+                                        -- WHERE i_status IN ('9', '7', '6')
+                                        WHERE i_status IN ('1', '2', '3', '6', '8')
                                         )
                 ORDER BY id desc";
 
@@ -702,6 +705,7 @@ class Mmaster extends CI_Model
         $sql = "SELECT a.*, b.e_bagian_name,                     
                     b2.i_bagian AS i_bagian_pengirim,
                     b2.e_bagian_name AS e_bagian_name_pengirim,
+                    c2.name,
                     c.id AS id_referensi,
                     c.i_document AS i_document_referensi,
                     to_char(c.d_document, 'dd FMMonth yyyy') AS d_referensi                    
@@ -713,6 +717,7 @@ class Mmaster extends CI_Model
                 INNER JOIN tr_bagian b2 ON (                                        
                                             b2.i_bagian = c.i_bagian AND b2.id_company = c.id_company
                                         ) 
+                LEFT JOIN public.company c2 ON c2.id = b2.id_company
                 WHERE a.id = '$id'";
 
         // var_dump($sql); die();

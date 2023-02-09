@@ -54,7 +54,10 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-12">
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>
+                            <button type="button" class="btn btn-inverse btn-block btn-sm" 
+                                    onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;">
+                                    <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali
+                            </button>
                         </div>
                     </div>
                 </div>           
@@ -76,7 +79,7 @@
                         <th class="text-center" width="10%">Kode</th>
                         <th class="text-center" width="30%">Nama Barang</th>
                         <th class="text-center" width="12%">Warna</th>
-                        <th class="text-center" width="8%">Qty</th>
+                        <th class="text-center" width="8%">Qty Kirim</th>
                         <th class="text-center" width="10%">Qty Terima</th>
                         <th class="text-center">Keterangan</th>
                     </tr>

@@ -55,19 +55,27 @@
                      <textarea id= "eremark" name="eremark" class="form-control"><?= $data->e_remark; ?></textarea>
                   </div>
                </div>
-               <div class="form-group">
-                  <div class="col-sm-12">
-                     <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7' || $data->i_status == '6') {?>
-                     <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2"><i class="fa fa-save mr-2" ></i>Update</button>
-                     <?php } ?>
-                     <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                     <?php if ($data->i_status == '1') {?>
-                     <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
-                     <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
-                     <?php }elseif($data->i_status=='2') {?>
-                     <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
-                     <?php } ?>
-                  </div>
+               <div class="form-group row">
+                   <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7' || $data->i_status == '6') {?>
+                      <div class="col">
+                        <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2"><i class="fa fa-save mr-2" ></i>Update</button>
+                      </div>
+                   <?php } ?>
+                      <div class="col">
+                        <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom."/".$dto;?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
+                      </div>
+                   <?php if ($data->i_status == '1') {?>
+                      <div class="col">
+                        <button type="button" id="send" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                      </div>
+                      <div class="col">
+                        <button type="button" id="hapus" class="btn btn-danger btn-block btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
+                      </div>
+                   <?php }elseif($data->i_status=='2') {?>
+                      <div class="col">
+                        <button type="button" id="cancel" class="btn btn-primary btn-block btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
+                      </div>
+                   <?php } ?>                  
                </div>
             </div>
          </div>

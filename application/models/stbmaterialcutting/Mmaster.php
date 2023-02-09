@@ -884,7 +884,7 @@ class Mmaster extends CI_Model
                 FROM tm_stb_material_cutting_item a, tm_stb_material_cutting b 
                 WHERE b.id = a.id_document AND i_status IN ('1','2','3','6')  group by 1,2,3
             ) h ON ( h.id_product_wip = a.id_product_wip AND a.id_material = h.id_material AND a.id_forecast = ANY(h.id_referensi))
-            WHERE ab.i_status = '6' AND ab.id_company = '4' AND (round(a.n_quantity * a.n_fc_cutting, 2) - COALESCE (h.n_quantity,0)) > 0 
+            WHERE ab.i_status = '6' AND ab.id_company = '$this->id_company' AND (round(a.n_quantity * a.n_fc_cutting, 2) - COALESCE (h.n_quantity,0)) > 0 
             /*AND a.id_material IN ($id_material) AND a.id_product_wip IN ($id_product_wip)*/
             AND ARRAY[a.id_type_makloon] && (SELECT id_type_makloon FROM tr_bagian WHERE id = '$ibagian')
             AND a.i_periode IN ($i_periode)

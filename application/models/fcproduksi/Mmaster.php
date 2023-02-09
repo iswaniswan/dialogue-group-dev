@@ -438,7 +438,7 @@ class Mmaster extends CI_Model
                 FROM
                     cte a
                 LEFT JOIN f_mutasi_gudang_jadi ('$this->id_company',
-                    '$i_periode',
+                    '$i_periode_now',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',
@@ -447,7 +447,7 @@ class Mmaster extends CI_Model
                     (e.id_product_base = a.id_product_base
                         AND a.id_company = e.id_company)
                 LEFT JOIN f_mutasi_wip ('$this->id_company',
-                    '$i_periode',
+                    '$i_periode_now',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',
@@ -462,7 +462,7 @@ class Mmaster extends CI_Model
                         sum(saldo_akhir) AS saldo_akhir
                     FROM
                         f_mutasi_unitjahit('$this->id_company',
-                        '$i_periode',
+                        '$i_periode_now',
                         '9999-01-01',
                         '9999-01-31',
                         '$dfrom',
@@ -480,7 +480,7 @@ class Mmaster extends CI_Model
                         c.id id_product_base
                     FROM
                         f_mutasi_saldoawal_pengadaan_newbie ('$this->id_company',
-                        '$i_periode',
+                        '$i_periode_now',
                         '9999-01-01',
                         '9999-01-31',
                         '$dfrom',
@@ -495,7 +495,7 @@ class Mmaster extends CI_Model
                     (h.id_product_base = a.id_product_base
                         AND a.id_company = h.id_company)
                 LEFT JOIN f_mutasi_packing ('$this->id_company',
-                    '$i_periode',
+                    '$i_periode_now',
                     '9999-01-01',
                     '9999-01-31',
                     '$dfrom',

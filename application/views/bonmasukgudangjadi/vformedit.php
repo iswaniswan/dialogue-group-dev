@@ -28,12 +28,7 @@
                                 <input type="hidden" id="id" name="id" value="<?= $data->id; ?>">
                                 <input type="hidden" id="ibbmold" value="<?= $data->i_document; ?>">
                                 <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="16" class="form-control input-sm" value="<?= $data->i_document; ?>" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
-                                    <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
                             </div>
-                            <span class="notekode">Format : (<?= $number; ?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-3">
                             <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= $data->d_document; ?>" readonly>
@@ -139,7 +134,7 @@ if ($datadetail) { ?>
                             <th class="text-center" width="10%">Kode</th>
                             <th class="text-center" width="30%">Nama Barang</th>
                             <th class="text-center" width="12%">Warna</th>
-                            <th class="text-center" width="8%">Qty</th>
+                            <th class="text-center" width="8%">Qty Kirim</th>
                             <th class="text-center" width="10%">Qty Terima</th>
                             <th class="text-center">Keterangan</th>
                         </tr>

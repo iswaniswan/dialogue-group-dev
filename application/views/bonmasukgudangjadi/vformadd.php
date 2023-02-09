@@ -23,14 +23,7 @@
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="16" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <!-- <span class="input-group-addon">
-                                    <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span> -->
-                            </div>
-                            <span class="notekode">Format : (<?= $number; ?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            <input type="text" name="idocument" required="" id="ibbm" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="16" class="form-control input-sm" value="" aria-label="Text input with dropdown button">                                                                     
                         </div>
                         <div class="col-sm-3">
                             <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= date('d-m-Y'); ?>" readonly>
@@ -92,7 +85,7 @@
                     <th class="text-center" width="10%">Kode</th>
                     <th class="text-center" width="30%">Nama Barang</th>
                     <th class="text-center" width="12%">Warna</th>
-                    <th class="text-center" width="8%">Qty</th>
+                    <th class="text-center" width="8%">Qty Kirim</th>
                     <th class="text-center" width="10%">Qty Terima</th>
                     <th class="text-center">Keterangan</th>
                 </tr>
@@ -183,6 +176,7 @@
                 url: '<?= base_url($folder . '/cform/detailreferensi'); ?>',
                 dataType: "json",
                 success: function(data) {
+                    console.log(data);
                     if (data['data'].length > 0) {
                         $('#jenis_barang').val(data['data'][0]['e_jenis_name']);
                         $('#id_jenis_barang').val(data['data'][0]['id_jenis_barang_keluar']);

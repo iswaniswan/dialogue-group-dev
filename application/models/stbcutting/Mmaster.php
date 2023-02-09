@@ -139,7 +139,7 @@ class Mmaster extends CI_Model
             $id_product_wip = $data['id_product_wip']; */
             $data   = '';
             $data .= "<label class='custom-control custom-checkbox'> 
-                <input type='checkbox' id='chk$i' name='chk$i' class='custom-control-input' ".$disable.">
+                <input type='checkbox' id='chk$i' name='chk$i' class='custom-control-input listitem' ".$disable.">
                 <span class='custom-control-indicator'></span>
                 <span class='custom-control-description'></span>
                 <input id='id$i' name='id$i' value='$id' type='hidden'>

@@ -32,7 +32,9 @@
                         <label class="col-md-4">Tanggal Referensi</label>
                         <div class="col-sm-4">
                             <select name="ipengirim" id="ipengirim" class="form-control select2" disabled>
-                                <option value="<?= $data->i_bagian_pengirim; ?>"><?= $data->e_bagian_name_pengirim; ?></option>
+                                <option value="<?= $data->i_bagian_pengirim; ?>">
+                                    <?= $data->e_bagian_name_pengirim ?> - <?= $data->name ?>
+                                </option>
                             </select>
                         </div>
                         <div class="col-sm-4">
@@ -50,9 +52,9 @@
                             <textarea id= "eremark" name="eremark" class="form-control" placeholder="Isi keterangan jika ada!" readonly><?= $data->e_remark; ?></textarea>
                         </div>
                     </div>
-                    <div class="form-group">
+                    <div class="row">
                         <div class="col-sm-offset-3 col-sm-12">
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?=$dfrom;?>/<?=$dto;?>','#main'); return false;"><i class="ti-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;&nbsp;
+                            <button type="button" class="btn btn-inverse btn-block btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?=$dfrom;?>/<?=$dto;?>','#main'); return false;"><i class="ti-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;&nbsp;
                         </div>
                     </div>
                 </div>

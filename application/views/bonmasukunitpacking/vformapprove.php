@@ -41,12 +41,18 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <div class="col-sm-12">
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
-                            <button type="button" class="btn btn-warning btn-rounded btn-sm" onclick="statuschange('<?= $folder."','".$data->id;?>','1','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;Change Requested</button>&nbsp;
-                            <button type="button" class="btn btn-danger btn-rounded btn-sm"  onclick="statuschange('<?= $folder."','".$data->id;?>','4','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-times"></i>&nbsp;&nbsp;Reject</button>&nbsp;
-                            <button type="button" id="approve" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Approve</button>&nbsp;
-                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-inverse btn-block btn-sm" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
+                        </div> 
+                        <div class="col">
+                            <button type="button" class="btn btn-warning btn-block btn-sm" onclick="statuschange('<?= $folder."','".$data->id;?>','1','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;Change Requested</button>&nbsp;
+                        </div> 
+                        <div class="col">
+                            <button type="button" class="btn btn-danger btn-block btn-sm"  onclick="statuschange('<?= $folder."','".$data->id;?>','4','<?= $dfrom."','".$dto;?>');"> <i class="fa fa-times"></i>&nbsp;&nbsp;Reject</button>&nbsp;
+                        </div> 
+                        <div class="col">
+                            <button type="button" id="approve" class="btn btn-success btn-block btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Approve</button>&nbsp;                        
+                        </div> 
                     </div>
                 </div>           
             </div>
@@ -67,7 +73,7 @@
                         <th class="text-center" width="10%">Kode</th>
                         <th class="text-center" width="30%">Nama Barang</th>
                         <th class="text-center" width="12%">Warna</th>
-                        <th class="text-center" width="8%">Qty</th>
+                        <th class="text-center" width="8%">Qty Kirim</th>
                         <th class="text-center" width="10%">Qty Terima</th>
                         <th class="text-center">Keterangan</th>
                     </tr>
