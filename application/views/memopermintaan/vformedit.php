@@ -104,7 +104,7 @@
                         <div class="row">
                             <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
                                 <div class="col-sm-3">
-                                    <button type="button" id="submit" class="btn btn-success btn-block btn-sm" onclick="return simpan();"><i class="fa fa-save mr-2 fa-lg"></i>Update</button>
+                                    <button type="button" id="submit" class="btn btn-success btn-block btn-sm" onclick=""><i class="fa fa-save mr-2 fa-lg"></i>Update</button>
                                 </div>
                                 <div class="col-sm-2">
                                     <button type="button" id="send" class="btn btn-primary btn-block btn-sm"><i class="fa fa-paper-plane-o mr-2 fa-lg"></i>Send</button>
@@ -220,8 +220,10 @@
     /*----------  LOAD SAAT DOKUMEN READY  ----------*/
 
     $(document).ready(function() {
+        <?php /*
         // var data = $('#itujuan_kirim option:selected').text();
         // $('#itujuan_kirim option:selected').text(`${data} - <?= $data->company_tujuan ?>`);
+        */ ?>
         /*----------  Load Form Validation  ----------*/
         $('#cekinputan').validate({
             errorClass: "my-error-class",

@@ -75,7 +75,7 @@
                         <div class="col-sm-9">
                             <textarea id="eremark" name="eremark" placeholder="Isi Keterangan Jika Ada!!!" class="form-control"><?= $data->e_remark;?></textarea>
                         </div>
-                    </div>                   
+                    </div>                 
                     <div class="form-group row">
                         <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') {?>
                             <div class="col">
@@ -83,7 +83,7 @@
                             </div>
                         <?php } ?>
                         <?php if($data->i_status == '2'){?>
-                            <div class="col">
+                            <div class="col d-none">
                                 <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
                             </div>
                         <?php }else{?>

@@ -727,7 +727,14 @@ class Mmaster extends CI_Model
 
     public function cek_datadetail($id)
     {
-        $sql = "SELECT a.*, b.i_material, b.e_material_name, c.e_satuan_name, d.n_quantity n_quantity_reff, d.n_quantity_sisa n_quantity_reff_sisa 
+        $sql = "SELECT 
+                    DISTINCT ON (a.id) /** avoid duplicate */
+                    a.*, 
+                    b.i_material, 
+                    b.e_material_name, 
+                    c.e_satuan_name, 
+                    d.n_quantity n_quantity_reff, 
+                    d.n_quantity_sisa n_quantity_reff_sisa 
                 FROM tm_masuk_material_item a 
                 INNER JOIN tr_material b ON b.id = a.id_material
                 INNER JOIN tr_satuan c ON (
@@ -742,6 +749,8 @@ class Mmaster extends CI_Model
                 )
                 WHERE id_document = '$id'
                 ORDER BY a.id";
+
+        // var_dump($sql); die();
 
         return $this->db->query($sql);
     }

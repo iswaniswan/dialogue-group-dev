@@ -19,7 +19,7 @@
                             <select name="ibagian" id="ibagian" class="form-control select2" required="">
                                 <?php if ($bagian) {
                                     foreach ($bagian as $row):?>
-                                        <option value="<?= $row->id;?>">
+                                        <option value="<?= $row->i_bagian;?>">
                                             <?= $row->e_bagian_name;?>
                                         </option>
                                     <?php endforeach; 

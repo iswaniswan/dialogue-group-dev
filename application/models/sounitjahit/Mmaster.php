@@ -298,27 +298,27 @@ class Mmaster extends CI_Model
                                           AND a.i_color = b.i_color)
                                   ", FALSE); */
 
-        return $this->db->query("SELECT
-                x.id_company,
-                cc.name as e_company_name,
-                c.i_product_wip,
-                c.id,
-                c.e_product_wipname,
-                b.id AS id_color,
-                b.e_color_name,
-                0 AS n_quantity,
-                0 qty_repair,
-                0 qty_bagus,
-                '' AS e_remark
-            FROM
-                f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x 
-            INNER JOIN tr_product_base a ON
-                (a.id = x.id_product_base)
-            INNER JOIN tr_product_wip c ON (c.i_product_wip = a.i_product_wip AND a.id_company = c.id_company AND c.i_color = a.i_color)
-            INNER JOIN tr_color b ON (b.id_company = c.id_company AND c.i_color = b.i_color)
-            inner join public.company cc ON (cc.id = c.id_company)
-            ORDER BY 2
-        ", FALSE);
+        $sql = "SELECT x.id_company,
+                    cc.name as e_company_name,
+                    c.i_product_wip,
+                    c.id,
+                    c.e_product_wipname,
+                    b.id AS id_color,
+                    b.e_color_name,
+                    0 AS n_quantity,
+                    0 qty_repair,
+                    0 qty_bagus,
+                    '' AS e_remark
+                FROM f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x 
+                INNER JOIN tr_product_base a ON a.id = x.id_product_base
+                INNER JOIN tr_product_wip c ON (c.i_product_wip = a.i_product_wip AND a.id_company = c.id_company AND c.i_color = a.i_color)
+                INNER JOIN tr_color b ON (b.id_company = c.id_company AND c.i_color = b.i_color)
+                inner join public.company cc ON (cc.id = c.id_company)
+                ORDER BY 2";
+
+        var_dump($sql); die();        
+
+        return $this->db->query($sql, FALSE);
     }
 
     /*----------  CARI BARANG  ----------*/
@@ -521,50 +521,45 @@ class Mmaster extends CI_Model
 
     public function dataheader_edit($id)
     {
-        return $this->db->query("
-                                  SELECT
-                                     a.id,
-                                     a.i_document,
-                                     to_char(a.d_document, 'dd-mm-yyyy') as d_document,
-                                     a.e_remark,
-                                     a.i_status,
-                                     a.i_bagian,
-                                     b.e_bagian_name 
-                                  FROM
-                                     tm_stockopname_unitjahit a 
-                                     INNER JOIN
-                                        tr_bagian b 
-                                        ON (a.i_bagian = b.i_bagian 
-                                        AND a.id_company = b.id_company) 
-                                  WHERE
-                                     a.id = '$id'
-                                ", FALSE);
+        $sql = "SELECT
+                    a.id,
+                    a.i_document,
+                    to_char(a.d_document, 'dd-mm-yyyy') as d_document,
+                    a.e_remark,
+                    a.i_status,
+                    a.i_bagian,
+                    b.e_bagian_name 
+                FROM tm_stockopname_unitjahit a 
+                INNER JOIN tr_bagian b ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company) 
+                WHERE a.id = '$id'";
+
+        // var_dump($sql); die();
+        
+        return $this->db->query($sql, FALSE);
     }
 
     public function datadetail_edit($id)
     {
-        return $this->db->query("SELECT
-                a.id_product_wip as id,
-                b.i_product_wip,
-                a.id_color,
-                b.e_product_wipname,
-                c.e_color_name,
-                a.n_quantity,
-                a.n_quantity_repair,
-                a.e_remark 
-            FROM
-                tm_stockopname_unitjahit_item a 
-            INNER JOIN
-                tr_product_wip b 
-                ON (a.id_product_wip = b.id) 
-            INNER JOIN
-                tr_color c 
-                ON (b.i_color = c.i_color 
-                AND a.id_color = c.id
-                AND b.id_company = c.id_company) 
-            WHERE
-                id_document = '$id'
-        ", FALSE);
+        $sql = "SELECT
+                    a.id_product_wip as id,
+                    b.i_product_wip,
+                    a.id_color,
+                    b.e_product_wipname,
+                    c.e_color_name,
+                    a.n_quantity,
+                    a.n_quantity_repair,
+                    a.e_remark 
+                FROM tm_stockopname_unitjahit_item a 
+                INNER JOIN tr_product_wip b ON a.id_product_wip = b.id
+                INNER JOIN tr_color c ON (
+                                            b.i_color = c.i_color AND 
+                                            b.id_company = c.id_company
+                                        ) 
+                WHERE id_document = '$id'";
+
+        // var_dump($sql); die();
+        
+        return $this->db->query($sql, FALSE);
     }
 
     public function updateheader($id, $eremarkh)

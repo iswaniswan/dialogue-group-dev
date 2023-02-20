@@ -31,7 +31,7 @@
                             <input type="text" name="ddocument" required="" id="ddocument" class="form-control input-sm date" value="<?= formatdmY($data->d_document); ?>" readonly>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" name="e_type" id="e_type" value="<?= $data->e_type_name ?> - <?= $data->company_tujuan ?>" readonly class="form-control input-sm">
+                            <input type="text" name="e_type" id="e_type" value="<?= $data->e_type_name ?> - <?= $data->company_penerima ?>" readonly class="form-control input-sm">
                         </div>
                     </div>
                     <div class="form-group row">
@@ -39,7 +39,7 @@
                         <label for="dkirim" class="col-md-3">Tanggal Kirim</label>
                         <label class="col-md-6">Keterangan</label>
                         <div class="col-sm-3">
-                            <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= $data->e_tujuan_name ?> - <?= $data->company_tujuan ?>" readonly>
+                            <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= $data->e_tujuan_name ?> - <?= $data->company ?>" readonly>
                         </div>
                         <div class="col-sm-3">
                             <input type="text" name="dkirim" required="" id="dkirim" class="form-control input-sm" value="<?= formatdmY($data->d_kirim) ?>" readonly>

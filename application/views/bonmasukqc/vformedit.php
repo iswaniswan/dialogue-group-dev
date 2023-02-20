@@ -136,8 +136,8 @@
                         </td>                                            
                     </tr>             
                     <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                    <?}
-                    }?>        
+                    <?php }
+                    } ?>        
                 </tbody>         
             </table>
         </div>

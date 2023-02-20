@@ -78,8 +78,8 @@ class Mmaster extends CI_Model
                     '$i_menu' as i_menu,
                     '$folder' AS folder
                 FROM tm_keluar_qc a 
-                JOIN tr_bagian b ON (a.i_tujuan = b.i_bagian AND a.id_company = b.id_company) 
-                JOIN tr_bagian ab ON (ab.i_bagian = a.i_bagian AND a.id_company = b.id_company AND ab.i_type = '12') 
+                JOIN tr_bagian b ON (b.i_bagian = a.i_tujuan AND b.id_company = a.id_company_tujuan) 
+                JOIN tr_bagian ab ON (ab.i_bagian = a.i_bagian AND ab.id_company = a.id_company AND ab.i_type = '12') 
                 JOIN tr_status_document c ON (a.i_status = c.i_status)   
                 JOIN tr_jenis_barang_keluar cc ON (cc.id = a.id_jenis_barang_keluar)     
                 LEFT JOIN public.company c2 ON c2.id = a.id_company_tujuan                    
@@ -89,6 +89,8 @@ class Mmaster extends CI_Model
                         AND a.i_status <> '5'
                     $where $bagian
                 ORDER BY a.id DESC";
+
+        // var_dump($sql); die();
 
         $datatables->query($sql, false);
 

@@ -77,10 +77,14 @@
                     </div>                   
                     <div class="form-group row">
                         <div class="col">
-                            <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2" ></i>Simpan</button>
+                            <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();">
+                                <i class="fa fa-save mr-2" ></i>Simpan
+                            </button>
                         </div>
                         <div class="col">
-                            <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
+                            <button type="button" id="addrow" class="btn btn-info btn-block btn-sm mr-2">
+                                <i class="fa fa-plus mr-2"></i>Item
+                            </button>
                         </div>
                         <div class="col">
                             <button type="button" class="btn btn-inverse btn-block btn-sm mr-2" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>              

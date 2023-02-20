@@ -7,51 +7,55 @@ class Mmaster extends CI_Model
 {
     function data($i_menu, $i_menu1, $folder, $folder1, $dfrom, $dto)
     {
-        $idcompany = $this->id_company;
-         if ($dfrom!='' && $dto!='') {
+        $i_departement = $this->session->userdata('i_departement');
+        $id_company = $this->session->userdata('id_company');
+        $username = $this->session->userdata('username');
+
+        $where = "";        
+        if ($dfrom!='' && $dto!='') {
             $dfrom = date('Y-m-d', strtotime($dfrom));
             $dto   = date('Y-m-d', strtotime($dto));
             $where = "AND a.d_document BETWEEN '$dfrom' AND '$dto'";
-        }else{
-            $where = "";
         }
 
-        $cek = $this->db->query("SELECT
-                i_bagian
-            FROM
-                tm_masuk_qc a
-            WHERE
-                i_status <> '5'
-                AND id_company = '".$this->session->userdata('id_company')."'
-                $where
-                AND i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '".$this->session->userdata('i_departement')."'
-                        AND id_company = '".$this->session->userdata('id_company')."'
-                        AND username = '".$this->session->userdata('username')."')
+        $sql_in_bagian = "SELECT i_bagian
+                            FROM tr_departement_cover
+                            WHERE i_departement = '$i_departement'
+                                AND id_company = '$id_company'
+                                AND username = '$username'";
 
-        ", FALSE);
-        if ($this->session->userdata('i_departement')=='4' || $this->session->userdata('i_departement')=='1') {
-            $bagian = "";
-        }else{
-            if ($cek->num_rows()>0) {                
+        $sql = "SELECT i_bagian
+                FROM tm_masuk_qc a
+                WHERE i_status <> '5' AND id_company = '$id_company'
+                    $where
+                    AND i_bagian IN ($sql_in_bagian)";
+
+        $cek = $this->db->query($sql, FALSE);
+
+        // if (($i_departement == '4') or ($i_departement =='1')) {
+        //     $bagian = "";
+        // }else{
+        //     if ($cek->num_rows()>0) {                
+        //         $i_bagian = $cek->row()->i_bagian;
+        //         $bagian = "AND a.i_bagian = '$i_bagian' ";
+        //     }else{
+        //         $bagian = "AND a.i_bagian IN ($sql_in_bagian)";
+        //     }
+        // }
+
+
+        /** refactor */
+        $bagian = "";
+        if (($i_departement != '4') and ($i_departement != '1')) {
+            $bagian = "AND a.i_bagian IN ($sql_in_bagian)";
+
+            if ($cek->num_rows() > 0) {
                 $i_bagian = $cek->row()->i_bagian;
-                $bagian = "AND a.i_bagian = '$i_bagian' ";
-            }else{
-                $bagian = "AND a.i_bagian IN (SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '".$this->session->userdata('i_departement')."'
-                        AND id_company = '".$this->session->userdata('id_company')."'
-                        AND username = '".$this->session->userdata('username')."')";
+                $bagian = "AND a.i_bagian = '$i_bagian'"; 
             }
         }
+
+
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query("SELECT
                 0 as no,
@@ -92,7 +96,7 @@ class Mmaster extends CI_Model
             WHERE
                 a.i_status <> '5'
             AND 
-                a.id_company = '$idcompany'
+                a.id_company = '$id_company'
             $where
             $bagian
             UNION ALL
@@ -134,7 +138,7 @@ class Mmaster extends CI_Model
                 (f.i_level = l.i_level)
 
             WHERE
-                a.id_company = '$idcompany' 
+                a.id_company = '$id_company' 
                 AND a.i_status <> '5'
                 $where
                 $bagian
@@ -211,7 +215,7 @@ class Mmaster extends CI_Model
         return $this->db->query($sql, false);
     }
 
-    public function bagianpengirim($cari, $id_bagian)
+    public function bagianpengirim($cari, $i_bagian)
     {
         $cari = str_replace("'", "", $cari);
         /* return $this->db->query(
@@ -230,6 +234,8 @@ class Mmaster extends CI_Model
                 b.e_bagian_name
         ", FALSE); */
 
+        /** using id_bagian */
+        /*        
         $sql = "SELECT DISTINCT b.id,
                         b.i_bagian,
                         b.id_company,
@@ -237,7 +243,7 @@ class Mmaster extends CI_Model
                         c.name AS company_name
                     FROM tm_keluar_jahit a
                     INNER JOIN tm_keluar_jahit_item ab ON	(ab.id_keluar_jahit = a.id)
-                    INNER JOIN tr_bagian b ON	(b.i_bagian = a.i_bagian		AND a.id_company = b.id_company)
+                    INNER JOIN tr_bagian b ON	(b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
                     INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company_bagian 
                     INNER JOIN public.company c ON	(c.id = b.id_company)
                     WHERE b2.id = '$id_bagian'
@@ -245,7 +251,26 @@ class Mmaster extends CI_Model
                             OR b.e_bagian_name ILIKE '%%')
                         AND a.i_status = '6'
                         AND ab.n_quantity_product <> 0
-                        AND ab.n_sisa <> 0";           
+                        AND ab.n_sisa <> 0";   
+        */ 
+        
+        /** using i_bagian */
+        $sql = "SELECT DISTINCT b.id,
+                        b.i_bagian,
+                        b.id_company,
+                        b.e_bagian_name,
+                        c.name AS company_name
+                    FROM tm_keluar_jahit a
+                    INNER JOIN tm_keluar_jahit_item ab ON	(ab.id_keluar_jahit = a.id)
+                    INNER JOIN tr_bagian b ON	(b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
+                    INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company_bagian 
+                    INNER JOIN public.company c ON	(c.id = b.id_company)
+                    WHERE b2.i_bagian = '$i_bagian'
+                        AND (b.i_bagian ILIKE '%%'
+                            OR b.e_bagian_name ILIKE '%%')
+                        AND a.i_status = '6'
+                        AND ab.n_quantity_product <> 0
+                        AND ab.n_sisa <> 0";   
 
         return $this->db->query($sql);
     }

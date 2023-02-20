@@ -150,8 +150,15 @@ if ($datadetail) { ?>
                                 </td>
                                 <td><input class="form-control input-sm" readonly type="text" id="eproduct<?= $i; ?>" name="eproduct<?= $i; ?>" value="<?= $key->e_product; ?>"></td>
                                 <td><input readonly class="form-control input-sm" type="text" id="ecolor<?= $i; ?>" name="ecolor<?= $i; ?>" value="<?= $key->e_color_name; ?>"></td>
-                                <td><input readonly class="form-control input-sm text-right" type="text" id="nquantity<?= $i; ?>" name="nquantity<?= $i; ?>" value="<?= $key->n_quantity_reff; ?>"><input type="hidden" name="nquantitysisa<?= $i; ?>" id="nquantitysisa<?= $i; ?>" value="<?= $key->n_quantity_sisa; ?>"></td>
-                                <td><input class="form-control input-sm text-right" type="text" id="npemenuhan<?= $i; ?>" name="npemenuhan<?= $i; ?>" value="<?= $key->n_quantity; ?>" placeholder="0" onkeyup="angkahungkul(this); cekqty(<?= $i; ?>);"></td>
+                                <td>
+                                    <input readonly class="form-control input-sm text-right" type="text" id="nquantity<?= $i; ?>" 
+                                            name="nquantity<?= $i; ?>" value="<?= $key->n_quantity_reff; ?>">
+                                    <input type="hidden" name="nquantitysisa<?= $i; ?>" id="nquantitysisa<?= $i; ?>" value="<?= $key->n_quantity_sisa; ?>">
+                                </td>
+                                <td>
+                                    <input class="form-control input-sm text-right" type="text" id="npemenuhan<?= $i; ?>" name="npemenuhan<?= $i; ?>" 
+                                            value="<?= $key->n_quantity; ?>" placeholder="0" onkeyup="angkahungkul(this); cekqty(<?= $i; ?>);">
+                                </td>
                                 <td><input class="form-control input-sm" placeholder="Isi keterangan jika ada!" type="text" id="eremark<?= $i; ?>" name="eremark<?= $i; ?>" value="<?= $key->e_remark; ?>"></td>
                             </tr>
                         <?php $i++;
@@ -256,7 +263,8 @@ if ($datadetail) { ?>
 
     function cekqty(x) {
         if (parseInt($('#npemenuhan' + x).val()) > parseInt($('#nquantitysisa' + x).val())) {
-            swal('Yaah :(', 'Qty Terima Tidak Boleh Lebih Dari Qty Sisa = ' + $('#nquantitysisa' + x).val() + '!', 'error');
+            // swal('Yaah :(', 'Qty Terima Tidak Boleh Lebih Dari Qty Sisa = ' + $('#nquantitysisa' + x).val() + '!', 'error');
+            swal('Yaah :(', 'Qty Terima Tidak Boleh Lebih Dari Qty Kirim = ' + $('#nquantitysisa' + x).val() + '!', 'error');
             $('#npemenuhan' + x).val($('#nquantitysisa' + x).val());
         }
     }
