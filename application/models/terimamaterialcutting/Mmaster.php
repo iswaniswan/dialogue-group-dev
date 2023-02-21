@@ -223,8 +223,8 @@ class Mmaster extends CI_Model
             p.id_product_wip = a.id_product_wip 
             AND a.id_material = p.id_material and p.f_marker_utama = true and p.v_gelar <> 0 
         )
-        INNER JOIN tr_type_makloon q ON (q.id = ANY(p.id_type_makloon))
-        WHERE id_document = '$id' and (q.e_type_makloon_name ILIKE '%CUTTING%' or q.e_type_makloon_name ILIKE '%AUTO%') 
+        /*INNER JOIN tr_type_makloon q ON (q.id = ANY(p.id_type_makloon))*/
+        WHERE id_document = '$id' /*and (q.e_type_makloon_name ILIKE '%CUTTING%' or q.e_type_makloon_name ILIKE '%AUTO%')*/
         /*AND id_document::varchar||a.id_product_wip::varchar||a.id_material::varchar NOT IN (
             SELECT id_document_referensi::varchar||id_product_wip::varchar||id_material::varchar 
             FROM tm_masuk_material_cutting_item a, tm_masuk_material_cutting b 

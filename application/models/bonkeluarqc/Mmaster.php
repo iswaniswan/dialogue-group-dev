@@ -418,6 +418,12 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
+
+        if ($this->id_company == '12') {
+            $bagian = 'PL001';
+        } else {
+            $bagian = 'AKP001';
+        }   
         return $this->db->query("SELECT
                 e.id,
                 e.i_material,
@@ -443,7 +449,7 @@ class Mmaster extends CI_Model
                     AND e.id_company = f.id_company)
             LEFT JOIN (
                 SELECT id_material, n_saldo_akhir FROM f_mutasi_material
-                ($this->id_company, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', 'AKP001') 
+                ($this->id_company, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$bagian') 
             ) s ON (s.id_material = e.id)
             WHERE
                 a.id_company = '$this->id_company'
@@ -566,6 +572,11 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
+        if ($this->id_company == '12') {
+            $bagian = 'PL001';
+        } else {
+            $bagian = 'AKP001';
+        }   
         /** 20220910 Alghi */
         /* return $this->db->query(
             "SELECT
@@ -690,7 +701,7 @@ class Mmaster extends CI_Model
                 INNER JOIN tr_satuan i ON (
                     i.i_satuan_code = h.i_satuan_code AND h.id_company = i.id_company
                 )
-                LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', 'AKP001') j ON (j.id_material = h.id)
+                LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$bagian') j ON (j.id_material = h.id)
                 inner join tr_marker k ON (k.id = g.id_marker)
                 /* inner join tm_keluar_qc_bundling l ON (l.id_keluar_qc_item = a.id)
                 inner join tr_product_base m ON (m.id = l.id_product and m.id_company = l.id_company)
@@ -1036,6 +1047,11 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
+         if ($this->id_company == '12') {
+            $bagian = 'PL001';
+        } else {
+            $bagian = 'AKP001';
+        }   
         $sql = "SELECT
                     a.id_keluar_qc,
                     f.id id_product,
@@ -1093,7 +1109,7 @@ class Mmaster extends CI_Model
                 INNER JOIN tr_satuan i ON (
                     i.i_satuan_code = h.i_satuan_code AND h.id_company = i.id_company
                 )
-                LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', 'AKP001') j ON (j.id_material = h.id) 
+                LEFT JOIN f_mutasi_material('$this->id_company', '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$bagian') j ON (j.id_material = h.id) 
                 WHERE
                     a.id_keluar_qc = '$id'
                     AND h.i_kode_group_barang = 'GRB0004'

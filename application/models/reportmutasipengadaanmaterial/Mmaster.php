@@ -129,15 +129,18 @@ class Mmaster extends CI_Model
 			$where2 .= "AND d.i_kode_kelompok = '$ikelompok'";
 		}
 
-		$this->db->select("distinct x.*,a.i_material,a.e_material_name,b.e_satuan_name
-		FROM f_mutasi_material_pengadaan('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
-      	INNER JOIN tr_material a ON (a.id_company = x.id_company AND a.id = x.id_material)
-      	INNER JOIN tr_satuan b ON (a.id_company = b.id_company AND a.i_satuan_code = b.i_satuan_code)
-		INNER JOIN tr_polacutting_new c ON (c.id_company = x.id_company and c.id_material = x.id_material and c.id_material = a.id and c.id_company = x.id_company)
-      	WHERE x.id_company is not null
-      	$where $where2 AND c.f_jahit = 't'
-      	ORDER BY a.i_material, a.e_material_name, b.e_satuan_name
-    ", FALSE);
+		$sql = "distinct x.*,a.i_material,a.e_material_name,b.e_satuan_name
+				FROM f_mutasi_material_pengadaan('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+				INNER JOIN tr_material a ON (a.id_company = x.id_company AND a.id = x.id_material)
+				INNER JOIN tr_satuan b ON (a.id_company = b.id_company AND a.i_satuan_code = b.i_satuan_code)
+				INNER JOIN tr_polacutting_new c ON (c.id_company = x.id_company and c.id_material = x.id_material and c.id_material = a.id and c.id_company = x.id_company)
+				WHERE x.id_company is not null
+				$where $where2 AND c.f_jahit = 't'
+				ORDER BY a.i_material, a.e_material_name, b.e_satuan_name";
+		
+		// var_dump($sql); die();
+
+		$this->db->select($sql, FALSE);
 		return $this->db->get();
 	}
 }

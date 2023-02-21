@@ -38,50 +38,45 @@ class Mmaster extends CI_Model
     public function bagianpengirim($cari,$ibagian)
     {
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("SELECT DISTINCT
-                a.i_bagian,
-                b.e_bagian_name
-            FROM tm_keluar_qcset a
-            JOIN tr_bagian b ON 
-                (a.i_bagian = b.i_bagian AND a.id_company = b.id_company)
-            WHERE
-                b.id_company = '$this->idcompany'
-                AND a.i_tujuan = '$ibagian'
-                AND a.i_bagian ILIKE '%$cari%'
-                AND b.e_bagian_name ILIKE '%$cari%'
-            ORDER BY
-                b.e_bagian_name
-        ", FALSE);
+
+        $sql = "SELECT DISTINCT
+                    a.i_bagian,
+                    b.e_bagian_name
+                FROM tm_keluar_qcset a
+                JOIN tr_bagian b ON (a.i_bagian = b.i_bagian AND a.id_company = b.id_company)
+                WHERE b.id_company = '$this->idcompany'
+                    AND a.i_tujuan = '$ibagian'
+                    AND a.i_bagian ILIKE '%$cari%'
+                    AND b.e_bagian_name ILIKE '%$cari%'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function referensi($cari, $iasal)
     {
         $cari = str_replace("'", "", $cari);
-        return $this->db->query("
-                                SELECT DISTINCT
-                                    a.id,
-                                    a.i_keluar_qcset as i_document,
-                                    to_char(a.d_keluar_qcset, 'dd-mm-yyyy') AS d_document,
-                                    c.e_jenis_name
-                                FROM
-                                    tm_keluar_qcset a
-                                    LEFT JOIN tm_keluar_qcset_item b
-                                        on (a.id = b.id_keluar_qcset AND a.id_company = b.id_company)
-                                    LEFT JOIN tr_jenis_barang_keluar c
-                                        on (a.id_jenis_barang_keluar = c.id)
-                                WHERE
-                                    a.id NOT IN (SELECT id_reff FROM tm_masuk_pengadaan WHERE i_status NOT IN ('4','5','9'))
-                                    AND a.i_bagian = '$iasal'
-                                    AND a.i_status = '6'
-                                    AND a.id_company = '$this->idcompany'
-                                    AND b.n_quantity_product_wip <> 0
-                                    AND b.n_quantity_penyusun <> 0
-                                    AND b.n_quantity_akhir <> 0
-                                    AND a.i_keluar_qcset ILIKE '%$cari%'
-                                ORDER BY
-                                    i_document,
-                                    d_document
-                            ", FALSE);
+
+        $sql = "SELECT DISTINCT a.id,
+                                a.i_keluar_qcset as i_document,
+                                to_char(a.d_keluar_qcset, 'dd-mm-yyyy') AS d_document,
+                                c.e_jenis_name
+                            FROM tm_keluar_qcset a
+                                LEFT JOIN tm_keluar_qcset_item b ON (a.id = b.id_keluar_qcset AND a.id_company = b.id_company)
+                                LEFT JOIN tr_jenis_barang_keluar c ON (a.id_jenis_barang_keluar = c.id)
+                            WHERE a.id NOT IN (SELECT id_reff FROM tm_masuk_pengadaan WHERE i_status NOT IN ('4','5','9'))
+                                AND a.i_bagian = '$iasal'
+                                AND a.i_status = '6'
+                                AND a.id_company = '$this->idcompany'
+                                AND b.n_quantity_product_wip <> 0
+                                AND b.n_quantity_penyusun <> 0
+                                AND b.n_quantity_akhir <> 0
+                                AND a.i_keluar_qcset ILIKE '%$cari%'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function data($i_menu, $i_menu1, $folder,$folder1, $dfrom, $dto)

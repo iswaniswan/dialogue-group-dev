@@ -381,7 +381,7 @@ class Mmaster extends CI_Model
                 ('$this->id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$d_from', '$d_to', '$i_bagian')
             ) f ON (f.id_panel_item = a.id)
             WHERE a.id_product_wip = '$id' AND a.id_marker = '$id_marker'
-                AND a.f_status = 't' AND c.id_company = '4'
+                AND a.f_status = 't' AND c.id_company = '$this->id_company'
             ORDER BY
                 c.i_product_wip, b.i_material ASC"
         );

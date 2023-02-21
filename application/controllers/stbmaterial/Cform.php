@@ -198,7 +198,8 @@ class Cform extends CI_Controller
             for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
                 $check       = $this->input->post('chk' . $i, true);
                 $id_memo = $this->input->post('id' . $i, true);
-                $i_bagian = $this->input->post('tujuan_bagian' . $i, true);
+                // $i_bagian = $this->input->post('tujuan_bagian' . $i, true);
+                $i_bagian = $this->input->post('i_bagian' . $i, true);
                 $i_type = $this->input->post('i_type' . $i, true);
                 $id_company_tujuan = $this->input->post('id_company_tujuan' . $i, true);
                 if ($check == 'on') {

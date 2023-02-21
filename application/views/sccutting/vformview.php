@@ -101,8 +101,8 @@
                                 <td class="text-right"><?= $key->n_quantity; ?></td>
                                 <td class="text-right"><?= $key->n_quantity_product; ?></td>
                                 <td class="text-right"><?= $key->n_jumlah_gelar; ?></td>
-                                <td><?= $key->e_pic_name_cutting; ?></td>
-                                <td><?= $key->e_pic_name_gelar; ?></td>
+                                <td><?= $key->e_pic_cutting; ?></td>
+                                <td><?= $key->e_pic_gelar; ?></td>
                                 <td><?= ($key->n_realisasi_gelar) ? $key->n_realisasi_gelar : 0; ?></td>
                                 <td><?= ($key->n_realisasi_product) ? $key->n_realisasi_product : 0; ?></td>
                                 <!-- <td><?= formatdmY($key->d_cutting); ?></td> -->

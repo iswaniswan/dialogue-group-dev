@@ -515,7 +515,7 @@ class Mmaster extends CI_Model
         return $this->db->query("SELECT b.d_document, to_char(b.d_entry, 'HH24:MI:SS') t_document, a.id, a.id_product_wip, c.i_product_wip, initcap(c.e_product_wipname) e_product_wipname, 
                 initcap(e.e_color_name) e_color_name, a.id_material, d.i_material, initcap(d.e_material_name) e_material_name, 
                 initcap(f.e_satuan_name) e_satuan_name, a.n_quantity, 0 n_stock, b.id_company_referensi, g.name,
-                a.n_jumlah_gelar, /* floor(0.01 + a.n_quantity * a.v_set / NULLIF(a.v_gelar,0)) */ floor(a.n_quantity * a.v_set / NULLIF(a.v_gelar,0) + 0.01) n_quantity_product, a.v_set, a.v_gelar
+                a.n_jumlah_gelar, /* floor(0.01 + a.n_quantity * a.v_set / NULLIF(a.v_gelar,0)) */ floor(a.n_quantity * a.v_set / NULLIF(a.v_gelar,0) + 0.1) n_quantity_product, a.v_set, a.v_gelar
             FROM tm_masuk_material_cutting_item a
             INNER JOIN tm_masuk_material_cutting b ON (b.id = a.id_document)
             INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
@@ -536,17 +536,19 @@ class Mmaster extends CI_Model
     public function get_pic($cari, $f_cutting, $f_gelar)
     {
         return $this->db->query("SELECT id, e_pic_name FROM tr_pic 
-            WHERE f_status = 't' AND f_cutting = '$f_cutting' AND f_gelar = '$f_gelar' AND id_company = '$this->id_company' ");
+            WHERE f_status = 't' AND id_company = '$this->id_company' ");
     }
 
-    public function update_realisasi($id_item, $d_schedule_real, $jam_real, $id_pic_cutting, $id_pic_gelar, $n_realisasi_gelar, $n_realisasi_product){
+    public function update_realisasi($id_item, $d_schedule_real, $jam_real, $id_pic_cutting, $id_pic_gelar, $n_realisasi_gelar, $n_realisasi_product, $e_pic_cutting, $e_pic_gelar ){
         $data = array(
             'd_schedule_realisasi' => formatYmd($d_schedule_real),
             'jam_realisasi' => $jam_real,
             'id_pic_cutting' => $id_pic_cutting,
             'id_pic_gelar' => $id_pic_gelar,
             'n_realisasi_gelar' => $n_realisasi_gelar,
-            'n_realisasi_product' => $n_realisasi_product
+            'n_realisasi_product' => $n_realisasi_product,
+            'e_pic_cutting' => $e_pic_cutting,
+            'e_pic_gelar' => $e_pic_gelar,
         );
         $this->db->where('id', $id_item);
         $this->db->update('tm_schedule_cutting_item', $data);

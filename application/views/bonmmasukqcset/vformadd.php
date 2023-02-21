@@ -383,10 +383,23 @@
         });
     });
 
+    function getRawQtyTerima(qtyPenyusun, qtyTerima) {
+        return qtyPenyusun*qtyTerima;
+    };
+
     function set(kode, value) {
+        console.log(kode, value);
         /* alert(kode);
-        alert(value); */
-        $('.' + kode).val(value);
+        alert(value); */        
+
+        let elementTerima = $('.' + kode);
+
+        elementTerima.each(function() {
+            let penyusun = $(this).closest('tr').find('input[name*="qty_penyusun"]').val();
+            let qty = getRawQtyTerima(penyusun, value);
+            $(this).val(qty);
+        });
+
         for (let i = 1; i <= $('#jml').val(); i++) {
             ceksaldo(i);
         }

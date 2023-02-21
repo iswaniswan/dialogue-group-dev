@@ -532,9 +532,11 @@ class Cform extends CI_Controller
                 $jam_real = $this->input->post('jam_real' . $i, TRUE);
                 $id_pic_cutting = $this->input->post('id_pic_cutting' . $i, TRUE);
                 $id_pic_gelar = $this->input->post('id_pic_gelar' . $i, TRUE);
+                $e_pic_cutting = $this->input->post('e_pic_cutting' . $i, TRUE);
+                $e_pic_gelar = $this->input->post('e_pic_gelar' . $i, TRUE);
                 $n_realisasi_gelar = $this->input->post('n_realisasi_gelar' . $i, TRUE);
                 $n_realisasi_product = $this->input->post('n_realisasi_product' . $i, TRUE);
-                $this->mmaster->update_realisasi($id_item, $d_schedule_real, $jam_real, $id_pic_cutting, $id_pic_gelar, $n_realisasi_gelar, $n_realisasi_product);
+                $this->mmaster->update_realisasi($id_item, $d_schedule_real, $jam_real, $id_pic_cutting, $id_pic_gelar, $n_realisasi_gelar, $n_realisasi_product, $e_pic_cutting, $e_pic_gelar );
             }
             if ($this->db->trans_status() === FALSE) {
                 $this->db->trans_rollback();

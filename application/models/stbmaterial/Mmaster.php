@@ -138,10 +138,10 @@ class Mmaster extends CI_Model
                     LEFT JOIN public.company cc ON cc.id = tb.id_company
                     WHERE i_bagian IN ('$i_bagian') 
                         AND id_company = '$id_company_tujuan'";
+        
+        // var_dump($sql);
 
-        $query = $this->db->query($sql);
-        // var_dump($this->db->last_query());
-        return $query;
+        return $this->db->query($sql);
     }
 
     public function product($cari, $dfrom, $dto, $i_bagian)

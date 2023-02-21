@@ -166,14 +166,16 @@
                                     <input value="<?= $key->n_quantity_product / $key->v_set; ?>" type="hidden" readonly id="n_jumlah_gelar_round_down<?= $i; ?>" name="n_jumlah_gelar_round_down<?= $i; ?>">
                                 </td> -->
                                 <td class="col-1">
-                                    <select class="form-control input-sm" name="id_pic_cutting<?= $i; ?>" id="id_pic_cutting<?= $i; ?>" data-placeholder="Pilih PIC">
+                                    <!-- <select hidden class="form-control input-sm" name="id_pic_cutting<?= $i; ?>" id="id_pic_cutting<?= $i; ?>" data-placeholder="Pilih PIC">
                                         <option value="<?= $key->id_pic_cutting; ?>"><?= $key->e_pic_name_cutting; ?></option>
-                                    </select>
+                                    </select> -->
+                                    <input value="<?= $key->e_pic_cutting; ?>" class="form-control input-sm"  type="text" id="e_pic_cutting<?= $i; ?>" name="e_pic_cutting<?= $i; ?>">
                                 </td>
                                 <td class="col-1">
-                                    <select class="form-control input-sm" name="id_pic_gelar<?= $i; ?>" id="id_pic_gelar<?= $i; ?>" data-placeholder="Pilih PIC">
+                                    <!-- <select hidden class="form-control input-sm" name="id_pic_gelar<?= $i; ?>" id="id_pic_gelar<?= $i; ?>" data-placeholder="Pilih PIC">
                                         <option value="<?= $key->id_pic_gelar; ?>"><?= $key->e_pic_name_gelar; ?></option>
-                                    </select>
+                                    </select> -->
+                                    <input value="<?= $key->e_pic_gelar; ?>" class="form-control input-sm"  type="text" id="e_pic_gelar<?= $i; ?>" name="e_pic_gelar<?= $i; ?>">
                                 </td>
                                 <td class="col-1">
                                     <input class="form-control input-sm text-right" autocomplete="off" type="text" id="n_realisasi_gelar<?= $i; ?>" name="n_realisasi_gelar<?= $i; ?>" onkeyup="angkahungkul(this); hetangproductreal(this.value, <?= $i; ?>)" value="<?= ($key->n_realisasi_gelar) ? $key->n_realisasi_gelar : 0 ?>">
@@ -401,7 +403,7 @@
     function hetangproductreal(val, i) {
         let gelar = parseFloat(val);
         let set = parseInt($(`#v_set${i}`).val());
-        let resTotal = Math.floor(gelar * set/*  + 0.01 */);
+        let resTotal = Math.floor(gelar * set + 0.01 );
         if(gelar) {
             $(`#n_realisasi_product${i}`).val(resTotal);
         } else {

@@ -214,8 +214,9 @@ class Mmaster extends CI_Model
                 e.i_product_wip, e.e_product_wipname||' '|| f.e_color_name e_product_wipname,
                 d.i_material, d.e_material_name, c.i_panel, c.bagian, 
                 ((a.n_quantity * b.v_set)/ b.v_gelar) * c.n_qty_penyusun n_jumlah_awal,
-                FLOOR((a.n_quantity * b.v_set)/ b.v_gelar + 0.01) * c.n_qty_penyusun  n_jumlah,
-                c.n_qty_penyusun, a.n_jumlah_gelar
+                /*FLOOR((a.n_quantity * b.v_set)/ b.v_gelar + 0.01) * c.n_qty_penyusun  n_jumlah,*/
+                n_realisasi_product *  c.n_qty_penyusun  as n_jumlah,
+                c.n_qty_penyusun, n_realisasi_gelar as n_jumlah_gelar
             FROM tm_schedule_cutting_item a 
             INNER JOIN tr_polacutting_new b ON (
                 b.id_product_wip = a.id_product_wip AND a.id_material = b.id_material

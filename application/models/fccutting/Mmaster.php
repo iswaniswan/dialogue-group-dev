@@ -470,7 +470,7 @@ class Mmaster extends CI_Model
                 SELECT a.id_product_wip, sum(n_quantity) n_quantity 
                 FROM tm_schedule_jahit_item_new a
                 INNER JOIN tm_schedule_jahit b ON (b.id = a.id_document)
-                WHERE b.i_status = '6' AND b.i_periode = '$periode' 
+                WHERE b.i_status = '6' AND b.i_periode = '$periode' and id_document in ($id_schedule)
                 GROUP BY 1
             ) e ON (e.id_product_wip = a.id_product_wip)
             LEFT JOIN (
@@ -1513,10 +1513,11 @@ class Mmaster extends CI_Model
             INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
             INNER JOIN tr_color e ON (e.i_color = c.i_color AND c.id_company = e.id_company)
             INNER JOIN (
-                SELECT a.id_product_wip, a.id_material, a.f_marker_utama, a.id_type_makloon, sum((1/a.v_set) * a.v_gelar) as n_quantity
+                SELECT a.id_product_wip, a.id_material, a.f_marker_utama, a.id_type_makloon, 
+                sum((1 / a.v_set) * a.v_gelar) / nullif(cardinality(a.id_type_makloon),0) as n_quantity
                 FROM tr_polacutting_new a
                 INNER JOIN tr_type_makloon b ON (b.id = ANY(a.id_type_makloon))
-                WHERE id_type_makloon NOTNULL 
+                WHERE cardinality(a.id_type_makloon) > 0
                 AND (b.e_type_makloon_name ILIKE '%CUTTING%' or b.e_type_makloon_name ILIKE '%AUTO%') AND a.v_bisbisan = '0' AND a.f_marker_utama = 't' and a.f_status = 't' group by 1,2,3,4   
                 ) b ON (b.id_product_wip = a.id_product_wip)
             INNER JOIN tr_material d ON (d.id = b.id_material)

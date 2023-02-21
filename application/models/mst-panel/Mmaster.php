@@ -420,7 +420,7 @@ class Mmaster extends CI_Model
             a.id_marker, e.e_marker_name
         FROM tm_panel a
         JOIN tr_product_wip b ON 
-        (b.id = a.id_product_wip AND b.id_company = 4)
+        (b.id = a.id_product_wip AND b.id_company = $this->id_company)
         JOIN tr_color c ON 
         (c.i_color = b.i_color AND c.id_company = $idcompany)
         INNER JOIN tr_marker e ON (e.id = a.id_marker)
