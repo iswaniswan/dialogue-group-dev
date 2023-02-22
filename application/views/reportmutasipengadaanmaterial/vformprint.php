@@ -131,11 +131,11 @@
                                         <td class="text-right <?= warna($row->n_saldo_awal); ?>"><?= $row->n_saldo_awal; ?></td>
                                         <td class="text-right <?= warna($row->n_masuk_1); ?>"><?= $row->n_masuk_1; ?></td>
                                         <td class="text-right <?= warna($row->n_masuk_total); ?>"><?= $row->n_masuk_total; ?></td>
-                                        <td class="text-right <?= warna($row->n_keluar_1); ?>"><?= $row->n_keluar_1; ?></td>
-                                        <td class="text-right <?= warna($row->n_keluar_total); ?>"><?= $row->n_keluar_total; ?></td>
-                                        <th class="text-right <?= warna($row->n_saldo_akhir); ?>"><?= $row->n_saldo_akhir; ?></th>
+                                        <td class="text-right <?= warna($row->n_keluar_1); ?>"><?= number_format($row->n_keluar_1, 4, ".", ",") ?></td>
+                                        <td class="text-right <?= warna($row->n_keluar_total); ?>"><?= number_format($row->n_keluar_total, 4, ".", ",") ?></td>
+                                        <th class="text-right <?= warna($row->n_saldo_akhir); ?>"><?= number_format($row->n_saldo_akhir, 4, ".", ",") ?></th>
                                         <th class="text-right <?= warna($row->n_so); ?>"><?= $row->n_so; ?></th>
-                                        <th class="text-right <?= warna($row->n_selisih); ?>"><?= $row->n_selisih; ?></th>
+                                        <th class="text-right <?= warna($row->n_selisih); ?>"><?= number_format($row->n_selisih, 4, ".", ",") ?></th>
                                     </tr>
                             <?php }
                             } ?>
