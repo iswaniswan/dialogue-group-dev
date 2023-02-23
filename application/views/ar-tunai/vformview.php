@@ -19,21 +19,42 @@
                         <label class="col-md-3">Tanggal Dokumen</label>
                         <label class="col-md-3">Area</label>
                         <div class="col-sm-3">
-                            <input type="text" name="e_bagian_name" id="e_bagian_name" value="<?= $data->e_bagian_name; ?>" readonly class="form-control input-sm">
+                            <input type="text" value="<?= $data->e_bagian_name ?>" class="form-control input-sm" readonly>
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <input type="hidden" name="id" id="id" readonly value="<?= $data->i_dt; ?>">
-                                <input type="text" name="i_dt_id" id="i_dt_id" value="<?= $data->i_dt_id; ?>" readonly class="form-control input-sm">
+                                <input type="text" value="<?= $data->i_tunai_id ?>" class="form-control input-sm" readonly>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="d_dt" name="d_dt" class="form-control input-sm" readonly value="<?= $data->d_dt; ?>">
+                            <input type="text" value="<?= $data->d_tunai ?>" class="form-control input-sm" readonly>
                         </div>
                         <div class="col-sm-3">
-                        <input type="text" name="e_area_name" id="e_area_name" value="<?= $data->e_area_name; ?>" readonly class="form-control input-sm" aria-label="Text input with dropdown button">
+                            <input type="text" value="<?= $data->e_area; ?>" class="form-control input-sm" readonly>
                         </div>
                     </div>
+
+                    <div class="form-group row">
+                        <label class="col-md-3">Nama Pelanggan</label>
+                        <label class="col-md-3">Nama Sales</label>
+                        <label class="col-md-3">No. Daftar Tagihan</label>
+                        <label class="col-md-3">Keterangan</label>
+                        <div class="col-sm-3">
+                            <input type="text" value="<?= $data->e_customer_name ?>" class="form-control input-sm" readonly>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="text" value="<?= $data->e_sales ?>" class="form-control input-sm" readonly>
+                        </div>
+                        <div class="col-sm-3">
+                            <input type="text" value="<?= $data->i_dt_id ?>" class="form-control input-sm" readonly>
+                        </div>
+                        <div class="col-sm-3">
+                            <textarea name="keterangan" cols="24" rows="2" readonly class="text-left">
+                                <?= $data->e_remark ?>
+                            </textarea>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-sm-12">
                             <button type="button" class="btn btn-inverse btn-block btn-sm"
@@ -51,9 +72,6 @@
                     <div class="col-sm-11">
                         <h3 class="box-title m-b-0">Detail Nota</h3>
                     </div>
-                    <div class="col-sm-1" style="text-align: right;">
-                        -
-                    </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
@@ -65,44 +83,61 @@
                                         <th class="text-center" style="width: 3%;">No</th>
                                         <th>No. Nota</th>
                                         <th>Tgl. Nota</th>
-                                        <th>Tgl. Jatuh Tempo</th>
-                                        <th>Pelanggan</th>
-                                        <th class="text-right">Jumlah</th>
-                                        <th class="text-right">Sisa</th>
+                                        <!-- <th>Tgl. Jatuh Tempo</th> -->
+                                        <!-- <th>Pelanggan</th> -->
+                                        <th class="text-right" style="width: 200px;">Jumlah</th>
+                                        <th class="text-right" style="width: 200px;">Sisa</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $i = 0;
-                                    if ($datadetail) {
-                                        foreach ($datadetail as $key) {
-                                            $i++; ?>
-                                            <tr id="tr<?= $i; ?>">
-                                                <td class="text-center">
-                                                    <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
-                                                </td>
-                                                <td><?= $key->i_document;?></td>
-                                                <td><input type="hidden" name="d_nota_<?= $i; ?>" id="d_nota_<?= $i; ?>" value="<?= $key->d_document;?>"><span
-                                                        class="d_nota_<?= $i; ?>"><?= $key->d_nota;?></span></td>
-                                                <td><input type="hidden" name="d_jatuh_tempo_<?= $i; ?>" id="d_jatuh_tempo_<?= $i; ?>"
-                                                        value="<?= $key->d_jatuh_tempo;?>"><span class="d_jatuh_tempo_<?= $i; ?>"><?= $key->d_jatuh_tempo;?></span></td>
-                                                <td><input type="hidden" name="e_customer_name_<?= $i; ?>" id="e_customer_name_<?= $i; ?>"
-                                                        value="<?= $key->e_customer_name;?>"><span class="e_customer_name_<?= $i; ?>"><?= $key->e_customer_name;?></span></td>
-                                                <td class="text-right"><input type="hidden" name="v_nota_<?= $i; ?>" id="v_nota_<?= $i; ?>"
-                                                        value="<?= $key->v_bayar;?>"><span class="text-right v_nota_<?= $i; ?>"><?= number_format($key->v_bayar);?></span></td>
-                                                <td class="text-right"><input type="hidden" class="v_sisa" name="v_sisa_<?= $i; ?>"
-                                                        id="v_sisa_<?= $i; ?>" value="<?= $key->v_sisa;?>"><span class="text-right v_sisa_<?= $i; ?>"><?= number_format($key->v_sisa);?></span>
-                                                </td>
-                                            </tr>
-                                        <?php }
-                                    } ?>
+                                    <?php $grand_total_jumlah = 0; $grand_total_sisa = 0; ?>
+                                    <?php $i = 0; foreach ($datadetail as $item) { $i++; ?>
+                                        <tr id="tr<?= $i; ?>">
+                                            <td class="text-center">
+                                                <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
+                                            </td>
+                                            <td><?= $item->i_document;?></td>
+                                            <td><span><?= $item->d_document;?></span></td>
+                                            <td class="text-right">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                    </div>
+                                                    <span><?= number_format($item->v_jumlah, 0, ",", ".") ?></span>
+                                                    <?php $grand_total_jumlah += $item->v_jumlah; ?>
+                                                </div>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                    </div>
+                                                    <span><?= number_format($item->v_sisa, 0, ",", ".") ?></span>
+                                                    <?php $grand_total_sisa += $item->v_sisa; ?>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th class="text-right" colspan="5">Total</th>
-                                        <th class="text-right"><span id="jumlah"></span><input type="hidden"
-                                                class="form-control form-control-sm text-right" name="v_jumlah"
-                                                id="v_jumlah" value="0" readonly></th>
-                                        <th></th>
+                                        <th class="text-right" colspan="3">Total</th>
+                                        <th class="text-right">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                </div>
+                                                <span><?= number_format($grand_total_jumlah, 0, ",", ".") ?></span>
+                                            </div>
+                                        </th>
+                                        <th class="text-right">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                </div>
+                                                <span><?= number_format($grand_total_sisa, 0, ",", ".") ?></span>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </tfoot>
                                 <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">

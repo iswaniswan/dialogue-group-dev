@@ -53,20 +53,19 @@
                         <label class="col-md-3">No. Daftar Tagihan</label>
                         <label class="col-md-3">Keterangan</label>
                         <div class="col-sm-3">
-                            <select name="id_customer" id="id_customer" class="form-control select2">
+                            <select name="id_customer" id="id_customer" class="form-control select2" required>
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <select name="id_sales" id="id_sales" class="form-control select2">                               
+                            <select name="id_salesman" id="id_salesman" class="form-control select2" required>
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <select name="id_daftar_tagihan" id="id_daftar_tagihan" class="form-control select2">                               
+                            <select name="id_daftar_tagihan" id="id_daftar_tagihan" class="form-control select2" required>
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <textarea name="keterangan" id="keterangan" cols="24" rows="2">
-                            </textarea>
+                            <textarea name="keterangan" id="keterangan" rows="2" class="form-control text-left"></textarea>
                         </div>
                     </div>
                     <div class="row">
@@ -112,8 +111,8 @@
                                         <th class="text-center" style="width: 3%;">No</th>
                                         <th style="width: auto;">No. Nota</th>
                                         <th style="width: auto;">Tgl. Nota</th>
-                                        <th style="width: 10px;">Jumlah Nota</th>
-                                        <th class="text-right" style="width: auto;">Jumlah</th>
+                                        <th style="width: 200px;">Jumlah Nota</th>
+                                        <th class="text-right" style="width: 200px;">Jumlah</th>
                                         <th class="text-center" style="width: auto;">Act</th>
                                     </tr>
                                 </thead>
@@ -121,10 +120,16 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th class="text-right" colspan="5">Total</th>
-                                        <th class="text-right"><span id="jumlah"></span><input type="hidden"
-                                                class="form-control form-control-sm text-right" name="v_jumlah"
-                                                id="v_jumlah" value="0" readonly></th>
+                                        <th class="text-right" colspan="4">Total</th>
+                                        <th class="text-right">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                </div>
+                                                <input type="text" class="form-control input-sm" name="grand_total" id="grand_total" readonly>
+                                            </div>
+                                            <span id="jumlah"></span>
+                                        </th>
                                     </tr>
                                 </tfoot>
                                 <input type="hidden" name="jml" id="jml" value="0">
@@ -168,12 +173,35 @@
             var no = parseInt($('#tabledatax > tbody tr').length + 1);
             var newRow = $('<tr id="tr' + i + '">');
             var cols = "";
-            cols += '<td class="text-center"><spanx id="snum' + i + '">' + no + '</spanx></td>';
-            cols += '<td ><select data-nourut="' + i + '" id="i_nota' + i + '" class="form-control input-sm" name="i_nota' + i + '"></select></td>';
-            cols += `<td><input type="hidden" name="d_nota_${i}" id="d_nota_${i}" value=""><span class="d_nota_${i}"></span></td>`;
-            cols += `<td><input type="hidden" name="e_customer_name_${i}" id="e_customer_name_${i}" value=""><span class="e_customer_name_${i}"></span></td>`;
-            cols += `<td class="text-right"><input type="hidden" name="v_nota_${i}" id="v_nota_${i}" value=""><span class="text-right v_nota_${i}"></span></td>`;
-            cols += '<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
+            cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;
+            cols += `<td>
+                        <select data-nourut="${i}" id="i_nota${i}" class="form-control input-sm" name="items[${i}][i_nota]"></select>
+                    </td>`;
+            cols += `<td>
+                        <input type="text" name="items[${i}][d_nota]" id="d_nota_${i}" value="" class="form-control input-sm date" readonly>
+                    </td>`;            
+            cols += `<td>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                            </div>
+                            <input type="text" class="form-control input-sm"
+                                name="items[${i}][v_nota]" id="v_nota_${i}" readonly>
+                        </div>
+                    </td>`;
+            cols += `<td>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                            </div>
+                            <input type="text" class="form-control input-sm form-input-bayar"
+                                name="items[${i}][bayar]"
+                                id="bayar${i}">
+                        </div>
+                    </td>`;
+            cols += `<td class="text-center">
+                        <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
+                    </td>`;
             cols += `</tr>`;
             newRow.append(cols);
             $("#tabledatax").append(newRow);
@@ -230,18 +258,14 @@
                         url: '<?= base_url($folder . '/cform/detailnota'); ?>',
                         dataType: "json",
                         success: function (data) {
-                            $('#d_nota_' + z).val(data['detail'][0]['d_nota']);
-                            $('.d_nota_' + z).text(data['detail'][0]['d_document']);
-                            $('#d_jatuh_tempo_' + z).val(data['detail'][0]['d_jatuh_tempo']);
-                            $('.d_jatuh_tempo_' + z).text(data['detail'][0]['d_jatuh_tempo']);
-                            $('#e_customer_name_' + z).val(data['detail'][0]['e_customer_name']);
-                            $('.e_customer_name_' + z).text(data['detail'][0]['e_customer_name']);
-                            $('#v_nota_' + z).val(data['detail'][0]['v_bersih']);
-                            $('.v_nota_' + z).text(formatcemua(data['detail'][0]['v_bersih']));
-                            $('#v_sisa_' + z).val(data['detail'][0]['v_sisa']);
-                            $('.v_sisa_' + z).text(formatcemua(data['detail'][0]['v_sisa']));
-                            hetang()
+                            const formattedDate = formatDateId(data['detail'][0]['d_nota']);
+                            $('#d_nota_' + z).val(formattedDate);
+                            
+                            const nilaiBayar = formatRupiah(data['detail'][0]['v_bersih'], "");
+                            $('#v_nota_' + z).val(nilaiBayar);
 
+                            initKeyupFormatRupiah('bayar'+z);                            
+                            calculateGrandTotal();
                         },
                         error: function () {
                             swal('Data kosong : (');
@@ -261,6 +285,7 @@
             $(this).closest("tr").remove();
             $('#jml').val(i);
             del();
+            calculateGrandTotal();
         });
 
         $('#ceklis').click(function (event) {
@@ -280,7 +305,7 @@
             width: "100%",
         }).change(function() {
             $('#id_customer').val(null).trigger('change');
-            $('#id_sales').val(null).trigger('change');
+            $('#id_salesman').val(null).trigger('change');
             $('#id_daftar_tagihan').val(null).trigger('change');
             number();
             clear_table();
@@ -310,22 +335,25 @@
                 },
                 cache: true
             }
+        }).change(function() {
+            $('#id_salesman').val(null).trigger('change');
         });
         
         /** dropdown salesman */
-        $('#id_sales').select2({
+        $('#id_salesman').select2({
             placeholder: 'Pilih Sales',
             allowClear: false,
             width: "100%",
             type: "POST",
             ajax: {
-                url: '<?= base_url($folder . '/cform/get_all_sales/'); ?>',
+                url: '<?= base_url($folder . '/cform/get_all_salesman/'); ?>',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
                     var query = {
                         q: params.term,
                         id_area: $('#id_area').val(),
+                        id_customer: $('#id_customer').val(),
                     }
                     return query;
                 },
@@ -454,6 +482,53 @@
         });
         $('#jumlah').text(formatcemua(v_sisa));
         $('#v_jumlah').val(v_sisa);
+    }
+
+    function calculateGrandTotal() {
+        let items = document.querySelectorAll('.form-input-bayar');
+        let grandTotal = 0;
+        for (i=0; i<items.length; i++) {
+            let total = items[i].value.toString();
+            if (total == '') {
+                total = '0';
+            }
+            total = total.replaceAll(".", "");
+            total = total.replaceAll(",", ".");
+            grandTotal += parseFloat(total);
+        }
+        document.getElementById('grand_total').value = formatRupiah(grandTotal.toString());
+    }
+
+
+    function formatRupiah(angka, prefix) {
+        var number_string = angka.replace(/[^,\d]/g, "").toString(),
+        split = number_string.split(","),
+        sisa = split[0].length % 3,
+        rupiah = split[0].substr(0, sisa),
+        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        // tambahkan titik jika yang di input sudah menjadi angka ribuan
+        if (ribuan) {
+        separator = sisa ? "." : "";
+        rupiah += separator + ribuan.join(".");
+        }
+    
+        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+        return rupiah;
+    }
+
+    function initKeyupFormatRupiah(id_element) {
+        let element = document.getElementById(id_element);
+        element.addEventListener('keyup', function() {            
+            element.value = formatRupiah(this.value, "");
+            /** update grand total */
+            calculateGrandTotal();
+        })
+    }
+
+    function formatDateId(_date) {
+        let aDate = _date.split("-");
+        return `${aDate[2]}-${aDate[1]}-${aDate[0]}`;
     }
 
 

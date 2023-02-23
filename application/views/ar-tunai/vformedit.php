@@ -19,21 +19,18 @@
                         <label class="col-md-3">Tanggal Dokumen</label>
                         <label class="col-md-3">Area</label>
                         <div class="col-sm-3">
+                            <input type="hidden" name="id" id="id" value="<?= $data->i_tunai ?>">
                             <select name="ibagian" id="ibagian" onchange="number();" class="form-control select2">
-                                <?php if ($bagian) {
-                                    foreach ($bagian as $row): ?>
-                                        <option value="<?= $row->i_bagian; ?>" <?php if ($row->i_bagian == $data->i_bagian) {
-                                              echo 'selected';
-                                          } ?>>
-                                            <?= $row->e_bagian_name; ?>
-                                        </option>
-                                    <?php endforeach;
-                                } ?>
+                                <?php foreach ($bagian as $row) { ?>
+                                    <?php $selected = ($row->id == $data->id_bagian) ? "selected" : ''; ?>
+                                    <option value="<?= $row->id; ?>" <?= $selected ?>>
+                                        <?= $row->e_bagian_name; ?>
+                                    </option>
+                                <?php } ?>
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <div class="input-group">
-                                <input type="hidden" name="id" id="id" readonly value="<?= $data->i_dt; ?>">
+                            <div class="input-group">                                
                                 <input type="text" name="i_dt_id" id="i_dt_id" value="<?= $data->i_dt_id; ?>" readonly
                                     maxlength="20" class="form-control input-sm"
                                     aria-label="Text input with dropdown button">
@@ -41,22 +38,56 @@
                         </div>
                         <div class="col-sm-3">
                             <input type="text" id="d_dt" name="d_dt" class="form-control input-sm date" required=""
-                                readonly onchange="number();" value="<?= $data->d_dt; ?>">
+                                readonly onchange="number();" value="<?php echo date("d-m-Y"); ?>">
                         </div>
                         <div class="col-sm-3">
-                            <select name="i_area" id="i_area" class="form-control select2"
-                                onchange="number();clear_table();">
-                                <?php if ($area) {
-                                    foreach ($area as $row): ?>
-                                        <option value="<?= $row->id; ?>" <?php if ($row->id == $data->i_area) {
-                                              echo 'selected';
-                                          } ?>><?="[" . $row->i_area . "] - " . $row->e_area; ?>
-                                        </option>
-                                    <?php endforeach;
-                                } ?>
+                            <select name="id_area" id="id_area" class="form-control select2">
+                                <?php foreach ($all_area as $area)  { ?>
+                                    <?php $selected = ($area->id == $data->id_area) ? "selected" : "" ?>
+                                    <option value="<?= $area->id; ?>"><?="[" . $area->i_area . "] - " . $area->e_area; ?>
+                                    </option>
+                                <?php } ?>
                             </select>
                         </div>
                     </div>
+
+                    <div class="form-group row">
+                        <label class="col-md-3">Nama Pelanggan</label>
+                        <label class="col-md-3">Nama Sales</label>
+                        <label class="col-md-3">No. Daftar Tagihan</label>
+                        <label class="col-md-3">Keterangan</label>
+                        <div class="col-sm-3">
+                            <select name="id_customer" id="id_customer" class="form-control select2" required>
+                                <?php foreach ($all_customer as $customer)  { ?>
+                                    <?php $selected = ($customer->id == $data->id_customer) ? "selected" : "" ?>
+                                    <option value="<?= $customer->id; ?>" <?= $selected ?>>
+                                        <?= $customer->e_customer_name ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <select name="id_sales" id="id_sales" class="form-control select2" required>
+                            <?php foreach ($all_salesman as $salesman)  { ?>
+                                <?php $selected = ($salesman->id == $data->id_salesman) ? "selected" : "" ?>
+                                    <option value="<?= $salesman->id; ?>" <?= $selected ?>>
+                                        <?= $salesman->e_sales?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <select name="id_daftar_tagihan" id="id_daftar_tagihan" class="form-control select2" required>
+                                <option value="<?= $data->i_dt; ?>" selected>
+                                    <?= $data->i_dt_id?>
+                                </option>                            
+                            </select>
+                        </div>
+                        <div class="col-sm-3">
+                            <textarea name="keterangan" id="keterangan" cols="24" rows="2" class="form-control text-left"><?= $data->e_remark ?></textarea>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-sm-12">
                             <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
@@ -89,69 +120,82 @@
                     <div class="col-sm-11">
                         <h3 class="box-title m-b-0">Detail Nota</h3>
                     </div>
-                    <div class="col-sm-1" style="text-align: right;">
-                        -
-                    </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="table-responsive">
-                            <table id="tabledatax" class="table color-table success-table table-bordered class"
+                            <table id="tabledatax" class="table color-table inverse-table table-bordered class"
                                 cellpadding="8" cellspacing="1" width="100%">
                                 <thead>
                                     <tr>
                                         <th class="text-center" style="width: 3%;">No</th>
-                                        <th style="width: 30%;">No. Nota</th>
-                                        <th style="width: 10%;">Tgl. Nota</th>
-                                        <th style="width: 10%;">Tgl. Jatuh Tempo</th>
-                                        <th>Pelanggan</th>
-                                        <th class="text-right" width="13%" valign="center">Jumlah</th>
-                                        <th class="text-right" width="13%" valign="center">Sisa</th>
-                                        <th class="text-center" style="width: 3%;">Act</th>
+                                        <th>No. Nota</th>
+                                        <th>Tgl. Nota</th>
+                                        <!-- <th>Tgl. Jatuh Tempo</th> -->
+                                        <!-- <th>Pelanggan</th> -->
+                                        <th class="text-right" style="width: 200px;">Jumlah Nota</th>
+                                        <th class="text-right" style="width: 200px;">Jumlah</th>
+                                        <th class="text-center" style="width: 40px;">Act</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php $i = 0;
-                                    if ($datadetail) {
-                                        foreach ($datadetail as $key) {
-                                            $i++; ?>
-                                            <tr id="tr<?= $i; ?>">
-                                                <td class="text-center">
-                                                    <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
-                                                </td>
-                                                <td><select data-nourut="<?= $i; ?>" id="i_nota<?= $i; ?>"
-                                                        class="form-control input-sm" name="i_nota<?= $i; ?>">
-                                                        <option value="<?= $key->i_nota;?>"><?= $key->i_document;?></option>
-                                                    </select>
-                                                </td>
-                                                <td><input type="hidden" name="d_nota_<?= $i; ?>" id="d_nota_<?= $i; ?>" value="<?= $key->d_document;?>"><span
-                                                        class="d_nota_<?= $i; ?>"><?= $key->d_nota;?></span></td>
-                                                <td><input type="hidden" name="d_jatuh_tempo_<?= $i; ?>" id="d_jatuh_tempo_<?= $i; ?>"
-                                                        value="<?= $key->d_jatuh_tempo;?>"><span class="d_jatuh_tempo_<?= $i; ?>"><?= $key->d_jatuh_tempo;?></span></td>
-                                                <td><input type="hidden" name="e_customer_name_<?= $i; ?>" id="e_customer_name_<?= $i; ?>"
-                                                        value="<?= $key->e_customer_name;?>"><span class="e_customer_name_<?= $i; ?>"><?= $key->e_customer_name;?></span></td>
-                                                <td class="text-right"><input type="hidden" name="v_nota_<?= $i; ?>" id="v_nota_<?= $i; ?>"
-                                                        value="<?= $key->v_bayar;?>"><span class="text-right v_nota_<?= $i; ?>"><?= number_format($key->v_bayar);?></span></td>
-                                                <td class="text-right"><input type="hidden" class="v_sisa" name="v_sisa_<?= $i; ?>"
-                                                        id="v_sisa_<?= $i; ?>" value="<?= $key->v_sisa;?>"><span class="text-right v_sisa_<?= $i; ?>"><?= number_format($key->v_sisa);?></span>
-                                                </td>
-                                                <td class="text-center"><button type="button" title="Delete"
-                                                        class="ibtnDel btn btn-circle btn-danger"><i
-                                                            class="ti-close"></i></button></td>
-                                            </tr>
-                                        <?php }
-                                    } ?>
+                                    <?php $grand_total_jumlah = 0; $grand_total_sisa = 0; ?>
+                                    <?php $i = 0; foreach ($datadetail as $item) { $i++; ?>
+                                        <tr id="tr<?= $i; ?>">
+                                            <td class="text-center">
+                                                <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
+                                            </td>
+                                            <td>
+                                                <select data-nourut="<?= $i ?>" id="i_nota<?= $i ?>" class="form-control input-sm form-input-nota" name="items[<?= $i ?>][i_nota]">
+                                                    <option value="<?= $item->id_nota ?>" selected><?= $item->i_document ?></option>
+                                                </select>                                                
+                                            </td>
+                                            <td>                                                
+                                                <input type="text" name="items[<?= $i ?>][d_nota]" id="d_nota_<?= $i ?>" value="<?= $item->d_document ?>" class="form-control input-sm" readonly>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                    </div>                                                    
+                                                    <input type="text" class="form-control input-sm"
+                                                        name="items[<?= $i ?>][v_nota]" id="v_nota_<?= $i ?>" 
+                                                        value="<?= number_format($item->v_bersih, 0, ",", ".") ?>" 
+                                                        readonly>
+                                                </div>
+                                            </td>
+                                            <td class="text-right">
+                                                <div class="input-group">
+                                                    <div class="input-group-prepend">
+                                                        <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                    </div>
+                                                    <input type="text" class="form-control input-sm form-input-bayar"
+                                                        name="items[<?= $i ?>][bayar]"
+                                                        id="bayar<?= $i ?>"
+                                                        value="<?= number_format($item->v_jumlah, 0, ",", ".") ?>">
+                                                    <?php $grand_total_jumlah += $item->v_jumlah; ?>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th class="text-right" colspan="5">Total</th>
-                                        <th class="text-right"><span id="jumlah"></span><input type="hidden"
-                                                class="form-control form-control-sm text-right" name="v_jumlah"
-                                                id="v_jumlah" value="0" readonly></th>
-                                        <th></th>
+                                        <th class="text-right" colspan="4">Total</th>
+                                        <th class="text-right">
+                                            <div class="input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                                                </div>
+                                                <input type="text" class="form-control input-sm" name="grand_total" 
+                                                    value="<?= number_format($grand_total_jumlah, 0, ",", ".") ?>" id="grand_total" readonly>
+                                            </div>
+                                        </th>
                                     </tr>
                                 </tfoot>
-                                <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
                             </table>
                         </div>
                     </div>
@@ -275,14 +319,35 @@
             var no = parseInt($('#tabledatax > tbody tr').length + 1);
             var newRow = $('<tr id="tr' + i + '">');
             var cols = "";
-            cols += '<td class="text-center"><spanx id="snum' + i + '">' + no + '</spanx></td>';
-            cols += '<td ><select data-nourut="' + i + '" id="i_nota' + i + '" class="form-control input-sm" name="i_nota' + i + '"></select></td>';
-            cols += `<td><input type="hidden" name="d_nota_${i}" id="d_nota_${i}" value=""><span class="d_nota_${i}"></span></td>`;
-            cols += `<td><input type="hidden" name="d_jatuh_tempo_${i}" id="d_jatuh_tempo_${i}" value=""><span class="d_jatuh_tempo_${i}"></span></td>`;
-            cols += `<td><input type="hidden" name="e_customer_name_${i}" id="e_customer_name_${i}" value=""><span class="e_customer_name_${i}"></span></td>`;
-            cols += `<td class="text-right"><input type="hidden" name="v_nota_${i}" id="v_nota_${i}" value=""><span class="text-right v_nota_${i}"></span></td>`;
-            cols += `<td class="text-right"><input type="hidden" class="v_sisa" name="v_sisa_${i}" id="v_sisa_${i}" value=""><span class="text-right v_sisa_${i}"></span></td>`;
-            cols += '<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
+            cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;
+            cols += `<td>
+                        <select data-nourut="${i}" id="i_nota${i}" class="form-control input-sm form-input-nota" name="items[${i}][i_nota]"></select>
+                    </td>`;
+            cols += `<td>
+                        <input type="text" name="items[${i}][d_nota]" id="d_nota_${i}" value="" class="form-control input-sm date" readonly>
+                    </td>`;            
+            cols += `<td>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                            </div>
+                            <input type="text" class="form-control input-sm"
+                                name="items[${i}][v_nota]" id="v_nota_${i}" readonly>
+                        </div>
+                    </td>`;
+            cols += `<td>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                            </div>
+                            <input type="text" class="form-control input-sm form-input-bayar"
+                                name="items[${i}][bayar]"
+                                id="bayar${i}">
+                        </div>
+                    </td>`;
+            cols += `<td class="text-center">
+                        <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
+                    </td>`;
             cols += `</tr>`;
             newRow.append(cols);
             $("#tabledatax").append(newRow);
@@ -292,7 +357,7 @@
                 width: "100%",
                 type: "POST",
                 ajax: {
-                    url: '<?= base_url($folder . '/cform/nota/'); ?>',
+                    url: '<?= base_url($folder . '/cform/get_all_nota_penjualan/'); ?>',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
@@ -337,18 +402,14 @@
                         url: '<?= base_url($folder . '/cform/detailnota'); ?>',
                         dataType: "json",
                         success: function (data) {
-                            $('#d_nota_' + z).val(data['detail'][0]['d_nota']);
-                            $('.d_nota_' + z).text(data['detail'][0]['d_document']);
-                            $('#d_jatuh_tempo_' + z).val(data['detail'][0]['d_jatuh_tempo']);
-                            $('.d_jatuh_tempo_' + z).text(data['detail'][0]['d_jatuh_tempo']);
-                            $('#e_customer_name_' + z).val(data['detail'][0]['e_customer_name']);
-                            $('.e_customer_name_' + z).text(data['detail'][0]['e_customer_name']);
-                            $('#v_nota_' + z).val(data['detail'][0]['v_bersih']);
-                            $('.v_nota_' + z).text(formatcemua(data['detail'][0]['v_bersih']));
-                            $('#v_sisa_' + z).val(data['detail'][0]['v_sisa']);
-                            $('.v_sisa_' + z).text(formatcemua(data['detail'][0]['v_sisa']));
-                            hetang()
+                            const formattedDate = formatDateId(data['detail'][0]['d_nota']);
+                            $('#d_nota_' + z).val(formattedDate);
+                            
+                            const nilaiBayar = formatRupiah(data['detail'][0]['v_bersih'], "");
+                            $('#v_nota_' + z).val(nilaiBayar);
 
+                            initKeyupFormatRupiah('bayar'+z);                            
+                            calculateGrandTotal();
                         },
                         error: function () {
                             swal('Data kosong : (');
@@ -368,6 +429,7 @@
             $(this).closest("tr").remove();
             $('#jml').val(i);
             del();
+            calculateGrandTotal();
         });
 
         $('#ceklis').click(function (event) {
@@ -379,7 +441,131 @@
                 number();
             }
         });
+
+        /** init fungsi change select2 nota */
+        $('.form-input-nota').each(function() {
+            const _id = $(this).attr('id');
+            initChangeNota(_id);
+        });
+
+        /** init fungsi keyup input-bayar */
+        $('.form-input-bayar').each(function() {
+            const _id = $(this).attr('id');
+            initKeyupFormatRupiah(_id);
+        });
     });
+
+    function calculateGrandTotal() {
+        let items = document.querySelectorAll('.form-input-bayar');
+        let grandTotal = 0;
+        for (i=0; i<items.length; i++) {
+            let total = items[i].value.toString();
+            if (total == '') {
+                total = '0';
+            }
+            total = total.replaceAll(".", "");
+            total = total.replaceAll(",", ".");
+            grandTotal += parseFloat(total);
+        }
+        document.getElementById('grand_total').value = formatRupiah(grandTotal.toString());
+    }
+
+
+    function formatRupiah(angka, prefix) {
+        var number_string = angka.replace(/[^,\d]/g, "").toString(),
+        split = number_string.split(","),
+        sisa = split[0].length % 3,
+        rupiah = split[0].substr(0, sisa),
+        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        // tambahkan titik jika yang di input sudah menjadi angka ribuan
+        if (ribuan) {
+        separator = sisa ? "." : "";
+        rupiah += separator + ribuan.join(".");
+        }
+    
+        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+        return rupiah;
+    }
+
+    function initKeyupFormatRupiah(id_element) {
+        let element = document.getElementById(id_element);
+        element.addEventListener('keyup', function() {            
+            element.value = formatRupiah(this.value, "");
+            /** update grand total */
+            calculateGrandTotal();
+        })
+    }
+
+    function initChangeNota(id_element) {
+        let element = document.getElementById(id_element);
+        $(element).select2({
+            placeholder: 'Cari Nota Penjualan',
+            allowClear: true,
+            width: "100%",
+            type: "POST",
+            ajax: {
+                url: '<?= base_url($folder . '/cform/get_all_nota_penjualan/'); ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    var query = {
+                        q: params.term,
+                        id_customer: $('#id_customer').val(),
+                    }
+                    return query;
+                },
+                processResults: function (data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        }).change(function (event) {
+            /**
+             * Cek Barang Sudah Ada
+             * Get Harga Barang
+             */
+            var z = $(this).data('nourut');
+            var ada = true;
+            for (var x = 1; x <= $('#jml').val(); x++) {
+                if ($(this).val() != null) {
+                    if ((($(this).val()) == $('#i_nota' + x).val()) && (z != x)) {
+                        swal("Nota tersebut sudah ada !!!!!");
+                        ada = false;
+                        break;
+                    }
+                }
+            }
+            if (!ada) {
+                $(this).val('');
+                $(this).html('');
+            } else {
+                $.ajax({
+                    type: "post",
+                    data: {
+                        'id': $(this).val(),
+                    },
+                    url: '<?= base_url($folder . '/cform/detailnota'); ?>',
+                    dataType: "json",
+                    success: function (data) {
+                        const formattedDate = formatDateId(data['detail'][0]['d_nota']);
+                        $('#d_nota_' + z).val(formattedDate);
+                        
+                        const nilaiBayar = formatRupiah(data['detail'][0]['v_bersih'], "");
+                        $('#v_nota_' + z).val(nilaiBayar);
+
+                        initKeyupFormatRupiah('bayar'+z);                            
+                        calculateGrandTotal();
+                    },
+                    error: function () {
+                        swal('Data kosong : (');
+                    }
+                });
+            }
+        });
+    }
 
     function del() {
         obj = $('#tabledatax tr:visible').find('spanx');
@@ -391,6 +577,7 @@
 
     //new script
     function number() {
+        return;
         $.ajax({
             type: "post",
             data: {
@@ -470,5 +657,10 @@
         });
         $('#jumlah').text(formatcemua(v_sisa));
         $('#v_jumlah').val(v_sisa);
+    }
+
+    function formatDateId(_date) {
+        let aDate = _date.split("-");
+        return `${aDate[2]}-${aDate[1]}-${aDate[0]}`;
     }
 </script>

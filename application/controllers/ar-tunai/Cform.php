@@ -170,7 +170,7 @@ class Cform extends CI_Controller
         echo json_encode($query);
     }
 
-    public function simpan()
+    public function __simpan()
     {
         $data = check_role($this->i_menu, 1);
         if (!$data) {
@@ -229,12 +229,63 @@ class Cform extends CI_Controller
         $this->load->view('pesan2', $data);
     }
 
-    public function simpan2()
+    public function simpan()
     {
-        $id_bagian;
-        $id_area;
-        $id_daftar_tagihan;
+        $data = check_role($this->i_menu, 1);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
 
+        $id_bagian = $this->input->post('ibagian');
+        $i_dt_id = $this->input->post('i_dt_id');
+        $d_dt = $this->input->post('d_dt');
+        /** reformat tanggal */
+        $d_dt = formatYmd($d_dt);
+
+        $id_area = $this->input->post('id_area');
+        $id_customer = $this->input->post('id_customer');
+        $id_salesman = $this->input->post('id_salesman');
+        $id_daftar_tagihan = $this->input->post('id_daftar_tagihan');
+        $keterangan = $this->input->post('keterangan');
+        $items = $this->input->post('items');
+        
+        $grand_total = $this->input->post('grand_total');
+        $grand_total = str_replace(".", "", $grand_total);
+
+        $result = [
+            'sukses' => false,
+            'kode' => '-',
+            'id' => '-'
+        ];
+
+        /** insert table */
+        $this->db->trans_begin();            
+        // $this->mmaster->create_header($id, $i_dt_id, $ibagian, $i_area, $d_dt, $v_jumlah);
+        $this->mmaster->insert_tunai($i_dt_id, $d_dt, $id_bagian, $id_company=null, 
+                                        $id_area, $id_customer, $id_salesman, $id_daftar_tagihan, 
+                                        $keterangan, $grand_total);
+
+        $insert_id = $this->db->insert_id();
+
+        foreach ($items as $item) {
+            $i_nota = $item['i_nota'];
+            $v_jumlah = $item['bayar'];
+            $v_jumlah = str_replace(".", "", $v_jumlah);
+            $this->mmaster->insert_tunai_item($insert_id, $i_nota, $v_jumlah, null);
+        }        
+            
+        if ($this->db->trans_status()) {
+            $this->db->trans_commit();
+            $result = [
+                'sukses' => true,
+                'kode' => $i_dt_id,
+                'id' => $insert_id
+            ];
+            $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $insert_id);
+        } 
+
+        $this->db->trans_rollback();
+        $this->load->view('pesan2', $result);
     }
 
     /*----------  MEMBUKA MENU EDIT  ----------*/
@@ -257,8 +308,10 @@ class Cform extends CI_Controller
             'bagian' => $this->mmaster->bagian()->result(),
             'data' => $this->mmaster->dataedit($this->uri->segment(4))->row(),
             'datadetail' => $this->mmaster->dataeditdetail($this->uri->segment(4))->result(),
-            'area' => $this->mmaster->area()->result(),
-            'doc' => $this->mmaster->doc($this->i_menu)->row()->doc_qe,
+            'all_area' => $this->mmaster->area()->result(),
+            'all_customer' => $this->mmaster->get_all_customer()->result(),
+            'all_salesman' => $this->mmaster->get_all_salesman()->result()
+            // 'doc' => $this->mmaster->doc($this->i_menu)->row()->doc_qe,
         );
 
         $this->Logger->write('Membuka Menu Edit ' . $this->global['title']);
@@ -267,6 +320,66 @@ class Cform extends CI_Controller
     }
 
     public function update()
+    {
+        $data = check_role($this->i_menu, 1);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id = $this->input->post('id');
+        $id_bagian = $this->input->post('ibagian');
+        $i_dt_id = $this->input->post('i_dt_id');
+        $d_dt = $this->input->post('d_dt');
+        /** reformat tanggal */
+        $d_dt = formatYmd($d_dt);
+
+        $id_area = $this->input->post('id_area');
+        $id_customer = $this->input->post('id_customer');
+        $id_sales = $this->input->post('id_sales');
+        $id_daftar_tagihan = $this->input->post('id_daftar_tagihan');
+        $keterangan = $this->input->post('keterangan');
+        $items = $this->input->post('items');
+        
+        $grand_total = $this->input->post('grand_total');
+        $grand_total = str_replace(".", "", $grand_total);
+
+        $result = [
+            'sukses' => false,
+            'kode' => '-',
+            'id' => '-'
+        ];
+
+        /** insert table */
+        $this->db->trans_begin();            
+        // $this->mmaster->create_header($id, $i_dt_id, $ibagian, $i_area, $d_dt, $v_jumlah);
+        $this->mmaster->update_tunai($i_dt_id, $d_dt, $id_bagian, $id_company=null, 
+                                        $id_area, $id_customer, $id_sales, $id_daftar_tagihan, 
+                                        $keterangan, $grand_total, $id);
+
+        $this->mmaster->delete_tunai_item($id);                                        
+
+        foreach ($items as $item) {
+            $i_nota = $item['i_nota'];
+            $v_jumlah = $item['bayar'];
+            $v_jumlah = str_replace(".", "", $v_jumlah);
+            $this->mmaster->insert_tunai_item($id, $i_nota, $v_jumlah, null);
+        }        
+            
+        if ($this->db->trans_status()) {
+            $this->db->trans_commit();
+            $result = [
+                'sukses' => true,
+                'kode' => $i_dt_id,
+                'id' => $id
+            ];
+            $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $id);
+        } 
+
+        $this->db->trans_rollback();
+        $this->load->view('pesan2', $result);
+    }
+
+    public function __update()
     {
         $data = check_role($this->i_menu, 3);
         if (!$data) {
@@ -351,7 +464,7 @@ class Cform extends CI_Controller
 
         $data = array(
             'folder'        => $this->global['folder'],
-            'title'         => "Edit " . $this->global['title'],
+            'title'         => "Approve " . $this->global['title'],
             'title_list'    => 'List ' . $this->global['title'],
             'id'            => $this->uri->segment(4),
             'dfrom'         => $this->uri->segment(5),
@@ -378,7 +491,7 @@ class Cform extends CI_Controller
 
         $data = array(
             'folder'        => $this->global['folder'],
-            'title'         => "Edit " . $this->global['title'],
+            'title'         => "Lihat " . $this->global['title'],
             'title_list'    => 'List ' . $this->global['title'],
             'id'            => $this->uri->segment(4),
             'dfrom'         => $this->uri->segment(5),
@@ -452,14 +565,15 @@ class Cform extends CI_Controller
         echo json_encode($data);
     }
 
-    public function get_all_sales()
+    public function get_all_salesman()
     {
         $q = $this->input->get('q');
-        // $id_area = $this->input->get('id_customer');
+        $id_area = $this->input->get('id_area');
+        $id_customer = $this->input->get('id_customer');
 
         $data = [];
 
-        $query = $this->mmaster->get_all_sales(str_replace("'", "", $q), null);       
+        $query = $this->mmaster->get_all_salesman(str_replace("'", "", $q), $id_area, $id_customer);       
             
         foreach ($query->result() as $result) {
             $data[] = array(
@@ -473,11 +587,11 @@ class Cform extends CI_Controller
     public function get_all_daftar_tagihan()
     {
         $q = $this->input->get('q');
-        // $id_area = $this->input->get('id_customer');
+        $id_area = $this->input->get('id_area');
 
         $data = [];
 
-        $query = $this->mmaster->get_all_daftar_tagihan(str_replace("'", "", $q), null);       
+        $query = $this->mmaster->get_all_daftar_tagihan(str_replace("'", "", $q), $id_area);       
             
         foreach ($query->result() as $result) {
             $data[] = array(
@@ -491,11 +605,16 @@ class Cform extends CI_Controller
     public function get_all_nota_penjualan()
     {
         $q = $this->input->get('q');
-        // $id_area = $this->input->get('id_customer');
+        $id_customer = $this->input->get('id_customer');
 
         $data = [];
 
-        $query = $this->mmaster->get_all_nota_penjualan(str_replace("'", "", $q), null);       
+        if ($id_customer == null) {
+            echo json_encode($data);
+            return;
+        }
+
+        $query = $this->mmaster->get_all_nota_penjualan(str_replace("'", "", $q), $id_customer);       
             
         foreach ($query->result() as $result) {
             $data[] = array(

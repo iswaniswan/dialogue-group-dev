@@ -9,79 +9,67 @@ class Mmaster extends CI_Model
 
     function data($folder, $i_menu, $dfrom, $dto)
     {
-        $cek = $this->db->query("SELECT
-                i_bagian
-            FROM
-                tm_dt
-            WHERE
-                i_status <> '5'
-                and d_dt BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy') AND i_company = '$this->id_company'
-                AND i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '$this->i_departement'
-                        AND username = '$this->username'
-                        AND id_company = '$this->id_company')
+        $sql_in_bagian = "SELECT i_bagian
+                            FROM tr_departement_cover
+                            WHERE i_departement = '$this->i_departement'
+                                AND username = '$this->username'
+                                AND id_company = '$this->id_company'";
 
-        ", FALSE);
-        if ($this->i_departement == '1') {
-            $bagian = "";
-        } else {
+        $sql_cek = "SELECT i_bagian
+                    FROM tm_dt
+                    WHERE i_status <> '5'
+                        AND d_dt BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy') AND i_company = '$this->id_company'
+                        AND i_bagian IN ($sql_in_bagian)";
+
+        $cek = $this->db->query($sql_cek, FALSE);
+
+        $bagian = "";
+        if ($this->i_departement != '1') {
+            $bagian = "AND a.i_bagian IN ($sql_in_bagian)";
             if ($cek->num_rows() > 0) {
                 $i_bagian = $cek->row()->i_bagian;
                 $bagian = "AND a.i_bagian = '$i_bagian' ";
-            } else {
-                $bagian = "AND a.i_bagian IN (SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '$this->i_departement'
-                        AND username = '$this->username'
-                        AND id_company = '$this->id_company')";
-            }
-        }
+            }  
+        } 
 
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("SELECT
-                0 as no,
-                a.i_dt as id,
-                a.i_dt_id,
-                to_char(a.d_dt, 'dd-mm-yyyy') as d_dt,
-                '[' || b.i_area || '] - ' || b.e_area AS e_area,
-                v_jumlah::money AS v_jumlah,
-                a.i_status,
-                c.e_status_name,
-                c.label_color,
-                f.i_level,
-                l.e_level_name,
-                n_print,
-                '$dfrom' AS dfrom,
-                '$dto' AS dto,
-                '$i_menu' as i_menu,
-                '$folder' AS folder
-            FROM
-                tm_dt a 
-            JOIN tr_area b 
-                ON (a.i_area = b.id) 
-            JOIN tr_status_document c 
-                ON (a.i_status = c.i_status) 
-            LEFT JOIN tr_menu_approve f ON
-                (a.i_approve_urutan = f.n_urut
-                AND f.i_menu = '$i_menu')
-            LEFT JOIN public.tr_level l ON
-                (f.i_level = l.i_level)
-            WHERE 
-                a.i_company = '$this->id_company' AND
-                a.i_status <> '5'AND
-                a.d_dt BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
-                $bagian
-            ORDER BY
-                a.d_dt asc
-        ", false);
+
+        $sql = "SELECT
+                    a.i_tunai AS id,
+                    0 AS no,
+                    a.d_tunai,
+                    a.i_tunai_id,
+                    b.e_area,
+                    c.e_customer_name,
+                    ts.e_sales,
+                    a.v_jumlah,
+                    a.v_sisa,
+                    a.i_status,
+                    tsd.e_status_name,
+                    tsd.label_color,
+                    f.i_level,
+                    l.e_level_name,
+                    '$dfrom' AS dfrom,
+                    '$dto' AS dto,
+                    '$i_menu' as i_menu,
+                    '$folder' AS folder
+                FROM tm_tunai a 
+                JOIN tm_tunai_item ti ON ti.i_tunai = a.i_tunai
+                JOIN tr_area b ON b.id = a.id_area
+                JOIN tr_customer c ON c.id = a.id_customer
+                JOIN tr_salesman ts ON ts.id = a.id_salesman
+                JOIN tr_status_document tsd ON tsd.i_status = a.i_status
+                LEFT JOIN tr_menu_approve f ON (a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu')
+                LEFT JOIN public.tr_level l ON f.i_level = l.i_level
+                WHERE a.id_company = '$this->id_company' AND
+                    a.i_status <> '5'AND
+                    a.d_tunai BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
+                    $bagian
+                ORDER BY a.d_tunai asc";
+        
+        // var_dump($sql); die();
+
+        $datatables->query($sql, false);
 
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
@@ -91,13 +79,22 @@ class Mmaster extends CI_Model
             return '<span class="label label-' . $data['label_color'] . ' label-rouded">' . $data['e_status_name'] . '</span>';
         });
 
-        $datatables->edit('n_print', function ($data) {
-            if ($data['n_print'] == '0') {
-                $data = "<span class='label label-primary'>Belum</span>";
-            } else {
-                $data = "<span class='label label-info'>Sudah " . $data['n_print'] . 'x' . "</span>";
-            }
-            return $data;
+        // $datatables->edit('n_print', function ($data) {
+        //     if ($data['n_print'] == '0') {
+        //         $data = "<span class='label label-primary'>Belum</span>";
+        //     } else {
+        //         $data = "<span class='label label-info'>Sudah " . $data['n_print'] . 'x' . "</span>";
+        //     }
+        //     return $data;
+        // });
+
+        /** reformat v_jumlah & v_sisa */
+        $datatables->edit('v_jumlah', function ($data) {
+            return 'Rp. ' . number_format($data['v_jumlah'], 0, ",", ".");
+        });
+
+        $datatables->edit('v_sisa', function ($data) {
+            return 'Rp. ' . number_format($data['v_sisa'], 0, ",", ".");
         });
 
         $datatables->add('action', function ($data) {
@@ -165,9 +162,18 @@ class Mmaster extends CI_Model
 
     public function area()
     {
-        return $this->db->query(
-            "SELECT id, i_area, e_area FROM tr_area WHERE f_status = 't' ORDER BY 2,3"
-        );
+        $id_company = $this->session->userdata('id_company');
+        $username = $this->session->userdata('username');
+
+        $where = "WHERE tua.id_company = '$id_company' AND tua.username = '$username'";
+
+        $sql = "SELECT ta.id, ta.i_area, ta.e_area 
+                FROM tm_user_area tua
+                INNER JOIN tr_area ta ON ta.i_area = tua.i_area
+                $where";
+                
+
+        return $this->db->query($sql);
     }
 
     public function get_all_customer($q='', $id_area=null)
@@ -193,24 +199,28 @@ class Mmaster extends CI_Model
         return $this->db->query($sql);
     }
 
-    public function get_all_sales($q='', $id_area=null)
+    public function get_all_salesman($q='', $id_area=null, $id_customer=null)
     {
         $id_company = $this->session->userdata('id_company');
 
-        // $where = " AND id_company = '$id_company'";
-        $where = '';
-
-        if ($id_area != null) {
-            $where .= " AND id_area = $id_area";
-        }
+        $where = "WHERE ts.f_status = 't' AND tcs.id_company = '$id_company'";
 
         if ($q != '') {
-            $where .= " AND e_customer_name ILIKE '%$q%'";
+            $where .= " AND ts.e_sales ILIKE '%$q%'";
+        }
+        
+        if ($id_area != null) {
+            $where .= " AND tcs.id_area = $id_area";
         }
 
-        $sql = "SELECT * 
-                FROM tr_salesman ts  
-                WHERE f_status = 't' $where";
+        if ($id_customer != null) {
+            $where .= " AND tcs.id_customer = '$id_customer'";
+        }
+
+        $sql = "SELECT ts.* 
+                FROM tr_customer_salesman tcs 
+                INNER JOIN tr_salesman ts ON ts.id = tcs.id_salesman
+                $where";
 
         // var_dump($sql);
 
@@ -221,44 +231,43 @@ class Mmaster extends CI_Model
     {
         $id_company = $this->session->userdata('id_company');
 
-        // $where = " AND id_company = '$id_company'";
-        $where = '';
-
-        if ($id_area != null) {
-            $where .= " AND id_area = $id_area";
-        }
+        $where = "WHERE td.i_status = '6' AND td.i_company = '$id_company'";
 
         if ($q != '') {
             $where .= " AND i_dt_id ILIKE '%$q%'";
         }
 
+        if ($id_area != null) {
+            $where .= " AND i_area = $id_area";
+        }
+
         $sql = "SELECT * 
-                FROM tm_dt td  
-                WHERE i_status = '6' $where";
+                FROM tm_dt td
+                $where";
 
         // var_dump($sql);
 
         return $this->db->query($sql);
     }
 
-    public function get_all_nota_penjualan($q='', $id_customer=null)
+    public function get_all_nota_penjualan($q='', $id_dt=null)
     {
         $id_company = $this->session->userdata('id_company');
 
-        // $where = " AND id_company = '$id_company'";
-        $where = '';
-
-        if ($id_customer != null) {
-            $where .= " AND id_customer = $id_customer";
-        }
-
+        $where = "WHERE tnp.i_status = '6' AND tnp.id_company = '$id_company'";
+        
         if ($q != '') {
             $where .= " AND i_dt_id ILIKE '%$q%'";
         }
 
+        if ($id_customer != null) {
+            $where .= " AND tnp.id_customer = $id_customer";
+        }
+
         $sql = "SELECT * 
                 FROM tm_nota_penjualan tnp  
-                WHERE i_status = '6' $where";
+                INNER JOIN tm_dt_item tdi ON tdi.i_nota = tnp.id
+                $where";
 
         // var_dump($sql);
 
@@ -403,30 +412,107 @@ class Mmaster extends CI_Model
         $this->db->insert('tm_tunai_detail', $data);
     }
 
+    public function insert_tunai($i_tunai_id, $d_dt, $ibagian, $id_company=null, $id_area, $id_customer, $id_sales, $i_dt, $e_remark, $v_jumlah)
+    {
+        $id_company = $this->session->userdata('id_company');
+
+        /** default v_sisa sama dengan v_jumlah */
+        $data = [
+            'i_tunai_id' => $i_tunai_id,
+            'd_tunai' => $d_dt,
+            'id_bagian' => $ibagian,
+            'id_company' => $id_company,
+            'id_area' => $id_area,
+            'id_customer' => $id_customer,
+            'id_salesman' => $id_sales,
+            'i_dt' => $i_dt,
+            'e_remark' => $e_remark,
+            'v_jumlah' => $v_jumlah,
+            'v_sisa' => $v_jumlah
+        ];
+
+        $this->db->insert('tm_tunai', $data);
+    }
+
+    public function update_tunai($i_tunai_id, $d_dt, $ibagian, $id_company=null, $id_area, $id_customer, $id_sales, $i_dt, $e_remark, $v_jumlah, $id)
+    {
+        $id_company = $this->session->userdata('id_company');
+
+        /** default v_sisa sama dengan v_jumlah */
+        $data = [
+            'i_tunai_id' => $i_tunai_id,
+            'd_tunai' => $d_dt,
+            'id_bagian' => $ibagian,
+            'id_company' => $id_company,
+            'id_area' => $id_area,
+            'id_customer' => $id_customer,
+            'id_salesman' => $id_sales,
+            'i_dt' => $i_dt,
+            'e_remark' => $e_remark,
+            'v_jumlah' => $v_jumlah,
+            'v_sisa' => $v_jumlah
+        ];
+
+        $this->db->where('i_tunai', $id);
+        $this->db->update('tm_tunai', $data);
+    }
+
+    public function insert_tunai_item($i_tunai, $id_nota, $v_jumlah, $n_item_no)
+    {
+        $data = [
+            'i_tunai' => $i_tunai,
+            'id_nota' => $id_nota,
+            'v_jumlah' => $v_jumlah,
+            'n_item_no' => $n_item_no
+        ];
+
+        $this->db->insert('tm_tunai_item', $data);
+    }
+
+    public function delete_tunai_item($i_tunai)
+    {
+        $this->db->where('i_tunai', $i_tunai);
+        $this->db->delete('tm_tunai_item');
+    }
+
     /*----------  DATA EDIT HEADER  ----------*/
 
     public function dataedit($id)
     {
-        return $this->db->query(
-            "SELECT DISTINCT a.*, to_char(a.d_dt, 'dd-mm-yyyy') as d_dt, b.e_bagian_name, '['||c.i_area||'] - '||c.e_area as e_area_name 
-            FROM tm_dt a, tr_bagian b, tr_area c WHERE a.i_bagian = b.i_bagian AND b.id_company = a.i_company AND a.i_area = c.id AND a.i_dt = '$id'
-            "
-        );
+        $sql = "SELECT a.*, 
+                    tb.e_bagian_name,
+                    ta.e_area,
+                    ts.e_sales,
+                    tc.e_customer_name,
+                    td.i_dt_id
+                    FROM tm_tunai a
+                    INNER JOIN tm_tunai_item tti ON tti.i_tunai = a.i_tunai
+                    INNER JOIN tr_bagian tb ON tb.id = a.id_bagian
+                    INNER JOIN tr_area ta ON ta.id = a.id_area
+                    INNER JOIN tr_salesman ts ON ts.id = a.id_salesman
+                    INNER JOIN tr_customer tc ON tc.id = a.id_customer
+                    INNER JOIN tm_dt td ON td.i_dt = a.i_dt
+                    WHERE a.i_tunai = '$id'";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     /*----------  DATA EDIT DETAIL  ----------*/
 
     public function dataeditdetail($id)
     {
-        return $this->db->query(
-            "SELECT a.*, b.i_document, c.i_customer, c.e_customer_name AS e_customer, '[ ' || c.i_customer || ' ] - ' || c.e_customer_name AS e_customer_name, e_city_name,
-            b.d_document, to_char(b.d_document, 'DD FMMonth YYYY') as d_nota, to_char(d_jatuh_tempo, 'DD FMMonth YYYY') AS d_jatuh_tempo
-            FROM tm_dt_item a
-            INNER JOIN tm_nota_penjualan b ON (b.id = a.i_nota)
-            INNER JOIN tr_customer c ON (c.id = b.id_customer)
-            INNER JOIN tr_city d ON (d.id = c.id_city)
-            WHERE a.i_dt = '$id' ORDER BY n_item_no"
-        );
+        $sql = "SELECT a.*, tti.i_tunai_item, tti.id_nota, tti.v_jumlah, tti.n_item_no,
+                td.i_dt_id, 
+                tnp.i_document, tnp.d_document, tnp.v_bersih
+            FROM tm_tunai a
+            INNER JOIN tm_tunai_item tti ON tti.i_tunai = a.i_tunai
+            INNER JOIN tm_dt td ON td.i_dt = a.i_dt
+            INNER JOIN tm_nota_penjualan tnp ON tnp.id = tti.id_nota
+            WHERE a.i_tunai = '$id'";
+
+        return $this->db->query($sql);
     }
 
 
@@ -453,12 +539,15 @@ class Mmaster extends CI_Model
     public function changestatus($id, $istatus)
     {
         if ($istatus == '3' || $istatus == '6') {
-            $awal = $this->db->query(
-                "SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
-				FROM tm_dt a
-				JOIN tr_menu_approve b on (b.i_menu = '$this->i_menu')
-				WHERE a.i_dt = '$id'
-				GROUP BY 1,2")->row();
+            $sql_awal = "SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
+                        FROM tm_tunai a
+                        JOIN tr_menu_approve b on (b.i_menu = '$this->i_menu')
+                        WHERE a.i_tunai = '$id'
+                        GROUP BY 1,2";
+            
+            // var_dump($sql_awal); die();
+
+            $awal = $this->db->query($sql_awal)->row();
             if ($istatus == '3') {
                 if ($awal->i_approve_urutan - 1 == 0) {
                     $data = array(
@@ -485,15 +574,15 @@ class Mmaster extends CI_Model
                 }
                 $now = date('Y-m-d');
                 $this->db->query("INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
-					('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_dt');", FALSE);
+					('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_tunai');", FALSE);
             }
         } else {
             $data = array(
                 'i_status' => $istatus,
             );
         }
-        $this->db->where('i_dt', $id);
-        $this->db->update('tm_dt', $data);
+        $this->db->where('i_tunai', $id);
+        $this->db->update('tm_tunai', $data);
     }
 
     public function updateprint($id)
@@ -503,7 +592,7 @@ class Mmaster extends CI_Model
 
     public function generate_nomor_dokumen($id_bagian) {
 
-        $kode = 'DT';
+        $kode = 'TN';
 
         $sql = "SELECT count(*) 
                 FROM tm_tunai tt
