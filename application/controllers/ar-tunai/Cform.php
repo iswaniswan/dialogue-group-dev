@@ -605,16 +605,16 @@ class Cform extends CI_Controller
     public function get_all_nota_penjualan()
     {
         $q = $this->input->get('q');
-        $id_customer = $this->input->get('id_customer');
+        $id_daftar_tagihan = $this->input->get('id_daftar_tagihan');
 
-        $data = [];
+        $data = ['err'];
 
-        if ($id_customer == null) {
+        if ($id_daftar_tagihan == null) {
             echo json_encode($data);
             return;
         }
 
-        $query = $this->mmaster->get_all_nota_penjualan(str_replace("'", "", $q), $id_customer);       
+        $query = $this->mmaster->get_all_nota_penjualan(str_replace("'", "", $q), $id_daftar_tagihan);       
             
         foreach ($query->result() as $result) {
             $data[] = array(

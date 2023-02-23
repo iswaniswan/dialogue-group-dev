@@ -219,7 +219,7 @@
                     data: function (params) {
                         var query = {
                             q: params.term,
-                            id_customer: $('#id_customer').val(),
+                            id_daftar_tagihan: $('#id_daftar_tagihan').val(),
                         }
                         return query;
                     },

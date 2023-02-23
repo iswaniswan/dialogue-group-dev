@@ -250,23 +250,23 @@ class Mmaster extends CI_Model
         return $this->db->query($sql);
     }
 
-    public function get_all_nota_penjualan($q='', $id_dt=null)
+    public function get_all_nota_penjualan($q='', $id_daftar_tagihan=null)
     {
         $id_company = $this->session->userdata('id_company');
 
         $where = "WHERE tnp.i_status = '6' AND tnp.id_company = '$id_company'";
         
         if ($q != '') {
-            $where .= " AND i_dt_id ILIKE '%$q%'";
+            $where .= " AND tnp.i_document ILIKE '%$q%'";
         }
 
-        if ($id_customer != null) {
-            $where .= " AND tnp.id_customer = $id_customer";
+        if ($id_daftar_tagihan != null) {
+            $where .= " AND tdi.i_dt = '$id_daftar_tagihan'";
         }
 
         $sql = "SELECT * 
-                FROM tm_nota_penjualan tnp  
-                INNER JOIN tm_dt_item tdi ON tdi.i_nota = tnp.id
+                FROM tm_nota_penjualan tnp 
+                INNER JOIN tm_dt_item tdi ON tdi.i_nota = tnp.id                
                 $where";
 
         // var_dump($sql);
