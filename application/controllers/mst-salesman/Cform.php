@@ -84,7 +84,17 @@ class Cform extends CI_Controller {
 
     public function cekkode()
     {
-        $data = $this->mmaster->cek_kode($this->input->post('kode',TRUE));
+        $data = $this->mmaster->cek_kode($this->input->post('kode',TRUE)/* , $this->input->post('area',TRUE) */);
+        if ($data->num_rows()>0) {
+            echo json_encode(1);
+        }else{
+            echo json_encode(0);
+        }
+    }
+
+    public function cekkodeedit()
+    {
+        $data = $this->mmaster->cek_kode_edit($this->input->post('kode',TRUE), $this->input->post('kode_old',TRUE)/* , $this->input->post('area',TRUE) */);
         if ($data->num_rows()>0) {
             echo json_encode(1);
         }else{
@@ -105,6 +115,19 @@ class Cform extends CI_Controller {
         echo json_encode($filter);
     }
 
+    public function role(){
+        $filter = [];
+        $cari = strtoupper($this->input->get('q'));
+        $data = $this->mmaster->role($cari);
+        foreach($data->result() as  $key){
+                $filter[] = array(
+                'id'   => $key->i_role,  
+                'text' => $key->e_role_name,
+            );
+        }          
+        echo json_encode($filter);
+    }
+
     public function simpan()
     {
 
@@ -116,6 +139,7 @@ class Cform extends CI_Controller {
         $isales    = $this->input->post('isales', TRUE);
         $esales    = $this->input->post('esales', TRUE); 
         $iarea     = $this->input->post('iarea', TRUE);
+        $irole     = $this->input->post('irole', TRUE);
         $ekota     = $this->input->post('ekota', TRUE); 
         $etelepon  = $this->input->post('etelepon', TRUE); 
         $ealamat   = $this->input->post('ealamat', TRUE);
@@ -130,7 +154,7 @@ class Cform extends CI_Controller {
                 );
             }else{
                 $this->db->trans_begin();
-                $this->mmaster->insert($id, $isales, $esales, $iarea, $ekota, $ealamat, $ekodepos, $etelepon);
+                $this->mmaster->insert($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon);
                 if($this->db->trans_status() === False){
                     $this->db->trans_rollback();
                     $data = array(
@@ -188,6 +212,7 @@ class Cform extends CI_Controller {
         $isales    = $this->input->post('isales', TRUE);
         $esales    = $this->input->post('esales', TRUE); 
         $iarea     = $this->input->post('iarea', TRUE);
+        $irole     = $this->input->post('irole', TRUE);
         $ekota     = $this->input->post('ekota', TRUE); 
         $etelepon  = $this->input->post('etelepon', TRUE); 
         $ealamat   = $this->input->post('ealamat', TRUE);
@@ -195,7 +220,7 @@ class Cform extends CI_Controller {
 
         if ($id != '' && $isales != '' && $esales != ''){            
             $this->db->trans_begin();       
-            $this->mmaster->update($id, $isales, $esales, $iarea, $ekota, $ealamat, $ekodepos, $etelepon);
+            $this->mmaster->update($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon);
             if($this->db->trans_status() === False){
                 $this->db->trans_rollback();
                 $data = array(

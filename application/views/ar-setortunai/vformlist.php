@@ -1,7 +1,7 @@
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-info">
-            <div class="panel-heading"> <i class="fa fa-list mr-2"></i>
+            <div class="panel-heading"> <i></i>
                 <?= $title; ?>
                 <?php if (check_role($this->i_menu, 1)) { ?><a href="#"
                         onclick="show('<?= $folder; ?>/cform/tambah/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"
@@ -33,13 +33,10 @@
                 <table id="tabledata" class="display nowrap table-info" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th width="3%;" class="text-center">No</th>
-                            <th>No. Dokumen</th>
-                            <th>Tgl. Dokumen</th>
+                            <th class="text-center">No</th>
+                            <th>Tgl. Dok</th>
+                            <th>No. Dok</th>
                             <th>Area</th>
-                            <th>Nama Pelanggan</th>
-                            <th>Salesman</th>
-                            <th>A/N Pengirim</th>
                             <th>Jumlah</th>
                             <th>Referensi</th>
                             <th>Status</th>

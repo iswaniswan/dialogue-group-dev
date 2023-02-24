@@ -14,10 +14,11 @@
                             <label class="col-md-2">Kode Sales</label>
                             <label class="col-md-4">Nama Sales</label>
                             <label class="col-md-3">Area</label>
-                            <label class="col-md-3">Kota</label>
+                            <label class="col-md-3">Role</label>
                             <div class="col-sm-2">
                                 <input type="hidden" readonly="" name="id" value="<?= $data->id; ?>">
-                                <input type="text" name="isales" id="isales" class="form-control input-sm" required="" maxlength="15" onkeyup="gede(this); clearcode(this);" value="<?= $data->i_sales; ?>">
+                                <input type="text" name="isales" id="isales" class="form-control input-sm" required="" maxlength="2" onkeyup="gede(this); clearcode(this);" value="<?= $data->i_sales; ?>">
+                                <input type="hidden" name="isalesold" id="isalesold" class="form-control input-sm" required="" maxlength="2" onkeyup="gede(this); clearcode(this);" value="<?= $data->i_sales; ?>">
                                 <span class="notekode" hidden="true"><b>* Kode Sudah Ada!</b></span>
                             </div>
                             <div class="col-sm-4">
@@ -29,20 +30,26 @@
                                 </select>
                             </div>
                             <div class="col-sm-3">
-                                <input type="text" name="ekota" id="ekota" onkeyup="gede(this); clearname(this);" class="form-control input-sm" value="<?=$data->e_kota;?>">
-                            </div>   
+                                <select name="irole" id="irole" class="form-control select2">
+                                    <option value="<?=$data->i_role;?>"><?=$data->e_role_name;?></option>
+                                </select>
+                            </div>
                         </div>  
                         <div class="form-group row">       
+                            <label class="col-md-3">Kota</label>
                             <label class="col-md-3">Telepon</label>      
-                            <label class="col-md-6">Alamat</label>
-                            <label class="col-md-3">Kode Pos</label>   
+                            <label class="col-md-4">Alamat</label>
+                            <label class="col-md-2">Kode Pos</label>   
+                            <div class="col-sm-3">
+                                <input type="text" name="ekota" id="ekota" onkeyup="gede(this); clearname(this);" class="form-control input-sm" value="<?=$data->e_kota;?>">
+                            </div>   
                             <div class="col-sm-3">
                                 <input type="text" name="etelepon" id="etelepon" class="form-control input-sm" value="<?=$data->e_telepon;?>" >
                             </div>                                                  
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <textarea class="form-control input-sm" name="ealamat"><?=$data->e_alamat;?></textarea>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <input type="text" name="ekodepos" id="ekodepos" class="form-control input-sm" value="<?=$data->e_kodepos;?>">
                             </div>
                         </div>                        
@@ -84,30 +91,29 @@
             },
             cache: true
             }
+        }).change(function() {
+            cekkode();
+        });
+
+        $('#irole').select2({
+            placeholder: 'Pilih Role',
+            allowClear: true,
+            ajax: {
+            url: '<?= base_url($folder.'/cform/role'); ?>',
+            dataType: 'json',
+            delay: 250,          
+            processResults: function (data) {
+                return {
+                results: data
+                };
+            },
+            cache: true
+            }
         });
     });
 
-    $( "#iarea" ).keyup(function() {
-        $.ajax({
-            type: "post",
-            data: {
-                'kode' : $(this).val(),
-            },
-            url: '<?= base_url($folder.'/cform/cekkode'); ?>',
-            dataType: "json",
-            success: function (data) {
-                if (data==1) {
-                    $(".notekode").attr("hidden", false);
-                    $("#submit").attr("disabled", true);
-                }else{
-                    $(".notekode").attr("hidden", true);
-                    $("#submit").attr("disabled", false);
-                }
-            },
-            error: function () {
-                swal('Error :)');
-            }
-        });
+    $( "#isales" ).keyup(function() {
+        cekkode();
     });
 
     $("form").submit(function (event) {
@@ -124,5 +130,30 @@
             swal('Data Masih Ada yang Kosong!');
             return false;
         }
+    }
+
+    function cekkode() {
+        $.ajax({
+            type: "post",
+            data: {
+                'kode' : $('#isales').val(),
+                'kode_old' : $('#isalesold').val(),
+                // 'area' : $('#iarea').val()
+            },
+            url: '<?= base_url($folder.'/cform/cekkodeedit'); ?>',
+            dataType: "json",
+            success: function (data) {
+                if (data==1) {
+                    $(".notekode").attr("hidden", false);
+                    $("#submit").attr("disabled", true);
+                }else{
+                    $(".notekode").attr("hidden", true);
+                    $("#submit").attr("disabled", false);
+                }
+            },
+            error: function () {
+                swal('Error :)');
+            }
+        });
     }
 </script>

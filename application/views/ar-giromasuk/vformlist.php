@@ -33,13 +33,12 @@
                 <table id="tabledata" class="display nowrap table-info" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th width="3%;" class="text-center">No</th>
+                            <th class="text-center">No</th>
                             <th>No. Dokumen</th>
                             <th>Tgl. Dokumen</th>
                             <th>Area</th>
+                            <th>Bagian</th>
                             <th>Nama Pelanggan</th>
-                            <th>Salesman</th>
-                            <th>A/N Pengirim</th>
                             <th>Jumlah</th>
                             <th>Referensi</th>
                             <th>Status</th>

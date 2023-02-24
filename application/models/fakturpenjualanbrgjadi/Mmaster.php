@@ -360,7 +360,7 @@ class Mmaster extends CI_Model
 
     function get_item2($idsj)
     {
-        $where   = " where id_document IN (" . $idsj . ")";
+        $where   = " AND id_document IN (" . $idsj . ")";
         $this->db->select(" 
         a.id,a.id_document, b.i_document, to_char(b.d_document, 'dd-mm-yyyy') as d_document, a.id_product, c.i_product_base, 
         c.e_product_basename,a.n_quantity, a.v_price, a.n_diskon1, a.v_diskon1, a.n_diskon2, a.v_diskon2,  a.n_diskon3, 
@@ -368,7 +368,7 @@ class Mmaster extends CI_Model
         from tm_sj_item a 
         inner join tm_sj b on (a.id_document = b.id and a.id_company = b.id_company)
         inner join tr_product_base c on (a.id_product = c.id and a.id_company = c.id_company)
-        $where order by b.id , c.e_product_basename 
+        WHERE a.n_quantity > 0 $where order by b.id , c.e_product_basename 
       ", FALSE);
         return $this->db->get();
     }

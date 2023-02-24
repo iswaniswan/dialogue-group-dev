@@ -13,7 +13,7 @@
             <div class="panel-body">
                 <div id="pesan"></div>
                 <div class="col-md-12">
-                <div class="form-group row">
+                    <div class="form-group row">
                         <label class="col-md-3">Bagian Pembuat</label>
                         <label class="col-md-3">Nomor Dokumen</label>
                         <label class="col-md-3">Tanggal Dokumen</label>
@@ -23,11 +23,11 @@
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <input type="text" value="<?= $data->i_tunai_id ?>" class="form-control input-sm" readonly>
+                                <input type="text" value="<?= $data->i_st_id ?>" class="form-control input-sm" readonly>
                             </div>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" value="<?= $data->d_tunai ?>" class="form-control input-sm" readonly>
+                            <input type="text" value="<?= $data->d_st ?>" class="form-control input-sm" readonly>
                         </div>
                         <div class="col-sm-3">
                             <input type="text" value="<?= $data->e_area; ?>" class="form-control input-sm" readonly>
@@ -35,21 +35,13 @@
                     </div>
 
                     <div class="form-group row">
-                        <label class="col-md-3">Nama Pelanggan</label>
-                        <label class="col-md-3">Nama Sales</label>
-                        <label class="col-md-3">No. Daftar Tagihan</label>
-                        <label class="col-md-3">Keterangan</label>
-                        <div class="col-sm-3">
-                            <input type="text" value="<?= $data->e_customer_name ?>" class="form-control input-sm" readonly>
+                        <label class="col-md-6">Nama Bank</label>
+                        <label class="col-md-6">Keterangan</label>
+                        <div class="col-sm-6">
+                            <input type="text" value="<?= $data->e_bank_name; ?>" class="form-control input-sm" readonly>
                         </div>
-                        <div class="col-sm-3">
-                            <input type="text" value="<?= $data->e_sales ?>" class="form-control input-sm" readonly>
-                        </div>
-                        <div class="col-sm-3">
-                            <input type="text" value="<?= $data->i_dt_id ?>" class="form-control input-sm" readonly>
-                        </div>
-                        <div class="col-sm-3">
-                            <textarea name="keterangan" cols="24" rows="2" class="form-control text-left" readonly><?= $data->e_remark ?></textarea>
+                        <div class="col-sm-6">
+                            <textarea name="keterangan" id="keterangan" rows="2" class="form-control text-left"><?= $data->e_remark ?></textarea>
                         </div>
                     </div>
 
@@ -85,13 +77,11 @@
                                 cellpadding="8" cellspacing="1" width="100%">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" style="width: 3%;">No</th>
-                                        <th>No. Nota</th>
-                                        <th>Tgl. Nota</th>
-                                        <!-- <th>Tgl. Jatuh Tempo</th> -->
-                                        <!-- <th>Pelanggan</th> -->
-                                        <th style="width: 200px;">Jumlah Nota</th>
-                                        <th style="width: 200px;">Jumlah Tunai</th>
+                                        <th style="width: 35px;">No</th>
+                                        <th style="width: 200px;">No. Tunai Item</th>
+                                        <th style="width: 200px;">Tgl. Tunai Item</th>
+                                        <th style="width: auto;">Nama Pelanggan</th>
+                                        <th style="width: 200px;">Jumlah</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -101,40 +91,23 @@
                                             <td class="text-center">
                                                 <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
                                             </td>
-                                            <td><?= $item->i_document;?></td>
-                                            <td><span><?= $item->d_document;?></span></td>
-                                            <td class="text-right">
-                                                <div class="input-group">
-                                                    <div class="input-group-prepend">
-                                                        <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
-                                                    </div>
-                                                    <span><?= number_format($item->v_sisa, 0, ",", ".") ?></span>
-                                                    <?php $grand_total_jumlah_nota += $item->v_sisa; ?>
-                                                </div>
-                                            </td>
-                                            <td class="text-right">
+                                            <td><?= $item->i_tunai_id;?></td>
+                                            <td><span><?= $item->d_tunai;?></span></td>
+                                            <td><span><?= $item->e_customer_name;?></span></td>
+                                            <td>
                                                 <div class="input-group">
                                                     <div class="input-group-prepend">
                                                         <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                                                     </div>
                                                     <span><?= number_format($item->v_jumlah, 0, ",", ".") ?></span>
-                                                    <?php $grand_total_jumlah_tunai += $item->v_jumlah; ?>
                                                 </div>
-                                            </td>
+                                            <?php $grand_total_jumlah_tunai += $item->v_jumlah; ?>
                                         </tr>
                                     <?php } ?>
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <th class="text-right" colspan="3">Total</th>
-                                        <th class="text-right">
-                                            <div class="input-group">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
-                                                </div>
-                                                <span><?= number_format($grand_total_jumlah_nota, 0, ",", ".") ?></span>
-                                            </div>
-                                        </th>
+                                        <th class="text-right" colspan="4">Total</th>
                                         <th class="text-right">
                                             <div class="input-group">
                                                 <div class="input-group-prepend">

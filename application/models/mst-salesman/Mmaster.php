@@ -108,12 +108,25 @@ class Mmaster extends CI_Model {
         return $this->db->get()->row()->id+1;
     }
 
-    public function cek_kode($kode)
+    public function cek_kode($kode/* , $area */)
     {
         $idcompany  = $this->session->userdata('id_company');
         $this->db->select('*');
         $this->db->from('tr_salesman');
         $this->db->where('i_sales', $kode);
+        // $this->db->where('id_area', $area);
+        $this->db->where('id_company', $idcompany);
+        return $this->db->get();
+    }
+
+    public function cek_kode_edit($kode, $kode_old/* , $area */)
+    {
+        $idcompany  = $this->session->userdata('id_company');
+        $this->db->select('*');
+        $this->db->from('tr_salesman');
+        $this->db->where('i_sales', $kode);
+        $this->db->where('i_sales <>', $kode_old);
+        // $this->db->where('id_area', $area);
         $this->db->where('id_company', $idcompany);
         return $this->db->get();
     }
@@ -132,6 +145,20 @@ class Mmaster extends CI_Model {
         return $this->db->get();
     }
 
+    public function role($cari){
+        $this->db->select("
+                            * 
+                            FROM
+                                tr_salesman_role
+                            WHERE
+                                f_status = 't'
+                            AND
+                                (e_role_name ILIKE '%$cari%')
+                            ORDER BY 
+                                i_role ASC", FALSE);
+        return $this->db->get();
+    }
+
     public function cek_data($id)
     {
         $idcompany  = $this->session->userdata('id_company');
@@ -143,7 +170,7 @@ class Mmaster extends CI_Model {
         return $this->db->get();
     }    
 
-    public function insert($id, $isales, $esales, $iarea, $ekota, $ealamat, $ekodepos, $etelepon)
+    public function insert($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon)
     {
         $idcompany  = $this->session->userdata('id_company');
 
@@ -153,6 +180,8 @@ class Mmaster extends CI_Model {
                         'i_sales'       => $isales,
                         'e_sales'       => $esales,    
                         'id_area'       => $iarea, 
+                        'i_role'        => $irole,
+                        'id_salesman_upline' => $id, 
                         'e_kota'        => $ekota,
                         'e_telepon'     => $etelepon,
                         'e_alamat'      => $ealamat,
@@ -176,18 +205,22 @@ class Mmaster extends CI_Model {
                                 a.e_kota,
                                 a.e_kodepos,
                                 a.e_alamat,
-                                a.id_company
+                                a.id_company,
+                                a.i_role,
+                                c.e_role_name
                             FROM
                                 tr_salesman a
                             JOIN 
                                 tr_area b
                                 ON a.id_area = b.id
+                            inner join tr_salesman_role c
+                                ON (c.i_role = a.i_role)
                             WHERE
-                                a.id_company = '$idcompany'", FALSE);
+                                a.id_company = '$idcompany' AND a.id = '$id'", FALSE);
         return $this->db->get();
     }   
 
-    public function update($id, $isales, $esales, $iarea, $ekota, $ealamat, $ekodepos, $etelepon){
+    public function update($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon){
         $idcompany  = $this->session->userdata('id_company');
         
         $data = array(
@@ -195,6 +228,7 @@ class Mmaster extends CI_Model {
                         'i_sales'       => $isales,
                         'e_sales'       => $esales,    
                         'id_area'       => $iarea, 
+                        'i_role'        => $irole, 
                         'e_kota'        => $ekota,
                         'e_telepon'     => $etelepon,
                         'e_alamat'      => $ealamat,

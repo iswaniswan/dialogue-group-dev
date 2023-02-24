@@ -30,7 +30,7 @@
                             </select>
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" name="i_dt_id" id="i_dt_id" readonly autocomplete="off"
+                            <input type="text" name="i_st_id" id="i_st_id" readonly autocomplete="off"
                                         placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value=""
                                         aria-label="Text input with dropdown button">
                         </div>
@@ -48,23 +48,13 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-md-3">Nama Pelanggan</label>
-                        <label class="col-md-3">Nama Sales</label>
-                        <label class="col-md-3">No. Daftar Tagihan</label>
-                        <label class="col-md-3">Keterangan</label>
-                        <div class="col-sm-3">
-                            <select name="id_customer" id="id_customer" class="form-control select2" required>
+                        <label class="col-md-6">Nama Bank</label>
+                        <label class="col-md-6">Keterangan</label>
+                        <div class="col-sm-6">
+                            <select name="id_bank" id="id_bank" class="form-control select2" required>
                             </select>
                         </div>
-                        <div class="col-sm-3">
-                            <select name="id_salesman" id="id_salesman" class="form-control select2" required>
-                            </select>
-                        </div>
-                        <div class="col-sm-3">
-                            <select name="id_daftar_tagihan" id="id_daftar_tagihan" class="form-control select2" required>
-                            </select>
-                        </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-6">
                             <textarea name="keterangan" id="keterangan" rows="2" class="form-control text-left"></textarea>
                         </div>
                     </div>
@@ -95,10 +85,7 @@
             <div class="col-sm-12">
                 <div class="row">
                     <div class="col-sm-11">
-                        <h3 class="box-title m-b-0">Detail Nota</h3>
-                    </div>
-                    <div class="col-sm-1" style="text-align: right;">
-                        -
+                        <h3 class="box-title m-b-0">Detail Setor Tunai</h3>
                     </div>
                 </div>
                 <div class="row">
@@ -108,11 +95,11 @@
                                 cellpadding="8" cellspacing="1" width="100%">
                                 <thead>
                                     <tr>
-                                        <th class="text-center" style="width: 3%;">No</th>
-                                        <th style="width: auto;">No. Nota</th>
-                                        <th style="width: auto;">Tgl. Nota</th>
-                                        <th style="width: 200px;">Jumlah Nota</th>
-                                        <th style="width: 200px;">Jumlah Tunai</th>
+                                        <th style="width: 35px;">No</th>
+                                        <th style="width: 300px;">Dokumen Tunai Item</th>
+                                        <th style="width: 200px;">Tgl. Tunai Item</th>
+                                        <th style="width: auto;">Nama Pelanggan</th>
+                                        <th style="width: 200px;">Jumlah</th>
                                         <th class="text-center" style="width: auto;">Act</th>
                                     </tr>
                                 </thead>
@@ -175,30 +162,23 @@
             var cols = "";
             cols += `<td class="text-center"><spanx id="snum${i}">${no}</spanx></td>`;
             cols += `<td>
-                        <select data-nourut="${i}" id="i_nota${i}" class="form-control input-sm" name="items[${i}][i_nota]"></select>
+                        <select data-nourut="${i}" id="i_tunai${i}" class="form-control input-sm" name="items[${i}][i_tunai]"></select>
                     </td>`;
             cols += `<td>
-                        <input type="text" name="items[${i}][d_nota]" id="d_nota_${i}" value="" class="form-control input-sm date" readonly>
-                    </td>`;            
+                        <input type="text" name="items[${i}][d_tunai]" id="d_tunai_${i}" value="" class="form-control input-sm date" readonly>
+                    </td>`;   
             cols += `<td>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
-                            </div>
-                            <input type="text" class="form-control input-sm"
-                                name="items[${i}][v_nota]" id="v_nota_${i}" readonly>
-                        </div>
-                    </td>`;
+                        <input type="text" name="items[${i}][e_customer]" id="e_customer_${i}" value="" class="form-control input-sm date" readonly>
+                    </td>`;         
             cols += `<td>
                         <div class="input-group">
                             <div class="input-group-prepend">
                                 <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                             </div>
                             <input type="text" class="form-control input-sm form-input-bayar"
-                                name="items[${i}][bayar]"
-                                id="bayar${i}">
+                                name="items[${i}][v_jumlah]" id="v_jumlah_${i}" readonly>
                         </div>
-                    </td>`;
+                    </td>`;            
             cols += `<td class="text-center">
                         <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
                     </td>`;
@@ -207,19 +187,18 @@
             $("#tabledatax").append(newRow);
 
             /** dropdown detail nota penjualan */
-            $('#i_nota' + i).select2({
+            $('#i_tunai' + i).select2({
                 placeholder: 'Cari Nota Penjualan',
                 allowClear: true,
                 width: "100%",
                 type: "POST",
                 ajax: {
-                    url: '<?= base_url($folder . '/cform/get_all_nota_penjualan/'); ?>',
+                    url: '<?= base_url($folder . '/cform/get_all_tunai_item/'); ?>',
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
                         var query = {
                             q: params.term,
-                            id_daftar_tagihan: $('#id_daftar_tagihan').val(),
                         }
                         return query;
                     },
@@ -239,7 +218,7 @@
                 var ada = true;
                 for (var x = 1; x <= $('#jml').val(); x++) {
                     if ($(this).val() != null) {
-                        if ((($(this).val()) == $('#i_nota' + x).val()) && (z != x)) {
+                        if ((($(this).val()) == $('#i_tunai' + x).val()) && (z != x)) {
                             swal("Nota tersebut sudah ada !!!!!");
                             ada = false;
                             break;
@@ -251,20 +230,22 @@
                     $(this).html('');
                 } else {
                     $.ajax({
-                        type: "post",
+                        type: "GET",
                         data: {
                             'id': $(this).val(),
                         },
-                        url: '<?= base_url($folder . '/cform/detailnota'); ?>',
+                        url: '<?= base_url($folder . '/cform/get_all_tunai_item'); ?>',
                         dataType: "json",
                         success: function (data) {
-                            const formattedDate = formatDateId(data['detail'][0]['d_nota']);
-                            $('#d_nota_' + z).val(formattedDate);
-                            
-                            const nilaiBayar = formatRupiah(data['detail'][0]['v_bersih'], "");
-                            $('#v_nota_' + z).val(nilaiBayar);
+                            const response = data[0].userdata.data;
+                            let dTunai = response?.d_tunai;
+                            let customerName = response?.e_customer_name;
+                            let jumlah = response?.v_jumlah;
 
-                            initKeyupFormatRupiah('bayar'+z);                            
+                            $('#d_tunai_' + z).val(formatDateId(dTunai));
+                            $('#e_customer_' + z).val(customerName);
+                            $('#v_jumlah_' + z).val(formatRupiah(jumlah, ""));
+
                             calculateGrandTotal();
                         },
                         error: function () {
@@ -290,9 +271,9 @@
 
         $('#ceklis').click(function (event) {
             if ($('#ceklis').is(':checked')) {
-                $("#i_dt_id").attr("readonly", false);
+                $("#i_st_id").attr("readonly", false);
             } else {
-                $("#i_dt_id").attr("readonly", true);
+                $("#i_st_id").attr("readonly", true);
                 $("#ada").attr("hidden", true);
                 number();
             }
@@ -304,27 +285,27 @@
             allowClear: false,
             width: "100%",
         }).change(function() {
-            $('#id_customer').val(null).trigger('change');
+            $('#id_bank').val(null).trigger('change');
             $('#id_salesman').val(null).trigger('change');
             $('#id_daftar_tagihan').val(null).trigger('change');
             number();
             clear_table();
+            calculateGrandTotal();
         });
 
         /** dropdown customer */
-        $('#id_customer').select2({
-            placeholder: 'Pilih Customer',
+        $('#id_bank').select2({
+            placeholder: 'Pilih Bank',
             allowClear: false,
             width: "100%",
             type: "POST",
             ajax: {
-                url: '<?= base_url($folder . '/cform/get_all_customer/'); ?>',
+                url: '<?= base_url($folder . '/cform/get_all_bank/'); ?>',
                 dataType: 'json',
                 delay: 250,
                 data: function (params) {
                     var query = {
                         q: params.term,
-                        id_area: $('#id_area').val(),
                     }
                     return query;
                 },
@@ -336,61 +317,10 @@
                 cache: true
             }
         }).change(function() {
-            $('#id_salesman').val(null).trigger('change');
+            // $('#id_salesman').val(null).trigger('change');
         });
         
-        /** dropdown salesman */
-        $('#id_salesman').select2({
-            placeholder: 'Pilih Sales',
-            allowClear: false,
-            width: "100%",
-            type: "POST",
-            ajax: {
-                url: '<?= base_url($folder . '/cform/get_all_salesman/'); ?>',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    var query = {
-                        q: params.term,
-                        id_area: $('#id_area').val(),
-                        id_customer: $('#id_customer').val(),
-                    }
-                    return query;
-                },
-                processResults: function (data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            }
-        });
-
-        /** dropdown daftar tagihan */
-        $('#id_daftar_tagihan').select2({
-            placeholder: 'Pilih Tagihan',
-            allowClear: false,
-            width: "100%",
-            type: "POST",
-            ajax: {
-                url: '<?= base_url($folder . '/cform/get_all_daftar_tagihan/'); ?>',
-                dataType: 'json',
-                delay: 250,
-                data: function (params) {
-                    var query = {
-                        q: params.term,
-                        id_area: $('#id_area').val(),
-                    }
-                    return query;
-                },
-                processResults: function (data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            }
-        });
+        
 
     });
 
@@ -414,7 +344,7 @@
             url: '<?= base_url($folder . '/cform/generate_nomor_dokumen'); ?>',
             dataType: "json",
             success: function (data) {
-                $('#i_dt_id').val(data);
+                $('#i_st_id').val(data);
             },
             error: function () {
                 swal('Error :)');
@@ -422,25 +352,6 @@
         });
     }
 
-    function getstok(id) {
-        var idproduct = $('#idproduct' + id).val();
-        $.ajax({
-            type: "post",
-            data: {
-                'idproduct': idproduct,
-                'ibagian': $('#ibagian').val(),
-            },
-            url: '<?= base_url($folder . '/cform/getstok'); ?>',
-            dataType: "json",
-            success: function (data) {
-                //console.log(data.saldo_akhir);
-                $('#stok' + id).val(data.saldo_akhir);
-            },
-            error: function () {
-                swal('Error :)');
-            }
-        });
-    }
 
     function konfirm() {
         var jml = $('#jml').val();

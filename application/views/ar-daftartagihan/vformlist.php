@@ -33,7 +33,7 @@
                 <table id="tabledata" class="display nowrap table-info" cellspacing="0" width="100%">
                     <thead>
                         <tr>
-                            <th class="text-center">No</th>
+                            <th width="3%;" class="text-center">No</th>
                             <th>No. Dok</th>
                             <th>Tgl. Dok</th>
                             <th>Area</th>
@@ -54,7 +54,7 @@
 <script>
     $(document).ready(function () {
         showCalendar2('.date', null, 0);
-        datatablemod('#tabledata', base_url + '<?= $folder; ?>/Cform/data/<?= $dfrom . '/' . $dto; ?>');
+        datatableedit('#tabledata', base_url + '<?= $folder; ?>/Cform/data/<?= $dfrom . '/' . $dto; ?>',0,4);
     });
 
     $(document).ready(function () {

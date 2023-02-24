@@ -14,9 +14,9 @@
                             <label class="col-md-2">Kode Sales</label>
                             <label class="col-md-4">Nama Sales</label>
                             <label class="col-md-3">Area</label>
-                            <label class="col-md-3">Kota</label>
+                            <label class="col-md-3">Role</label>
                             <div class="col-sm-2">
-                                <input type="text" name="isales" id="isales" autocomplete="off" class="form-control input-sm" required="" maxlength="5" onkeyup="gede(this); clearcode(this);" value="" placeholder="Kode Sales">
+                                <input type="text" name="isales" id="isales" autocomplete="off" class="form-control input-sm" required="" maxlength="2" onkeyup="gede(this); clearcode(this);" value="" placeholder="Kode Sales">
                                 <span class="notekode" hidden="true"><b> * Kode Sudah Ada!</b></span>
                             </div>
                             <div class="col-sm-4">
@@ -27,20 +27,25 @@
                             </select>
                             </div>
                             <div class="col-sm-3">
+                               <select name="irole" id="irole" class="form-control select2">
+                            </select>
+                            </div>
+                        </div>  
+                        <div class="form-group row">   
+                            <label class="col-md-3">Kota</label>
+                            <label class="col-md-3">Telepon</label>      
+                            <label class="col-md-4">Alamat</label>
+                            <label class="col-md-2">Kode Pos</label> 
+                            <div class="col-sm-3">
                                 <input type="text" name="ekota" id="ekota" onkeyup="gede(this); clearname(this);" class="form-control input-sm" value="" placeholder="Kota">
                             </div>   
-                        </div>  
-                        <div class="form-group row">       
-                            <label class="col-md-3">Telepon</label>      
-                            <label class="col-md-6">Alamat</label>
-                            <label class="col-md-3">Kode Pos</label>   
                             <div class="col-sm-3">
                                 <input type="text" name="etelepon" id="etelepon" class="form-control input-sm" value="" placeholder="Nomor Telephone">
                             </div>                                                  
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <textarea class="form-control input-sm" name="ealamat" id="ealamat" placeholder="Alamat"></textarea>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <input type="text" name="ekodepos" id="ekodepos" class="form-control input-sm" value="" placeholder="Kode Pos">
                             </div>
                         </div>                                 
@@ -82,30 +87,29 @@
             },
             cache: true
             }
+        }).change(function() {
+            cekkode();
+        });
+
+        $('#irole').select2({
+            placeholder: 'Pilih Role',
+            allowClear: true,
+            ajax: {
+            url: '<?= base_url($folder.'/cform/role'); ?>',
+            dataType: 'json',
+            delay: 250,          
+            processResults: function (data) {
+                return {
+                results: data
+                };
+            },
+            cache: true
+            }
         });
     });
 
     $( "#isales" ).keyup(function() {
-        $.ajax({
-            type: "post",
-            data: {
-                'kode' : $(this).val(),
-            },
-            url: '<?= base_url($folder.'/cform/cekkode'); ?>',
-            dataType: "json",
-            success: function (data) {
-                if (data==1) {
-                    $(".notekode").attr("hidden", false);
-                    $("#submit").attr("disabled", true);
-                }else{
-                    $(".notekode").attr("hidden", true);
-                    $("#submit").attr("disabled", false);
-                }
-            },
-            error: function () {
-                swal('Error :)');
-            }
-        });
+        cekkode();
     });
     
     $("form").submit(function (event) {
@@ -122,5 +126,29 @@
             swal('Data Masih Ada yang Kosong!');
             return false;
         }
+    }
+
+    function cekkode() {
+        $.ajax({
+            type: "post",
+            data: {
+                'kode' : $('#isales').val(),
+                // 'area' : $('#iarea').val()
+            },
+            url: '<?= base_url($folder.'/cform/cekkodeedit'); ?>',
+            dataType: "json",
+            success: function (data) {
+                if (data==1) {
+                    $(".notekode").attr("hidden", false);
+                    $("#submit").attr("disabled", true);
+                }else{
+                    $(".notekode").attr("hidden", true);
+                    $("#submit").attr("disabled", false);
+                }
+            },
+            error: function () {
+                swal('Error :)');
+            }
+        });
     }
 </script>

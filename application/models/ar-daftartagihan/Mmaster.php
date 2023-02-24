@@ -9,42 +9,6 @@ class Mmaster extends CI_Model
 
     function data($folder, $i_menu, $dfrom, $dto)
     {
-        $cek = $this->db->query("SELECT
-                i_bagian
-            FROM
-                tm_dt
-            WHERE
-                i_status <> '5'
-                and d_dt BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy') AND i_company = '$this->id_company'
-                AND i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '$this->i_departement'
-                        AND username = '$this->username'
-                        AND id_company = '$this->id_company')
-
-        ", FALSE);
-        if ($this->i_departement == '1') {
-            $bagian = "";
-        } else {
-            if ($cek->num_rows() > 0) {
-                $i_bagian = $cek->row()->i_bagian;
-                $bagian = "AND a.i_bagian = '$i_bagian' ";
-            } else {
-                $bagian = "AND a.i_bagian IN (SELECT
-                        i_bagian
-                    FROM
-                        tr_departement_cover
-                    WHERE
-                        i_departement = '$this->i_departement'
-                        AND username = '$this->username'
-                        AND id_company = '$this->id_company')";
-            }
-        }
-
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query("SELECT
                 0 as no,
@@ -78,7 +42,7 @@ class Mmaster extends CI_Model
                 a.i_company = '$this->id_company' AND
                 a.i_status <> '5'AND
                 a.d_dt BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
-                $bagian
+                AND b.i_area IN (SELECT i_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username')
             ORDER BY
                 a.d_dt asc
         ", false);
@@ -166,7 +130,9 @@ class Mmaster extends CI_Model
     public function area()
     {
         return $this->db->query(
-            "SELECT id, i_area, e_area FROM tr_area WHERE f_status = 't' ORDER BY 2,3"
+            "SELECT id, i_area, e_area FROM tr_area WHERE f_status = 't' 
+            AND i_area IN (SELECT i_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username')
+            ORDER BY 2,3"
         );
     }
 

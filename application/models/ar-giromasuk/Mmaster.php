@@ -9,17 +9,52 @@ class Mmaster extends CI_Model
 
     function data($folder, $i_menu, $dfrom, $dto)
     {
+        $cek = $this->db->query("SELECT
+                i_bagian
+            FROM
+                tm_giro_masuk
+            WHERE
+                i_status <> '5'
+                and d_giro BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy') AND i_company = '$this->id_company'
+                AND i_bagian IN (
+                    SELECT
+                        i_bagian
+                    FROM
+                        tr_departement_cover
+                    WHERE
+                        i_departement = '$this->i_departement'
+                        AND username = '$this->username'
+                        AND id_company = '$this->id_company')
+
+        ", FALSE);
+        if ($this->i_departement == '1') {
+            $bagian = "";
+        } else {
+            if ($cek->num_rows() > 0) {
+                $i_bagian = $cek->row()->i_bagian;
+                $bagian = "AND a.i_bagian = '$i_bagian' ";
+            } else {
+                $bagian = "AND a.i_bagian IN (SELECT
+                        i_bagian
+                    FROM
+                        tr_departement_cover
+                    WHERE
+                        i_departement = '$this->i_departement'
+                        AND username = '$this->username'
+                        AND id_company = '$this->id_company')";
+            }
+        }
+
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query(
             "SELECT
                 0 as no,
-                a.i_kum as id,
-                a.i_kum_id,
-                to_char(a.d_kum, 'dd-mm-yyyy') as d_kum,
+                a.i_giro as id,
+                a.i_giro_id,
+                to_char(a.d_giro, 'dd-mm-yyyy') as d_giro,
                 '[' || b.i_area || '] - ' || b.e_area AS e_area,
+                d.e_bagian_name,
                 c.i_customer||' - '|| c.e_customer_name AS e_customer_name,
-                d.e_sales,
-                a.e_send_name,
                 a.v_jumlah::money AS v_jumlah,
                 t.i_dt_id,
                 a.i_status,
@@ -32,11 +67,12 @@ class Mmaster extends CI_Model
                 '$i_menu' as i_menu,
                 '$folder' AS folder
             FROM
-                tm_kum a 
+                tm_giro_masuk a 
             INNER JOIN tr_area b 
                 ON (a.i_area = b.id)
             INNER JOIN tr_customer c ON (c.id = a.i_customer)
-            INNER JOIN tr_salesman d ON (d.id = a.i_salesman)
+            inner join tr_bagian d ON (d.i_bagian = a.i_bagian and d.id_company = a.i_company)
+            -- INNER JOIN tr_salesman d ON (d.id = a.i_salesman)
             JOIN tr_status_document e
                 ON (a.i_status = e.i_status) 
             LEFT JOIN tr_menu_approve f ON
@@ -48,10 +84,10 @@ class Mmaster extends CI_Model
             WHERE 
                 a.i_company = '$this->id_company' AND
                 a.i_status <> '5'AND
-                a.d_kum BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
-                AND b.i_area IN (SELECT i_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username')
+                a.d_giro BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
+                $bagian
             ORDER BY
-                a.d_kum asc"
+                a.d_giro asc"
         );
 
         $datatables->edit('e_status_name', function ($data) {
@@ -120,7 +156,7 @@ class Mmaster extends CI_Model
     public function area()
     {
         return $this->db->query(
-            "SELECT id, i_area, e_area FROM tr_area WHERE f_status = 't' AND i_area IN (SELECT i_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username') ORDER BY 2,3"
+            "SELECT id, i_area, e_area FROM tr_area WHERE f_status = 't' ORDER BY 2,3"
         );
     }
 
@@ -136,25 +172,25 @@ class Mmaster extends CI_Model
     {
         $area = $this->db->query("SELECT i_area FROM tr_area WHERE id = '$iarea' ")->row()->i_area;
         $cek = $this->db->query(
-            "SELECT substring(i_kum_id, 1, 2) AS kode FROM tm_kum WHERE i_status <> '5' AND i_bagian = '$ibagian' AND i_company = '$this->id_company' AND i_area = '$iarea' ORDER BY i_kum DESC LIMIT 1"
+            "SELECT substring(i_giro_id, 1, 2) AS kode FROM tm_giro_masuk WHERE i_status <> '5' AND i_bagian = '$ibagian' AND i_company = '$this->id_company' AND i_area = '$iarea' ORDER BY i_giro DESC LIMIT 1"
         );
 
         if ($cek->num_rows() > 0) {
             $kode = $cek->row()->kode;
         } else {
-            $kode = 'TF';
+            $kode = 'GR';
         }
         if (strlen($id) > 0) {
             $query = $this->db->query(
-                "SELECT max(substring(i_kum_id, 12, 4)) AS max FROM tm_kum WHERE to_char (d_kum, 'yyyy') = '$tahun' 
+                "SELECT max(substring(i_giro_id, 12, 4)) AS max FROM tm_giro_masuk WHERE to_char (d_giro, 'yyyy') = '$tahun' 
                 AND i_status <> '5' AND i_bagian = '$ibagian' AND i_company = '$this->id_company'
-                AND i_kum_id ILIKE '%$kode%' AND i_kum <> '$id' "
+                AND i_giro_id ILIKE '%$kode%' AND i_giro <> '$id' "
             );
         } else {
             $query = $this->db->query(
-                "SELECT max(substring(i_kum_id, 12, 4)) AS max FROM tm_kum WHERE to_char (d_kum, 'yyyy') = '$tahun' 
+                "SELECT max(substring(i_giro_id, 12, 4)) AS max FROM tm_giro_masuk WHERE to_char (d_giro, 'yyyy') = '$tahun' 
                 AND i_status <> '5' AND i_bagian = '$ibagian' AND i_company = '$this->id_company'
-                AND i_kum_id ILIKE '%$kode%'"
+                AND i_giro_id ILIKE '%$kode%'"
             );
         }
         if ($query->num_rows() > 0) {
@@ -168,11 +204,11 @@ class Mmaster extends CI_Model
                 $number = "0" . $number;
                 $n = strlen($number);
             }
-            $number = $kode . "-" . $area . '-' . $thbl . "-" . $number;
+            $number = $kode . " " . $area . $thbl . $number;
             return $number;
         } else {
             $number = "0001";
-            $number = $kode . "-" . $area . '-' . $thbl . "-" . $number;
+            $number = $kode . " " . $area . $thbl . $number;
             return $number;
         }
     }
@@ -183,7 +219,7 @@ class Mmaster extends CI_Model
         return $this->db->query(
             "SELECT id, i_customer, '[ ' || i_customer || ' ] - ' || e_customer_name AS name
             FROM tr_customer
-            WHERE id_area = '$i_area' AND (e_customer_name ILIKE '%$cari%' OR i_customer ILIKE '%$cari%') AND f_status = 't'
+            WHERE id_area = '$i_area' AND (e_customer_name ILIKE '%$cari%' OR i_customer ILIKE '%$cari%') AND f_status = 't' AND id_company = '$this->id_company'
             ORDER BY 3"
         );
     }
@@ -219,32 +255,68 @@ class Mmaster extends CI_Model
         );
     }
 
+    /** Cek Apakah Data Sudah Ada */
+    public function cek_code()
+    {
+        $i_giro_id = str_replace("_", "", $this->input->post('i_giro_id'));
+        $i_area = $this->input->post('i_area');
+        return $this->db->query("
+            SELECT 
+                i_giro_id
+            FROM 
+                tm_giro_masuk 
+            WHERE 
+                upper(trim(i_giro_id)) = upper(trim('$i_giro_id'))
+                AND i_area = '$i_area'
+                AND i_company = '$this->id_company'
+        ", FALSE);
+    }
+
+    /** Cek Apakah Data Sudah Ada Pas Edit */
+    public function cek_edit()
+    {
+        $i_giro_id = str_replace("_", "", $this->input->post('i_giro_id'));
+        $i_giro_id_old = str_replace("_", "", $this->input->post('i_giro_id_old'));
+        $i_area = $this->input->post('i_area');
+        return $this->db->query("
+             SELECT 
+                 i_giro_id
+             FROM 
+                 tm_giro_masuk 
+             WHERE 
+                 trim(upper(i_giro_id)) <> trim(upper('$i_giro_id_old'))
+                 AND trim(upper(i_giro_id)) = trim(upper('$i_giro_id'))
+                 AND i_area = '$i_area'
+                 AND i_company = '$this->id_company'
+         ", FALSE);
+    }
+
     /*----------  SIMPAN DATA  ----------*/
     public function runningid()
     {
-        $this->db->select('max(i_kum) AS id');
-        $this->db->from('tm_kum');
+        $this->db->select('max(i_giro) AS id');
+        $this->db->from('tm_giro_masuk');
         return $this->db->get()->row()->id + 1;
     }
 
-    public function create($id, $i_kum_id, $i_bagian, $i_area, $i_customer, $i_salesman, $i_bank, $i_dt, $d_kum, $v_jumlah, $e_remark, $e_send_name)
+    public function create($id, $i_giro_id, $i_bagian, $i_area, $i_customer, $e_giro_bank, $i_dt, $d_giro, $d_giro_duedate, $d_giro_terima, $v_jumlah, $e_giro_description)
     {
         $data = array(
-            'i_kum' => $id,
-            'i_kum_id' => $i_kum_id,
+            'i_giro' => $id,
+            'i_giro_id' => $i_giro_id,
             'i_company' => $this->id_company,
             'i_bagian' => $i_bagian,
             'i_area' => $i_area,
             'i_customer' => $i_customer,
-            'i_salesman' => $i_salesman,
-            'i_bank' => $i_bank,
+            'e_giro_bank' => $e_giro_bank,
             'i_dt' => $i_dt,
-            'd_kum' => $d_kum,
+            'd_giro' => $d_giro,
+            'd_giro_duedate' => $d_giro_duedate,
+            'd_giro_terima' => $d_giro_terima,
             'v_jumlah' => $v_jumlah,
-            'e_remark' => $e_remark,
-            'e_send_name' => $e_send_name
+            'e_giro_description' => $e_giro_description
         );
-        $this->db->insert('tm_kum', $data);
+        $this->db->insert('tm_giro_masuk', $data);
     }
     /*----------  DATA EDIT HEADER  ----------*/
 
@@ -252,39 +324,37 @@ class Mmaster extends CI_Model
     {
         return $this->db->query(
             "SELECT a.*, b.i_bagian, b.e_bagian_name, c.i_area as i_area_code, c.e_area, 
-            d.i_customer as i_customer_code, d.e_customer_name, g.i_bank as i_bank_code, g.e_bank_name, 
-            e.i_sales as i_sales_code, e.e_sales, f.i_dt_id, to_char(f.d_dt, 'DD FMMonth YYYY') as d_dt
-            FROM tm_kum a
+            d.i_customer as i_customer_code, d.e_customer_name, a.e_giro_bank,
+            f.i_dt_id, to_char(f.d_dt, 'DD FMMonth YYYY') as d_dt
+            FROM tm_giro_masuk a
             INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.i_company = b.id_company)
             INNER JOIN tr_area c ON (c.id = a.i_area)
             INNER JOIN tr_customer d ON (d.id = a.i_customer)
-            LEFT JOIN tr_bank g ON (g.id = a.i_bank)
-            LEFT JOIN tr_salesman e ON (e.id = a.i_salesman)
             LEFT JOIN tm_dt f ON (f.i_dt = a.i_dt)
-            WHERE a.i_kum = '$id'
+            WHERE a.i_giro = '$id'
             "
         );
     }
 
-    public function update($id, $i_kum_id, $i_bagian, $i_area, $i_customer, $i_salesman, $i_bank, $i_dt, $d_kum, $v_jumlah, $e_remark, $e_send_name)
+    public function update($id, $i_giro_id, $i_bagian, $i_area, $i_customer, $e_giro_bank, $i_dt, $d_giro, $d_giro_duedate, $d_giro_terima, $v_jumlah, $e_giro_description)
     {
         $data = array(
-            'i_kum_id' => $i_kum_id,
+            'i_giro_id' => $i_giro_id,
             'i_company' => $this->id_company,
             'i_bagian' => $i_bagian,
             'i_area' => $i_area,
             'i_customer' => $i_customer,
-            'i_salesman' => $i_salesman,
-            'i_bank' => $i_bank,
+            'e_giro_bank' => $e_giro_bank,
             'i_dt' => $i_dt,
-            'd_kum' => $d_kum,
+            'd_giro' => $d_giro,
+            'd_giro_duedate' => $d_giro_duedate,
+            'd_giro_terima' => $d_giro_terima,
             'v_jumlah' => $v_jumlah,
-            'e_remark' => $e_remark,
-            'e_send_name' => $e_send_name,
+            'e_giro_description' => $e_giro_description,
             'd_update' => current_datetime()
         );
-        $this->db->where('i_kum', $id);
-        $this->db->update('tm_kum', $data);
+        $this->db->where('i_giro', $id);
+        $this->db->update('tm_giro_masuk', $data);
     }
 
     public function changestatus($id, $istatus)
@@ -292,9 +362,9 @@ class Mmaster extends CI_Model
         if ($istatus == '3' || $istatus == '6') {
             $awal = $this->db->query(
                 "SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
-				FROM tm_kum a
+				FROM tm_giro_masuk a
 				JOIN tr_menu_approve b on (b.i_menu = '$this->i_menu')
-				WHERE a.i_kum = '$id'
+				WHERE a.i_giro = '$id'
 				GROUP BY 1,2"
             )->row();
             if ($istatus == '3') {
@@ -323,15 +393,15 @@ class Mmaster extends CI_Model
                 }
                 $now = date('Y-m-d');
                 $this->db->query("INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
-					('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_kum');", FALSE);
+					('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_giro_masuk');", FALSE);
             }
         } else {
             $data = array(
                 'i_status' => $istatus,
             );
         }
-        $this->db->where('i_kum', $id);
-        $this->db->update('tm_kum', $data);
+        $this->db->where('i_giro', $id);
+        $this->db->update('tm_giro_masuk', $data);
     }
 }
 /* End of file Mmaster.php */

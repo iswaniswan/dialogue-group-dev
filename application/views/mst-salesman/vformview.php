@@ -13,7 +13,7 @@
                             <label class="col-md-2">Kode Sales</label>
                             <label class="col-md-4">Nama Sales</label>
                             <label class="col-md-3">Area</label>
-                            <label class="col-md-3">Kota</label>
+                            <label class="col-md-3">Role</label>
                             <div class="col-sm-2">
                                 <input type="hidden" readonly="" name="id" value="<?= $data->id; ?>">
                                 <input type="text" name="isales" id="isales" class="form-control input-sm" required="" value="<?= $data->i_sales; ?>" readonly>
@@ -27,20 +27,26 @@
                                 </select>
                             </div>
                             <div class="col-sm-3">
-                                <input type="text" name="ekota" id="ekota" class="form-control input-sm" value="<?=$data->e_kota;?>" readonly>
-                            </div>   
+                                <select name="irole" id="irole" class="form-control select2" disabled="">
+                                    <option value="<?=$data->i_role;?>"><?=$data->e_role_name;?></option>
+                                </select>
+                            </div>
                         </div>  
                         <div class="form-group row">       
+                            <label class="col-md-3">Kota</label>
                             <label class="col-md-3">Telepon</label>      
-                            <label class="col-md-6">Alamat</label>
-                            <label class="col-md-3">Kode Pos</label>   
+                            <label class="col-md-4">Alamat</label>
+                            <label class="col-md-2">Kode Pos</label>   
+                            <div class="col-sm-3">
+                                <input type="text" name="ekota" id="ekota" class="form-control input-sm" value="<?=$data->e_kota;?>" readonly>
+                            </div>   
                             <div class="col-sm-3">
                                 <input type="text" name="etelepon" id="etelepon" class="form-control input-sm" value="<?=$data->e_telepon;?>" readonly>
                             </div>                                                  
-                            <div class="col-sm-6">
+                            <div class="col-sm-4">
                                 <textarea class="form-control input-sm" name="ealamat" readonly><?=$data->e_alamat;?></textarea>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <input type="text" name="ekodepos" id="ekodepos" class="form-control input-sm" value="<?=$data->e_kodepos;?>" readonly>
                             </div>
                         </div>                        
