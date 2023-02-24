@@ -464,13 +464,20 @@ class Mmaster extends CI_Model
         $this->db->delete('tm_st_item');
     }
 
-    public function update_sisa_tunai($i_tunai, $v_jumlah)
+    public function update_sisa_tunai($id)
     {
-        $sql = "UPDATE tm_tunai 
+        $all_setor_tunai = $this->dataeditdetail($id);
+
+        foreach ($all_setor_tunai->result() as $setor_tunai) {
+            $i_tunai = $setor_tunai->i_tunai;
+            $v_jumlah = $setor_tunai->v_jumlah;            
+
+            $sql = "UPDATE tm_tunai 
                 SET v_sisa = v_sisa - $v_jumlah 
                 WHERE i_tunai = $i_tunai ";
 
-        $this->db->query($sql);
+            $this->db->query($sql);
+        }        
     }
 
     /*----------  DATA EDIT HEADER  ----------*/
@@ -601,9 +608,8 @@ class Mmaster extends CI_Model
                     'd_approve' => date('Y-m-d'),
                 ];
 
-                /** update sisa ke table tm_tunai */
-                
-                $this->mmaster->update_sisa_tunai($i_tunai, $v_jumlah);
+                /** update sisa ke table tm_tunai */                
+                $this->update_sisa_tunai($id);
             } 
 
             $this->change_status_insert_menu_approve($id, $this->i_menu, $this->i_level, $this->username);
@@ -612,8 +618,6 @@ class Mmaster extends CI_Model
         $this->db->where('i_st', $id);
         $this->db->update('tm_st', $data);
     }
-
-    public function get_tunai_item($i_t)
 
     public function updateprint($id)
     {
