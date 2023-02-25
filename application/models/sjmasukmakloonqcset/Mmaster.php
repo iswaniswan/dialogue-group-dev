@@ -374,7 +374,7 @@ class Mmaster extends CI_Model
     public function dataeditdetail($id)
     {
         return $this->db->query("
-            SELECT a.id, b.id_document_reff, k.i_document, c.id as id_product_wip, c.i_product_wip, c.e_product_wipname, d.e_color_name, ki.n_quantity as keluarfull, ki.n_quantity as keluar, COALESCE(b.n_quantity, 0) as masuk, b.e_remark, p.id as id_panel, p.bagian, p.i_panel, b.id_marker, m.e_marker_name
+            SELECT a.id, b.id_document_reff, k.i_document, c.id as id_product_wip, c.i_product_wip, c.e_product_wipname, d.e_color_name, ki.n_quantity as keluarfull, ki.n_quantity_sisa as keluar, COALESCE(b.n_quantity, 0) as masuk, b.e_remark, p.id as id_panel, p.bagian, p.i_panel, b.id_marker, m.e_marker_name
             FROM tm_masuk_makloonqcset a
             INNER JOIN tm_masuk_makloonqcset_item b ON (a.id = b.id_document)
             INNER JOIN tm_keluar_makloon_qcset_new k ON (k.id = b.id_document_reff)
@@ -442,7 +442,7 @@ class Mmaster extends CI_Model
         }
         return $this->db->query(
             "SELECT a.i_document, a.id, b.id_panel_item, c.id as id_product_wip, 
-            c.i_product_wip, c.e_product_wipname, d.e_color_name, b.n_quantity,e.id as id_panel, 
+            c.i_product_wip, c.e_product_wipname, d.e_color_name, b.n_quantity_sisa as n_quantity,e.id as id_panel, 
             e.bagian, e.i_panel, b.id_marker, m.e_marker_name, b.e_remark
             FROM tm_keluar_makloon_qcset_new a
             INNER JOIN tm_keluar_makloon_qcset_item_new b ON (a.id = b.id_document)

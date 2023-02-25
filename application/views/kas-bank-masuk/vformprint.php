@@ -26,18 +26,18 @@
                         <div class="invoice-logo-title row">
                             <div class="col-9 d-flex flex-column justify-content-center align-items-start">
                                 <!-- <span>Software Development</span> -->
-                                <p class="font-large-2 text-uppercase text-primary">
+                                <h1 class="font-large-2 text-uppercase text-primary">
                                     <?= $company->name; ?>
                                     <input type="hidden" id="id" value="<?= $data->i_rv; ?>">
                                     <input type="hidden" id="path" value="<?= base_url($this->global['folder']); ?>">
                                     <br><span class="font-medium-3 text-capitalize">
                                         <?= check_constant('AlmtPerusahaan'); ?>
                                     </span><br>
-                                </p>
+                                </h1>
                             </div>
 
                             <div class="col-3 d-flex justify-content-end invoice-logo">
-                                <img src="<?= base_url(); ?>assets/images/<?= $company->logo; ?>" alt="company-logo"
+                            <img src="<?= base_url(); ?>assets/images/logo/<?= $company->logo; ?>" alt="company-logo"
                                     height="94" width="149">
                             </div>
                         </div>

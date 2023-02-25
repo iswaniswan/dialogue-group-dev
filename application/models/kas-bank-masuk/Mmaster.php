@@ -176,7 +176,8 @@ class Mmaster extends CI_Model
             "SELECT id as i_coa, i_coa as i_coa_id, e_coa_name
             FROM tr_coa a
             INNER JOIN tr_rv_type b ON (
-                b.i_coa_group = a.i_coa_ledger AND b.i_coa_group <> a.i_coa AND b.i_rv_type = '$i_rv_type'
+                b.i_rv_type = '$i_rv_type' AND CASE WHEN b.f_kas_besar = TRUE THEN b.i_coa_group = a.i_coa_ledger ELSE b.i_coa_group = a.i_coa_ledger AND b.i_coa_group <> a.i_coa END
+                /* b.i_coa_group = a.i_coa_ledger AND (b.i_coa_group <> a.i_coa AND b.i_rv_type = '$i_rv_type' */
             )
             WHERE 
                 (e_coa_name ILIKE '%$cari%' OR i_coa ILIKE '%$cari%')
