@@ -3,4 +3,5 @@ application/logs/
 import/
 
 .idea
+.vscode
 application/views/main.php

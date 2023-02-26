@@ -230,7 +230,7 @@ class Cform extends CI_Controller {
 
     /*----------  SIMPAN DATA  ----------*/    
 
-    public function simpan()
+    public function __simpan()
     {
 
         $data = check_role($this->i_menu, 1);
@@ -300,6 +300,86 @@ class Cform extends CI_Controller {
                 'id'     => null
             );
         }
+        echo json_encode($data);
+    }
+
+    public function simpan()
+    {
+        $data = check_role($this->i_menu, 1);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id_company = $this->session->userdata('id_company');
+
+        $id_bagian = $this->input->post('ibagian');
+        $i_document = $this->input->post('i_document');
+        $d_document = $this->input->post('d_document');
+        /** reformat tanggal */
+        $d_document = formatYmd($d_document);
+
+        $i_rv = $this->input->post('i_rv');
+        $i_rv_id = $this->input->post('i_rv_id');
+        $i_rv_item = $this->input->post('i_rv_item');
+        $d_bukti = $this->input->post('d_bukti');
+        $e_bank_name = $this->input->post('e_bank_name');
+        $id_customer = $this->input->post('id_customer');
+        $id_area = $this->input->post('id_area');
+
+        $v_jumlah = $this->input->post('v_jumlah');
+        $v_jumlah = str_replace(".", "", $v_jumlah);
+
+        $items = $this->input->post('items');        
+
+        $result = [
+            'sukses' => false,
+            'kode' => '-',
+            'id' => '-'
+        ];
+
+        /** insert table */
+        $this->db->trans_begin();            
+        $this->mmaster->insert_alokasi_kas($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah,
+                                                null, $id_area, $id_customer, $id_bagian);
+
+        $insert_id = $this->db->insert_id();
+
+        foreach ($items as $item) {
+            $id_nota = $item['id_nota'];
+            $d_nota = $item['dnota'];
+            
+            $v_nilai = $item['vnilai'];
+            $v_nilai = str_replace(".", "", $v_nilai);
+
+            $v_bayar = $item['vbayar'];
+            $v_bayar = str_replace(".", "", $v_bayar);
+            $v_jumlah = $v_bayar;
+
+            $v_sisa = $item['vsisa'];
+            $v_sisa = str_replace(".", "", $v_sisa);
+
+            $v_lebih = $item['vlebih'];
+            $v_lebih = str_replace(".", "", $v_lebih);
+
+            $e_remark = $item['eremark'];
+
+            $this->mmaster->insert_alokasi_kas_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
+                                                        $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company, $id_area);
+        }        
+            
+        if ($this->db->trans_status()) {
+            $this->db->trans_commit();
+            $result = [
+                'sukses' => true,
+                'kode' => $i_document,
+                'id' => $insert_id
+            ];
+            $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $insert_id);
+            echo json_encode($result);
+            return;
+        } 
+
+        $this->db->trans_rollback();
         echo json_encode($data);
     }
 
@@ -543,23 +623,6 @@ class Cform extends CI_Controller {
 		}
 		echo json_encode($query);
 	}
-
-    public function get_keterangan_option()
-    {
-        $all_options = [
-            'Retur' => 'Retur',
-            'Biaya Promo' => 'Biaya Promo',
-            'Kurang Bayar' => 'Kurang Bayar',
-            'Cicil' => 'Cicil',
-            'Pembulatan' => 'Pembulatan',
-            'Lebih Bayar' => 'Lebih Bayar',
-            'Biaya Ekspedisi' => 'Biaya Ekspedisi',
-            'Biaya Administrasi' => 'Biaya Administrasi',
-        ];
-        
-        header("Content-Type: application/json", true);
-        echo json_encode($all_options);
-    }
 
 }
 /* End of file Cform.php */

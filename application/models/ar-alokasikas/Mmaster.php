@@ -914,6 +914,27 @@ class Mmaster extends CI_Model {
         $this->db->insert('tm_alokasi_kas_bank', $data);
     }
 
+    public function insert_alokasi_kas($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah,
+                                        $id_company=null, $id_area, $id_customer, $id_bagian)
+    {
+        $id_company = $this->session->userdata('id_company');
+
+        $data = [
+            'i_alokasi_id' => $i_alokasi_id,
+            'i_rv' => $i_rv,
+            'i_rv_item' => $i_rv_item,
+            'd_alokasi' => $d_alokasi,
+            'e_bank_name' => $e_bank_name,
+            'v_jumlah' => $v_jumlah,
+            'id_company' => $id_company,
+            'id_area' => $id_area,            
+            'id_customer' => $id_customer,
+            'id_bagian' => $id_bagian,
+        ];
+
+        $this->db->insert('tm_alokasi_kas', $data);
+    }
+
     /*----------  SIMPAN DATA ITEM  ----------*/
     
     public function insertdetail($id,$idreferensi,$idreferensiitem,$idnota,$vbayar,$vsisa,$eremark,$groupfaktur)
@@ -930,6 +951,30 @@ class Mmaster extends CI_Model {
             'group_faktur'        => $groupfaktur
         );
         $this->db->insert('tm_alokasi_kas_bank_item', $data);
+    }
+
+    public function insert_alokasi_kas_item($i_alokasi, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
+                                    $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company=null, $id_area)
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->userdata('id_company');
+        }
+
+        $data = [
+            'i_alokasi' => $i_alokasi,
+            // 'i_alokasi_item' => $i_alokasi_item,
+            'i_rv_item' => $i_rv_item,
+            'id_nota' => $id_nota,
+            'd_nota' => $d_nota,
+            'v_jumlah' => $v_jumlah,
+            'v_sisa' => $v_sisa,
+            'n_item_no' => $n_item_no,
+            'e_remark' => $e_remark,
+            'id_company' => $id_company,
+            'id_area' => $id_area
+        ];
+
+        $this->db->insert('tm_alokasi_kas_item', $data);
     }
 
     /*----------  GET VIEW, EDIT & APPROVE HEADER  ----------*/

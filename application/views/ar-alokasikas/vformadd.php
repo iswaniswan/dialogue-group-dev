@@ -53,6 +53,7 @@
 
                             <div class="col-md-3">
                                 <input type="hidden" name="i_rv" id="i_rv" class="" value="<?= $data->i_rv ?>" readonly>
+                                <input type="hidden" name="i_rv_item" id="i_rv_item" class="" value="<?= $data->i_rv_item ?>" readonly>
                                 <input type="text" name="i_rv_id_id" id="i_rv_id_id"
                                     class="form-control input-sm" value="<?= $data->i_rv_id ?>" readonly>
                             </div>
@@ -90,11 +91,25 @@
                     </div>
                     <div class="col-md-12">
                         <div class="form-group row">
-                            <div class="col-sm-12">
-                                <button type="button" id="submit" class="btn btn-success btn-rounded btn-sm"><i class="fa fa-save" ></i>&nbsp;&nbsp;Simpan</button>&nbsp;
-                                <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder;?>/cform/indexx/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
-                                <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm"><i class="fa fa-plus"></i>&nbsp;&nbsp;Item</button>&nbsp;
-                                <button type="button" id="send" hidden="true" class="btn btn-primary btn-rounded btn-sm"><i class="fa fa-paper-plane-o"></i>&nbsp;&nbsp;Send</button>
+                            <div class="col-sm-3">
+                                <button type="button" id="submit" class="btn btn-success btn-block btn-sm">
+                                    <i class="fa fa-save" ></i>&nbsp;&nbsp;Simpan
+                                </button>
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" class="btn btn-inverse btn-block btn-sm" onclick="show('<?= $folder;?>/cform/indexx/<?= $dfrom."/".$dto;?>','#main')">
+                                    <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali
+                                </button>
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" id="addrow" class="btn btn-info btn-block btn-sm">
+                                    <i class="fa fa-plus"></i>&nbsp;&nbsp;Item
+                                </button>&nbsp;
+                            </div>
+                            <div class="col-sm-3">
+                                <button type="button" id="send" hidden="true" class="btn btn-primary btn-block btn-sm">
+                                    <i class="fa fa-paper-plane-o"></i>&nbsp;&nbsp;Send
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -287,20 +302,41 @@
                     <input type="text" readonly class="form-control input-sm" name="items[${i}][dnota]" id="dnota${i}"/>
                 </td>`;
         cols += `<td>
-                    <input type="text" readonly class="form-control input-sm text-right" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                        </div>
+                        <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
+                    </div>                    
                 </td>`;
         cols += `<td>
-                    <input type="text" id="vbayar${i}" class="form-control text-right input-sm inputitem" autocomplete="off" name="items[${i}][vbayar]" onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeyup="angkahungkul(this); reformat(this); hitung();">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                        </div>
+                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem"
+                            autocomplete="off" name="items[${i}][vbayar]" value="0">
+                    </div>
                 </td>`;
         cols += `<td>
-                    <input type="text" readonly class="form-control input-sm text-right" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                        </div>
+                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
+                    </div>
                 </td>`;
         cols += `<td>
-                    <input type="text" readonly class="form-control input-sm text-right" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
+                        </div>
+                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
+                    </div>
                 </td>`;
         cols += `<td>
                     <input type="hidden" class="form-control input-sm" name="items[${i}][groupfaktur]" id="groupfaktur${i}" value=""/>
-                    <seletct class="form-control input-sm" name="items[${i}][eremark]" id="eremark${i}"></select>
+                    <select class="form-control input-sm" name="items[${i}][eremark]" id="eremark${i}"></select>
                 </td>`;
         cols += `<td class="text-center">
                     <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
@@ -335,22 +371,25 @@
             }
         });
 
-        $('#eremark' + i).select2({
+        $('#vbayar'+i).bind('keyup', function() {
+            const elementNilai = $('#vnilai'+i);
+            const elementSisa = $('#vsisa'+i);
+            const elementLebih = $('#vlebih'+i);
+            calculateBayar(this, elementNilai, elementSisa, elementLebih);
+        });
+
+        for (const opsi of OPSI_KETERANGAN) {
+            let option = `<option value=${opsi.id}>${opsi.text}</option>`;
+            $('#eremark'+i).append(option);
+        }
+
+        $('#eremark'+i).select2({
+            placeholder: "Pilih Keterangan",
             allowClear: true,
             width: "100%",
-            type: "GET",
-            ajax: {
-                url: '<?= base_url($folder.'/cform/get_keterangan_option/'); ?>',
-                dataType: 'json',
-                delay: 250,
-                processResults: function (data) {
-                    return {
-                        results: data
-                    };
-                },
-                cache: true
-            }
-        })
+        }).val("").trigger("change");
+
+        
     });    
     
     /*----------  HAPUS TR  ----------*/    
@@ -394,7 +433,7 @@
                     if(!ada){
                         $('#dnota'+id).val(data[0].d_document);
                         $('#groupfaktur'+id).val(data[0].groupfaktur);
-                        $('#vnilai'+id).val(formatcemua(data[0].v_sisa));
+                        $('#vnilai'+id).val(formatRupiah(data[0].v_sisa));
                         
                         // if (parseInt(formatulang($('#vjumlahsisa').val())) > parseInt(formatulang(data[0].v_sisa))) {
                         //     $('#vbayar'+id).val(formatcemua(data[0].v_sisa));
@@ -524,5 +563,63 @@
             }
         }
         return false;     
-    })
+    });
+
+    function calculateBayar(eBayar, eNilai, eSisa, eLebih) {
+        let vNilai = $(eNilai).val();
+        vNilai = currencyTextToNumber(vNilai);
+
+        let vBayar = $(eBayar).val();
+        vBayar = currencyTextToNumber(vBayar);        
+
+        let vSisa = vNilai - vBayar;
+        let vLebih = 0;
+        
+        if (vBayar > vNilai) {
+            vSisa = 0;
+            vLebih = vBayar - vNilai;
+        }
+
+        $(eBayar).val(formatRupiah(vBayar.toString()));
+        $(eSisa).val(formatRupiah(vSisa.toString()));
+        $(eLebih).val(formatRupiah(vLebih.toString()));
+    }
+
+    const OPSI_KETERANGAN = [
+        {id: 'Retur', text: 'Retur'},
+        {id: 'Biaya Promo', text: 'Biaya Promo'},
+        {id: 'Kurang Bayar', text: 'Kurang Bayar'},
+        {id: 'Cicil', text: 'Cicil'},
+        {id: 'Pembulatan', text: 'Pembulatan'},
+        {id: 'Lebih Bayar', text: 'Lebih Bayar'},
+        {id: 'Biaya Ekspedisi', text: 'Biaya Ekspedisi'},
+        {id: 'Biaya Administrasi', text: 'Biaya Administrasi'},
+    ];
+
+    function currencyTextToNumber (_text) {
+        let _number = _text.replaceAll(".", "");
+        if (isNaN(_number) || _text == '' || _text === undefined) {
+            return 0;
+        }
+
+        return parseFloat(_number);
+    };
+
+    function formatRupiah(angka, prefix) {
+        var number_string = angka.replace(/[^,\d]/g, "").toString(),
+        split = number_string.split(","),
+        sisa = split[0].length % 3,
+        rupiah = split[0].substr(0, sisa),
+        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+    
+        // tambahkan titik jika yang di input sudah menjadi angka ribuan
+        if (ribuan) {
+        separator = sisa ? "." : "";
+        rupiah += separator + ribuan.join(".");
+        }
+    
+        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+        return rupiah;
+    }
+    
 </script>
