@@ -6,7 +6,7 @@ class Cform extends CI_Controller {
     /*----------  Created By A  ----------*/
 
     public $global = array();
-    public $i_menu = '2040215';
+    public $i_menu = '2040216';
 
     public function __construct()
     {
@@ -108,7 +108,7 @@ class Cform extends CI_Controller {
 
         $this->Logger->write('Membuka Menu '.$this->global['title']);
 
-        $this->load->view($this->global['folder'].'/vformlisttagihan', $data);
+        $this->load->view($this->global['folder'].'/vformlistvoucher', $data);
     }
 
     /*----------  DAFTAR DATA SPB  ----------*/
@@ -340,7 +340,7 @@ class Cform extends CI_Controller {
 
         /** insert table */
         $this->db->trans_begin();            
-        $this->mmaster->insert_alokasi_kas($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah,
+        $this->mmaster->insert_alokasi_piutang($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah,
                                                 null, $id_area, $id_customer, $id_bagian);
 
         $insert_id = $this->db->insert_id();
@@ -364,7 +364,7 @@ class Cform extends CI_Controller {
 
             $e_remark = $item['eremark'];
 
-            $this->mmaster->insert_alokasi_kas_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
+            $this->mmaster->insert_alokasi_piutang_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
                                                         $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company, $id_area);
         }        
             
@@ -506,7 +506,7 @@ class Cform extends CI_Controller {
         foreach ($items as $item) {
             $id = $item['id'];
             $e_remark = $item['eremark'];
-            $this->mmaster->update_alokasi_kas_item($id, $e_remark);
+            $this->mmaster->update_alokasi_piutang_item($id, $e_remark);
         }
 
         if ($this->db->trans_status()) {

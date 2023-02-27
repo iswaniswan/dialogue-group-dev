@@ -48,16 +48,16 @@ class Mmaster extends CI_Model {
 
         $sql = "SELECT 
                 0 AS NO,
-                tak.i_alokasi AS id,
-                tak.d_alokasi,
-                tak.i_alokasi_id,
+                tap.i_alokasi AS id,
+                tap.d_alokasi,
+                tap.i_alokasi_id,
                 tc.e_customer_name,
                 ta.e_area,
                 tr.i_rv_id,
-                tak.e_bank_name,
-                tak.v_jumlah,
-                tak.v_lebih,                
-                tak.i_status,
+                tap.e_bank_name,
+                tap.v_jumlah,
+                tap.v_lebih,                
+                tap.i_status,
                 tsd.e_status_name,
                 tsd.label_color,
                 tma.i_level,
@@ -66,19 +66,19 @@ class Mmaster extends CI_Model {
                 '$folder' AS folder,
                 '$dfrom' AS dfrom,
                 '$dto' AS dto 
-                FROM tm_alokasi_kas tak
-                INNER JOIN tm_alokasi_kas_item taki ON taki.i_alokasi = tak.i_alokasi
-                INNER JOIN tr_status_document tsd ON tsd.i_status = tak.i_status 
-                LEFT JOIN tr_menu_approve tma ON (tma.n_urut = tak.i_approve_urutan AND tma.i_menu = '$i_menu')
+                FROM tm_alokasi_piutang tap
+                INNER JOIN tm_alokasi_piutang_item tapi ON tapi.i_alokasi = tap.i_alokasi
+                INNER JOIN tr_status_document tsd ON tsd.i_status = tap.i_status 
+                LEFT JOIN tr_menu_approve tma ON (tma.n_urut = tap.i_approve_urutan AND tma.i_menu = '$i_menu')
                 LEFT JOIN public.tr_level tl ON tl.i_level = tma.i_level
-                LEFT JOIN tr_customer tc ON tc.id = tak.id_customer
-                LEFT JOIN tr_area ta ON ta.id = tak.id_area
-                LEFT JOIN tm_rv tr ON tr.i_rv = tak.i_rv
-                WHERE tak.id_company = '$id_company' AND
-                    tak.i_status <> '5'AND
-                    tak.d_alokasi BETWEEN to_date('$dfrom','yyyy-mm-dd') AND to_date('$dto','yyyy-mm-dd')
+                LEFT JOIN tr_customer tc ON tc.id = tap.id_customer
+                LEFT JOIN tr_area ta ON ta.id = tap.id_area
+                LEFT JOIN tm_rv tr ON tr.i_rv = tap.i_rv
+                WHERE tap.id_company = '$id_company' AND
+                    tap.i_status <> '5'AND
+                    tap.d_alokasi BETWEEN to_date('$dfrom','yyyy-mm-dd') AND to_date('$dto','yyyy-mm-dd')
                     $bagian
-                ORDER BY tak.d_alokasi DESC";
+                ORDER BY tap.d_alokasi DESC";
 
         // var_dump($sql); die();
         
@@ -383,23 +383,26 @@ class Mmaster extends CI_Model {
                     to_char(tri.d_bukti, 'YYYYMM') AS i_periode,
                     tc.e_coa_name,
                     tr.i_rv_id,
+                    tri.i_area,
+                    ta.e_area,
+                    trrt.e_rv_refference_type_name,
                     tri.v_rv AS jumlah,
                     tri.v_rv_saldo AS sisa,
                     tri.e_remark,
                     '$id_menu' AS id_menu,
                     '$folder' AS folder,
                     '$dfrom' AS dfrom,
-                    '$dto' AS dto,
-                    '0' AS i_area
+                    '$dto' AS dto
                 FROM tm_rv_item tri
                 INNER JOIN tm_rv tr ON tr.i_rv = tri.i_rv 
                 INNER JOIN tr_coa tc ON tc.id = tr.i_coa
                 LEFT JOIN tr_rv_refference_type trrt ON	(trrt.i_rv_refference_type = tri.i_rv_refference_type)
+                LEFT JOIN tr_area ta ON ta.id = tri.i_area
                 WHERE
                     tr.i_company = '$id_company'
                     AND tri.d_bukti BETWEEN '$dfrom' AND '$dto'
                     AND tri.v_rv_saldo > 0
-                    and tc.e_coa_name ILIKE '%Kas Besar%'";        
+                    and tc.e_coa_name NOT LIKE '%Kas Besar%'";        
 
         // var_dump($sql); die();
 
@@ -435,8 +438,8 @@ class Mmaster extends CI_Model {
         $datatables->hide('dfrom');
         $datatables->hide('dto');
         $datatables->hide('id_menu');
-        $datatables->hide('folder');
         $datatables->hide('i_area');
+        $datatables->hide('folder');
         return $datatables->generate();
     }
     
@@ -870,7 +873,7 @@ class Mmaster extends CI_Model {
         $this->db->insert('tm_alokasi_kas_bank', $data);
     }
 
-    public function insert_alokasi_kas($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah,
+    public function insert_alokasi_piutang($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah,
                                         $id_company=null, $id_area, $id_customer, $id_bagian)
     {
         $id_company = $this->session->userdata('id_company');
@@ -888,18 +891,18 @@ class Mmaster extends CI_Model {
             'id_bagian' => $id_bagian,
         ];
 
-        $this->db->insert('tm_alokasi_kas', $data);
+        $this->db->insert('tm_alokasi_piutang', $data);
     }
 
     /** untuk detail update keterangan saja */
-    public function update_alokasi_kas_item($id, $e_remark)
+    public function update_alokasi_piutang_item($id, $e_remark)
     {
         $data = [
             'e_remark' => $e_remark
         ]; 
 
         $this->db->where('i_alokasi_item', $id);
-        $this->db->update('tm_alokasi_kas_item', $data);
+        $this->db->update('tm_alokasi_piutang_item', $data);
     }
 
     /*----------  SIMPAN DATA ITEM  ----------*/
@@ -920,7 +923,7 @@ class Mmaster extends CI_Model {
         $this->db->insert('tm_alokasi_kas_bank_item', $data);
     }
 
-    public function insert_alokasi_kas_item($i_alokasi, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
+    public function insert_alokasi_piutang_item($i_alokasi, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
                                     $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company=null, $id_area)
     {
         if ($id_company == null) {
@@ -941,7 +944,7 @@ class Mmaster extends CI_Model {
             'id_area' => $id_area
         ];
 
-        $this->db->insert('tm_alokasi_kas_item', $data);
+        $this->db->insert('tm_alokasi_piutang_item', $data);
     }
 
     /*----------  GET VIEW, EDIT & APPROVE HEADER  ----------*/
@@ -1040,35 +1043,35 @@ class Mmaster extends CI_Model {
 
     public function data_header($id)
     {
-        $sql = "SELECT tak.*,
+        $sql = "SELECT tap.*,
                     tr.i_rv,
                     tr.i_rv_id,
                     tr.d_rv,
                     tb.e_bagian_name,
                     ta.e_area,
                     tc.e_customer_name
-                FROM tm_alokasi_kas tak 
-                INNER JOIN tm_alokasi_kas_item taki ON taki.i_alokasi = tak.i_alokasi
-                LEFT JOIN tm_rv tr ON tr.i_rv = tak.i_rv
-                LEFT JOIN tr_bagian tb ON tb.id = tak.id_bagian
-                LEFT JOIN tr_area ta ON ta.id = tak.id_area
-                LEFT JOIN tr_customer tc ON tc.id = tak.id_customer
-                WHERE tak.i_alokasi = '$id'";
+                FROM tm_alokasi_piutang tap
+                INNER JOIN tm_alokasi_piutang_item tapi ON tapi.i_alokasi = tap.i_alokasi
+                LEFT JOIN tm_rv tr ON tr.i_rv = tap.i_rv
+                LEFT JOIN tr_bagian tb ON tb.id = tap.id_bagian
+                LEFT JOIN tr_area ta ON ta.id = tap.id_area
+                LEFT JOIN tr_customer tc ON tc.id = tap.id_customer
+                WHERE tap.i_alokasi = '$id'";
 
         return $this->db->query($sql);
     }
 
     public function data_detail($id)
     {
-        $sql = "SELECT taki.*,
+        $sql = "SELECT tapi.*,
                 tnp.i_document,
                 tnp.d_document,
                 tnp.v_sisa AS v_nilai,
-                tak.v_lebih
-                FROM tm_alokasi_kas_item taki
-                INNER JOIN tm_alokasi_kas tak ON tak.i_alokasi = taki.i_alokasi
-                INNER JOIN tm_nota_penjualan tnp ON tnp.id = taki.id_nota
-                WHERE taki.i_alokasi = $id";
+                tap.v_lebih
+                FROM tm_alokasi_piutang_item tapi
+                INNER JOIN tm_alokasi_piutang tap ON tap.i_alokasi = tapi.i_alokasi
+                INNER JOIN tm_nota_penjualan tnp ON tnp.id = tapi.id_nota
+                WHERE tapi.i_alokasi = $id";
 
         return $this->db->query($sql);
     }
@@ -1198,7 +1201,7 @@ class Mmaster extends CI_Model {
         ];
 
         $this->db->where('i_alokasi', $id);
-        $this->db->update('tm_alokasi_kas', $data);
+        $this->db->update('tm_alokasi_piutang', $data);
     }
 
     /*----------  UPDATE SISA KN  ----------*/
@@ -1437,7 +1440,7 @@ class Mmaster extends CI_Model {
         $sql = "INSERT INTO tm_menu_approve 
                     (i_menu, i_level, i_document, e_approve, d_approve, e_database) 
                 VALUES
-                    ('$i_menu','$i_level','$id','$username','$now','tm_alokasi_kas')";
+                    ('$i_menu','$i_level','$id','$username','$now','tm_alokasi_piutang')";
 
         $this->db->query($sql, FALSE);
     }
@@ -1445,7 +1448,7 @@ class Mmaster extends CI_Model {
     private function change_status_get_status_approval($id, $i_menu)
     {
         $sql = "SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
-            FROM tm_alokasi_kas a
+            FROM tm_alokasi_piutang a
             JOIN tr_menu_approve b on (b.i_menu = '$i_menu')
             WHERE a.i_alokasi = '$id'
             GROUP BY 1,2";
@@ -1501,7 +1504,7 @@ class Mmaster extends CI_Model {
         }        
 
         $this->db->where('i_alokasi', $id);
-        $this->db->update('tm_alokasi_kas', $data);
+        $this->db->update('tm_alokasi_piutang', $data);
     }
 
     private function update_action_approve($id)
@@ -1585,7 +1588,7 @@ class Mmaster extends CI_Model {
 
     public function generate_nomor_dokumen($id_bagian) {
 
-        $kode = 'KB';
+        $kode = 'AL';
 
         $sql = "SELECT count(*) 
                 FROM tm_alokasi_kas tt
@@ -1616,6 +1619,7 @@ class Mmaster extends CI_Model {
                     AND id_company = '$id_company'
                     AND v_sisa > 0
                 ORDER BY i_document ASC ";
+        // var_dump($sql); die();
 
         return $this->db->query($sql, FALSE);
     }
