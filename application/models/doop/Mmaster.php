@@ -1292,8 +1292,8 @@ class Mmaster extends CI_Model
         } else {
             $this->db->query(
             "INSERT INTO produksi.tm_spb
-            (id, id_company, i_document, d_document, i_bagian, id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, d_entry, i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id_spb_turunan)
-            SELECT '$idbaru', '$this->id_company','$idocument','$datedocument','$ibagian',id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, now(), i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id
+            (id, id_company, i_document, d_document, i_bagian, id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, d_entry, i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id_spb_turunan, f_spb_stockdaerah)
+            SELECT '$idbaru', '$this->id_company','$idocument','$datedocument','$ibagian',id_customer, id_harga_kode, id_area, id_salesman, i_referensi, e_remark, now(), i_promo, e_jenis_spb, id_jenis_barang_keluar, n_ppn, id, f_spb_stockdaerah
             FROM tm_spb WHERE id = '$ireferensi' AND d_document = '$datereferensi';
             ");
         }

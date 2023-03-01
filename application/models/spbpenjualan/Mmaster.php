@@ -13,10 +13,10 @@ class Mmaster extends CI_Model
     {
         if ($dfrom != '' && $dto != '') {
             $dfrom = date('Y-m-d', strtotime($dfrom));
-            $dto   = date('Y-m-d', strtotime($dto));
-            $and   = "AND d_document BETWEEN '$dfrom' AND '$dto'";
+            $dto = date('Y-m-d', strtotime($dto));
+            $and = "AND d_document BETWEEN '$dfrom' AND '$dto'";
         } else {
-            $and   = "";
+            $and = "";
         }
         $cek = $this->db->query("
             SELECT
@@ -54,6 +54,7 @@ class Mmaster extends CI_Model
             }
         }
 
+        $area_cover = " AND a.id_area in (select id_area from public.tm_user_area where id_company = '$this->company' and username = '$this->username')";
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query("SELECT
                 0 AS NO,
@@ -64,11 +65,13 @@ class Mmaster extends CI_Model
                 b.e_customer_name,
                 a.i_referensi,
                 a.e_jenis_spb,
+                case when a.f_spb_stockdaerah = true then 'Cabang' else 'Pusat' end as f_spb_stockdaerah,
                 e_remark,
                 e_status_name,
                 label_color,
                 l.i_level,
                 l.e_level_name,
+                td.e_departement_name,
                 a.i_status,
                 '$i_menu' AS i_menu,
                 '$folder' AS folder,
@@ -82,14 +85,15 @@ class Mmaster extends CI_Model
                 (d.i_status = a.i_status)
             LEFT JOIN public.tr_menu_approve e on 
                 (a.i_approve_urutan = e.n_urut and e.i_menu = '$i_menu')
-            LEFT JOIN public.tr_level l on 
-                (e.i_level = l.i_level)
+            LEFT JOIN public.tr_level l on (e.i_level = l.i_level)
+            LEFT JOIN public.tr_departement td on (e.i_departement = td.i_departement)
             WHERE
                 a.i_status <> '5'
                 AND a.id_company = $this->company 
                 AND a.i_promo ISNULL
                 $and 
                 $bagian
+                $area_cover
             ORDER BY
                 a.id desc
         ", FALSE);
@@ -97,23 +101,23 @@ class Mmaster extends CI_Model
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
             if ($i_status == '2') {
-                $data['e_status_name'] = $data['e_status_name'] . ' ' . $data['e_level_name'];
+                $data['e_status_name'] = $data['e_status_name'] . ' ' . $data['e_level_name'] . ' ' . $data['e_departement_name'];
             }
             return '<span class="label label-' . $data['label_color'] . ' label-rouded">' . $data['e_status_name'] . '</span>';
         });
 
         $datatables->add('action', function ($data) {
-            $id         = trim($data['id']);
+            $id = trim($data['id']);
             $idcustomer = trim($data['id_customer']);
-            $ddocument  = $data['d_document'];
-            $i_menu     = $data['i_menu'];
-            $folder     = $data['folder'];
-            $i_status   = $data['i_status'];
-            $dfrom      = $data['dfrom'];
-            $dto        = $data['dto'];
-            $jenis      = $data['e_jenis_spb'];
-            $i_level    = $data['i_level'];
-            $data       = '';
+            $ddocument = $data['d_document'];
+            $i_menu = $data['i_menu'];
+            $folder = $data['folder'];
+            $i_status = $data['i_status'];
+            $dfrom = $data['dfrom'];
+            $dto = $data['dto'];
+            $jenis = $data['e_jenis_spb'];
+            $i_level = $data['i_level'];
+            $data = '';
 
             if (check_role($i_menu, 2)) {
                 $data .= "<a href=\"#\" title='Detail' onclick='show(\"$folder/cform/view/$id/$dfrom/$dto/$jenis/\",\"#main\"); return false;'><i class='ti-eye text-success fa-lg mr-3'></i></a>";
@@ -126,7 +130,7 @@ class Mmaster extends CI_Model
             }
 
             if (check_role($i_menu, 7) && $i_status == '2') {
-                if ($i_level == $this->level || 1 == $this->level) {
+                if (($i_level == $this->level && $i_departement == $this->departement) || 1 == $this->level) {
                     $data .= "<a href=\"#\" title='Approve' onclick='show(\"$folder/cform/approval/$id/$dfrom/$dto/$jenis/\",\"#main\"); return false;'><i class='ti-check-box text-primary fa-lg mr-3'></i></a>";
                 }
             }
@@ -137,7 +141,7 @@ class Mmaster extends CI_Model
                 }
             }
 
-            if (check_role($i_menu, 4)  && ($i_status == '1')) {
+            if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg mr-3'></i></a>";
             }
 
@@ -153,7 +157,7 @@ class Mmaster extends CI_Model
         $datatables->hide('label_color');
         $datatables->hide('i_level');
         $datatables->hide('e_level_name');
-        // $datatables->hide('e_jenis_spb');
+        $datatables->hide('e_departement_name');
         return $datatables->generate();
     }
 
@@ -195,7 +199,7 @@ class Mmaster extends CI_Model
             }
         }
         if (strlen($kode) == 4) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 11, 4)) AS max 
+            $sql = $this->db->query("SELECT max(substring(i_document, 11, 4)) AS max 
                 FROM tm_spb
                 WHERE to_char (d_document, 'yymm') = '$thbl'
                 AND i_status <> '5'
@@ -204,7 +208,7 @@ class Mmaster extends CI_Model
                 AND i_document ILIKE '$kode%'
             ", false);
         } elseif (strlen($kode) == 3) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max 
+            $sql = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max 
                 FROM tm_spb
                 WHERE to_char (d_document, 'yymm') = '$thbl'
                 AND i_status <> '5'
@@ -213,7 +217,7 @@ class Mmaster extends CI_Model
                 AND i_document ILIKE '$kode%'
             ", false);
         } elseif (strlen($kode) == 2) {
-            $sql  = $this->db->query("SELECT max(substring(i_document, 9, 4)) AS max 
+            $sql = $this->db->query("SELECT max(substring(i_document, 9, 4)) AS max 
                 FROM tm_spb
                 WHERE to_char (d_document, 'yymm') = '$thbl'
                 AND i_status <> '5'
@@ -237,7 +241,67 @@ class Mmaster extends CI_Model
             return $number;
         } else {
             $number = "0001";
-            $nomer  = $kode . "-" . $thbl . "-" . $number;
+            $nomer = $kode . "-" . $thbl . "-" . $number;
+            return $nomer;
+        }
+    }
+
+    public function runningnumber_salesforce($thbl, $tahun, $ibagian, $idcustomer, $id_company)
+    {
+        $kode = 'SPB';
+        if ($idcustomer != '' || $idcustomer != null) {
+            $query = $this->db->query("SELECT coalesce(e_doc_penjualan,'SPB') as e_doc_penjualan
+            FROM produksi.tr_supplier_group WHERE i_supplier_group IN (
+                SELECT i_supplier_group FROM produksi.tr_customer WHERE id_company = '$id_company' AND id = $idcustomer)
+            AND id_company = '$id_company'");
+            if ($query->num_rows() > 0) {
+                $kode = $query->row()->e_doc_penjualan;
+            }
+        }
+        if (strlen($kode) == 4) {
+            $sql = $this->db->query("SELECT max(substring(i_document, 11, 4)) AS max 
+                FROM produksi.tm_spb
+                WHERE to_char (d_document, 'yymm') = '$thbl'
+                AND i_status <> '5'
+                AND i_bagian = '$ibagian'
+                AND id_company = '$id_company'
+                AND i_document ILIKE '$kode%'
+            ", false);
+        } elseif (strlen($kode) == 3) {
+            $sql = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max 
+                FROM produksi.tm_spb
+                WHERE to_char (d_document, 'yymm') = '$thbl'
+                AND i_status <> '5'
+                AND i_bagian = '$ibagian'
+                AND id_company = '$id_company'
+                AND i_document ILIKE '$kode%'
+            ", false);
+        } elseif (strlen($kode) == 2) {
+            $sql = $this->db->query("SELECT max(substring(i_document, 9, 4)) AS max 
+                FROM produksi.tm_spb
+                WHERE to_char (d_document, 'yymm') = '$thbl'
+                AND i_status <> '5'
+                AND i_bagian = '$ibagian'
+                AND id_company = '$id_company'
+                AND i_document ILIKE '$kode%'
+            ", false);
+        }
+        if ($sql->num_rows() > 0) {
+            foreach ($sql->result() as $row) {
+                $no = $row->max;
+            }
+            $number = $no + 1;
+            settype($number, "string");
+            $n = strlen($number);
+            while ($n < 4) {
+                $number = "0" . $number;
+                $n = strlen($number);
+            }
+            $number = $kode . "-" . $thbl . "-" . $number;
+            return $number;
+        } else {
+            $number = "0001";
+            $nomer = $kode . "-" . $thbl . "-" . $number;
             return $nomer;
         }
     }
@@ -259,7 +323,7 @@ class Mmaster extends CI_Model
         } else {
             $kode = 'SPB';
         }
-        $query  = $this->db->query("SELECT
+        $query = $this->db->query("SELECT
                 max(substring(i_document, 10, 6)) AS max
             FROM
                 tm_spb
@@ -286,7 +350,7 @@ class Mmaster extends CI_Model
             return $number;
         } else {
             $number = "000001";
-            $nomer  = $kode . "-" . $thbl . "-" . $number;
+            $nomer = $kode . "-" . $thbl . "-" . $number;
             return $nomer;
         }
     }
@@ -309,25 +373,23 @@ class Mmaster extends CI_Model
     public function customer($cari, $iarea)
     {
         return $this->db->query("
-            SELECT
-                a.id,
-                i_customer,
-                e_customer_name
-            FROM
-                tr_customer a
-            INNER JOIN tr_type_industry b ON
-                (b.i_type_industry = a.i_type_industry
-                AND a.id_company = b.id_company)
-            /* INNER JOIN tr_type_spb c ON
-                (c.id_type_industry = b.id) */
-            WHERE
-                a.id_company = $this->company
-                AND (i_customer ILIKE '%$cari%'
-                OR e_customer_name ILIKE '%$cari%')
-                AND a.f_status = 't'
-                /* AND c.i_type = '3' */
-            ORDER BY
-                e_customer_name
+            SELECT a.id, i_customer, e_customer_name FROM tr_customer a
+            INNER JOIN tr_type_industry b on (b.i_type_industry = a.i_type_industry AND a.id_company = b.id_company)
+            where a.id_company = $this->company AND (i_customer ILIKE '%$cari%' OR e_customer_name ILIKE '%$cari%')
+            AND a.f_status = 't' and a.id_area  = '$iarea'
+            ORDER by e_customer_name
+            ", FALSE);
+    }
+
+    /*----------  CARI SALESMAN  ----------*/
+
+    public function salesman($cari, $icustomer)
+    {
+        return $this->db->query("
+            select distinct b.id, b.i_sales , b.e_sales from tr_customer_salesman a
+            inner join tr_salesman b on (a.id_salesman = b.id)
+            where a.e_periode = to_char(current_date, 'yyyymm')  and a.id_customer = $icustomer and (b.e_sales ilike '%$cari%' or b.i_sales ilike '%$cari%')
+            order by 2
             ", FALSE);
     }
 
@@ -357,16 +419,9 @@ class Mmaster extends CI_Model
     public function area()
     {
         return $this->db->query("
-            SELECT
-                id,
-                i_area,
-                e_area
-            FROM
-                tr_area
-            WHERE
-                f_status = 't'
-            ORDER BY
-                i_area
+            SELECT id, a.i_area, e_area from tr_area a
+            inner join public.tm_user_area b on (b.id_company = any(a.id_company) and a.i_area = b.i_area)
+            where f_status = 't' and b.id_company = '$this->id_company' and b.username = '$this->username'
         ", FALSE);
     }
 
@@ -455,7 +510,7 @@ class Mmaster extends CI_Model
     public function product($cari, $ikategori, $ijenis, $ibagian, $idharga, $id_jenis_barang_keluar)
     {
         $kategori = "";
-        $jenis    = "";
+        $jenis = "";
         if ($this->departement != '5' || $this->departement != '1') {
             if (($ikategori != '' || $ikategori != null) && $ikategori != 'all') {
                 $kategori = "AND i_kode_kelompok = '$ikategori' ";
@@ -518,9 +573,9 @@ class Mmaster extends CI_Model
 
     public function getproduct($idproduct, $idharga, $ddocument, $idcustomer, $id_jenis_barang_keluar)
     {
-        $dberlaku  = date('Y-m-d', strtotime($ddocument));
-        $dakhir    = date('Y-m-d', strtotime('+1 year', strtotime($ddocument))); /*tambah tanggal sebanyak 1 tahun*/
-        $periode   = date('Ym', strtotime($ddocument));
+        $dberlaku = date('Y-m-d', strtotime($ddocument));
+        $dakhir = date('Y-m-d', strtotime('+1 year', strtotime($ddocument))); /*tambah tanggal sebanyak 1 tahun*/
+        $periode = date('Ym', strtotime($ddocument));
 
         return $this->db->query("
             SELECT
@@ -574,7 +629,7 @@ class Mmaster extends CI_Model
     public function runningid()
     {
         $this->db->select('max(id) AS id');
-        $this->db->from('tm_spb');
+        $this->db->from('produksi.tm_spb');
         return $this->db->get()->row()->id + 1;
     }
 
@@ -589,57 +644,59 @@ class Mmaster extends CI_Model
 
     /*----------  SIMPAN DATA HEADER ----------*/
 
-    public function insertheader($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $etypespb, $id_jenis_barang_keluar, $nppn)
+    public function insertheader($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $etypespb, $id_jenis_barang_keluar, $nppn, $i_area_distributor, $f_spb_stockdaerah)
     {
-        if($etypespb == 'Transfer') {
+        if ($etypespb == 'Transfer') {
             $data = array(
-                'id'                => $id,
-                'id_company'        => $this->company,
-                'i_document'        => $idocument,
-                'd_document'        => $ddocument,
-                'i_bagian'          => $ibagian,
-                'id_customer'       => $idcustomer,
-                'id_area'           => $idarea,
-                'id_salesman'       => $idsales,
-                'i_referensi'       => $ireferensi,
-                'v_bruto'           => $vkotor,
-                'v_discount'        => $vdiskon,
-                'v_dpp'             => $vdpp,
-                'v_ppn'             => $vppn,
-                'v_netto'           => $vbersih,
-                'id_harga_kode'     => $idharga,
-                'e_remark'          => $eremarkh,
-                'e_jenis_spb'       => $etypespb,
-                'd_entry'           => current_datetime(),
+                'id' => $id,
+                'id_company' => $this->company,
+                'i_document' => $idocument,
+                'd_document' => $ddocument,
+                'i_bagian' => $ibagian,
+                'id_customer' => $idcustomer,
+                'id_area' => $idarea,
+                'id_salesman' => $idsales,
+                'i_referensi' => $ireferensi,
+                'v_bruto' => $vkotor,
+                'v_discount' => $vdiskon,
+                'v_dpp' => $vdpp,
+                'v_ppn' => $vppn,
+                'v_netto' => $vbersih,
+                'id_harga_kode' => $idharga,
+                'e_remark' => $eremarkh,
+                'e_jenis_spb' => $etypespb,
+                'd_entry' => current_datetime(),
                 'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
-                'n_ppn'             => $nppn,
-                'i_status'          => '6'
+                'n_ppn' => $nppn,
+                'i_status' => '6',
+                'i_area_distributor' => $i_area_distributor,
             );
         } else {
             $data = array(
-                'id'                => $id,
-                'id_company'        => $this->company,
-                'i_document'        => $idocument,
-                'd_document'        => $ddocument,
-                'i_bagian'          => $ibagian,
-                'id_customer'       => $idcustomer,
-                'id_area'           => $idarea,
-                'id_salesman'       => $idsales,
-                'i_referensi'       => $ireferensi,
-                'v_bruto'           => $vkotor,
-                'v_discount'        => $vdiskon,
-                'v_dpp'             => $vdpp,
-                'v_ppn'             => $vppn,
-                'v_netto'           => $vbersih,
-                'id_harga_kode'     => $idharga,
-                'e_remark'          => $eremarkh,
-                'e_jenis_spb'       => $etypespb,
-                'd_entry'           => current_datetime(),
+                'id' => $id,
+                'id_company' => $this->company,
+                'i_document' => $idocument,
+                'd_document' => $ddocument,
+                'i_bagian' => $ibagian,
+                'id_customer' => $idcustomer,
+                'id_area' => $idarea,
+                'id_salesman' => $idsales,
+                'i_referensi' => $ireferensi,
+                'v_bruto' => $vkotor,
+                'v_discount' => $vdiskon,
+                'v_dpp' => $vdpp,
+                'v_ppn' => $vppn,
+                'v_netto' => $vbersih,
+                'id_harga_kode' => $idharga,
+                'e_remark' => $eremarkh,
+                'e_jenis_spb' => $etypespb,
+                'd_entry' => current_datetime(),
                 'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
-                'n_ppn'             => $nppn
+                'n_ppn' => $nppn,
+                'f_spb_stockdaerah' => $f_spb_stockdaerah
             );
         }
-        $this->db->insert('tm_spb', $data);
+        $this->db->insert('produksi.tm_spb', $data);
     }
 
     /*----------  SIMPAN DATA ITEM  ----------*/
@@ -647,24 +704,24 @@ class Mmaster extends CI_Model
     public function insertdetail($id, $idproduct, $nquantity, $vprice, $ndiskon1, $ndiskon2, $ndiskon3, $vdiskon1, $vdiskon2, $vdiskon3, $vdiskonplus, $vtotaldiskon, $vtotal, $eremark)
     {
         $data = array(
-            'id_company'        => $this->company,
-            'id_document'       => $id,
-            'id_product'        => $idproduct,
-            'n_quantity'        => $nquantity,
-            'n_quantity_sisa'   => $nquantity,
-            'v_price'           => $vprice,
-            'n_diskon1'         => $ndiskon1,
-            'n_diskon2'         => $ndiskon2,
-            'n_diskon3'         => $ndiskon3,
-            'v_diskon1'         => $vdiskon1,
-            'v_diskon2'         => $vdiskon2,
-            'v_diskon3'         => $vdiskon3,
+            'id_company' => $this->company,
+            'id_document' => $id,
+            'id_product' => $idproduct,
+            'n_quantity' => $nquantity,
+            'n_quantity_sisa' => $nquantity,
+            'v_price' => $vprice,
+            'n_diskon1' => $ndiskon1,
+            'n_diskon2' => $ndiskon2,
+            'n_diskon3' => $ndiskon3,
+            'v_diskon1' => $vdiskon1,
+            'v_diskon2' => $vdiskon2,
+            'v_diskon3' => $vdiskon3,
             'v_diskon_tambahan' => $vdiskonplus,
-            'v_diskon_total'    => $vtotaldiskon,
-            'v_total'           => $vtotal,
-            'e_remark'          => $eremark,
+            'v_diskon_total' => $vtotaldiskon,
+            'v_total' => $vtotal,
+            'e_remark' => $eremark,
         );
-        $this->db->insert('tm_spb_item', $data);
+        $this->db->insert('produksi.tm_spb_item', $data);
     }
 
     /*----------  GET VIEW, EDIT & APPROVE HEADER  ----------*/
@@ -705,7 +762,8 @@ class Mmaster extends CI_Model
                 to_char(e.d_join, 'dd-mm-yyyy') AS d_join,
                 id_jenis_barang_keluar,
                 n_ppn,
-                e_jenis_name
+                e_jenis_name,
+                a.f_spb_stockdaerah
             FROM
                 tm_spb a
             INNER JOIN tr_bagian b ON
@@ -838,26 +896,27 @@ class Mmaster extends CI_Model
 
     /*----------  UPDATE HEADER  ----------*/
 
-    public function updateheader($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $id_jenis_barang_keluar, $nppn)
+    public function updateheader($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $id_jenis_barang_keluar, $nppn, $f_spb_stockdaerah)
     {
         $data = array(
-            'i_document'        => $idocument,
-            'd_document'        => $ddocument,
-            'i_bagian'          => $ibagian,
-            'id_customer'       => $idcustomer,
-            'id_area'           => $idarea,
-            'id_salesman'       => $idsales,
-            'i_referensi'       => $ireferensi,
-            'v_bruto'           => $vkotor,
-            'v_discount'        => $vdiskon,
-            'v_dpp'             => $vdpp,
-            'v_ppn'             => $vppn,
-            'v_netto'           => $vbersih,
-            'id_harga_kode'     => $idharga,
-            'e_remark'          => $eremarkh,
-            'd_update'          => current_datetime(),
+            'i_document' => $idocument,
+            'd_document' => $ddocument,
+            'i_bagian' => $ibagian,
+            'id_customer' => $idcustomer,
+            'id_area' => $idarea,
+            'id_salesman' => $idsales,
+            'i_referensi' => $ireferensi,
+            'v_bruto' => $vkotor,
+            'v_discount' => $vdiskon,
+            'v_dpp' => $vdpp,
+            'v_ppn' => $vppn,
+            'v_netto' => $vbersih,
+            'id_harga_kode' => $idharga,
+            'e_remark' => $eremarkh,
+            'd_update' => current_datetime(),
             'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
-            'n_ppn'             => $nppn
+            'n_ppn' => $nppn,
+            'f_spb_stockdaerah' => $f_spb_stockdaerah
         );
         $this->db->where('id', $id);
         $this->db->update('tm_spb', $data);
@@ -876,57 +935,91 @@ class Mmaster extends CI_Model
     public function changestatus($id, $istatus)
     {
         /* if ($istatus=='6') {
-            $data = array(
-                'i_status'  => $istatus,
-                'e_approve' => $this->username,
-                'd_approve' => date('Y-m-d'),
-            );
+        $data = array(
+        'i_status'  => $istatus,
+        'e_approve' => $this->username,
+        'd_approve' => date('Y-m-d'),
+        );
         }else{
-            $data = array(
-                'i_status'  => $istatus,
-            );
+        $data = array(
+        'i_status'  => $istatus,
+        );
         }
         $this->db->where('id', $id);
         $this->db->update('tm_spb', $data); */
         $now = date('Y-m-d');
+        $f_spb_stockdaerah = $this->db->query("SELECT f_spb_stockdaerah from tm_spb where id = '$id'")->row()->f_spb_stockdaerah;
+        $awal = $this->db->query("
+                SELECT b.i_menu , a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut, coalesce(min(b.n_urut),1) as n_urut_min from tm_spb a
+                inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
+                where a.id = '$id'
+                group by 1,2", FALSE)->row();
         if ($istatus == '3' || $istatus == '6') {
-            $awal = $this->db->query("
-            	SELECT b.i_menu , a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut from tm_spb a
-				inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
-				where a.id = '$id'
-				group by 1,2", FALSE)->row();
 
-            if ($istatus == '3') {
-                if ($awal->i_approve_urutan - 1 == 0) {
+            if ($f_spb_stockdaerah == 't') {
+                if ($istatus == '3') {
                     $data = array(
-                        'i_status'  => $istatus,
+                        'i_status' => $istatus,
+                        'i_approve_urutan' => $awal->n_urut,
                     );
-                } else {
-                    $data = array(
-                        'i_approve_urutan'  => $awal->i_approve_urutan - 1,
-                    );
+                    $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->level' and i_document = '$id' ", FALSE);
+                } else if ($istatus == '6') {
+                    if ($awal->i_approve_urutan - 1 < $awal->n_urut_min) {
+                        $data = array(
+                            'i_status' => $istatus,
+                            'i_approve_urutan' => $awal->i_approve_urutan - 1,
+                            'e_approve' => $this->username,
+                            'd_approve' => $now,
+                        );
+                    } else {
+                        $data = array(
+                            'i_approve_urutan' => $awal->i_approve_urutan - 1,
+                        );
+                    }
+                    $this->db->query("
+                        INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
+                         ('$this->i_menu','$this->level','$id','$this->username','$now','tm_spb');", FALSE);
                 }
-                $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->level' and i_document = '$id' ", FALSE);
-            } else if ($istatus == '6') {
-                if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
-                    $data = array(
-                        'i_status'  => $istatus,
-                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
-                        'e_approve' => $this->username,
-                        'd_approve' => $now,
-                    );
-                } else {
-                    $data = array(
-                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
-                    );
+            } else {
+                if ($istatus == '3') {
+                    if ($awal->i_approve_urutan - 1 == 0) {
+                        $data = array(
+                            'i_status' => $istatus,
+                        );
+                    } else {
+                        $data = array(
+                            'i_approve_urutan' => $awal->i_approve_urutan - 1,
+                        );
+                    }
+                    $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->level' and i_document = '$id' ", FALSE);
+                } else if ($istatus == '6') {
+                    if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
+                        $data = array(
+                            'i_status' => $istatus,
+                            'i_approve_urutan' => $awal->i_approve_urutan + 1,
+                            'e_approve' => $this->username,
+                            'd_approve' => $now,
+                        );
+                    } else {
+                        $data = array(
+                            'i_approve_urutan' => $awal->i_approve_urutan + 1,
+                        );
+                    }
+                    $this->db->query("
+                        INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
+                         ('$this->i_menu','$this->level','$id','$this->username','$now','tm_spb');", FALSE);
                 }
-                $this->db->query("
-            		INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
-					 ('$this->i_menu','$this->level','$id','$this->username','$now','tm_spb');", FALSE);
             }
+
+
+        } else if ($istatus == '2') {
+            $data = array(
+                'i_status' => $istatus,
+                'i_approve_urutan' => ($f_spb_stockdaerah == 't') ? $awal->n_urut : $awal->n_urut_min,
+            );
         } else {
             $data = array(
-                'i_status'  => $istatus,
+                'i_status' => $istatus,
             );
         }
         $this->db->where('id', $id);
@@ -962,16 +1055,16 @@ class Mmaster extends CI_Model
     {
         if ($dfrom != '' && $dto != '') {
             $dfrom = date('Y-m-d', strtotime($dfrom));
-            $dto   = date('Y-m-d', strtotime($dto));
-            $and   = "AND d_op BETWEEN '$dfrom' AND '$dto'";
+            $dto = date('Y-m-d', strtotime($dto));
+            $and = "AND d_op BETWEEN '$dfrom' AND '$dto'";
         } else {
-            $and   = "";
+            $and = "";
         }
 
         if ($icustomer != 'SD') {
-            $where   = "AND y.id_customer = '$icustomer'";
+            $where = "AND y.id_customer = '$icustomer'";
         } else {
-            $where   = "";
+            $where = "";
         }
 
         $custransfer = $this->db->query("
@@ -1174,19 +1267,19 @@ class Mmaster extends CI_Model
         ", FALSE);
 
         $datatables->add('action', function ($data) {
-            $jml             = $data['jml'];
-            $i               = $data['i'];
-            $i_op            = $data['i_op'];
-            $i_menu          = $data['i_menu'];
-            $id_customer     = $data['id_customer'];
+            $jml = $data['jml'];
+            $i = $data['i'];
+            $i_op = $data['i_op'];
+            $i_menu = $data['i_menu'];
+            $id_customer = $data['id_customer'];
             $e_customer_name = $data['e_customer_name'];
-            $db_name         = $data['db_name'];
-            $folder          = $data['folder'];
-            $dfrom           = $data['dfrom'];
-            $dto             = $data['dto'];
-            $data            = '';
+            $db_name = $data['db_name'];
+            $folder = $data['folder'];
+            $dfrom = $data['dfrom'];
+            $dto = $data['dto'];
+            $data = '';
             if (check_role($i_menu, 1)) {
-                $data  .= "
+                $data .= "
                 <label class=\"custom-control custom-checkbox\">
                 <input type=\"checkbox\" id=\"chk\" name=\"chk" . $i . "\" class=\"custom-control-input\">
                 <span class=\"custom-control-indicator\"></span><span class=\"custom-control-description\"></span>
@@ -1243,7 +1336,7 @@ class Mmaster extends CI_Model
         $dfrom_mutasi = date('Y-m-01');
         $dto_mutasi = date('Y-m-t');
 
-        $and   = "AND a.i_op IN (" . $iop . ")";
+        $and = "AND a.i_op IN (" . $iop . ")";
         $query = $this->db->query("
             SELECT 
                 *
@@ -1268,7 +1361,7 @@ class Mmaster extends CI_Model
                                ORDER BY a.i_op, b.i_product ASC 
                               $$
                               ) AS get_op ( 
-                                   i_op varchar(14), d_op date, e_op_remark CHARACTER VARYING (100), i_area CHARACTER(3), i_product CHARACTER VARYING(20), 
+                                   i_op varchar(14), d_op date, e_op_remark CHARACTER VARYING(100), i_area CHARACTER VARYING(255), i_product CHARACTER VARYING(20), 
                                    n_order NUMERIC, id_customer integer
                               )
                          ) AS x 
@@ -1309,7 +1402,8 @@ class Mmaster extends CI_Model
         return $this->db->query("select i_referensi from tm_spb where i_referensi = '$iopref' and id_customer = $idcustomer and id_company = $this->company and i_status in ('1','2','3', '6')", FALSE);
     }
 
-    public function getforecast($cari, $idcustomer) {
+    public function getforecast($cari, $idcustomer)
+    {
         return $this->db->query("
             WITH cte as (
                  select distinct periode , substring(periode,0,5) as tahun, to_char(to_date(periode, 'yyyymm'),'FMMonth') as bulan 
@@ -1324,9 +1418,9 @@ class Mmaster extends CI_Model
     public function getdetailforecast($idcustomer, $periode)
     {
         $tanggal = date('d');
-        $ddocument = substr($periode,0,4).'-'.substr($periode,4,6).'-'.$tanggal;
-        $dberlaku  = date('Y-m-d', strtotime($ddocument));
-        $dakhir    = date('Y-m-d', strtotime('+1 year', strtotime($ddocument))); /*tambah tanggal sebanyak 1 tahun*/
+        $ddocument = substr($periode, 0, 4) . '-' . substr($periode, 4, 6) . '-' . $tanggal;
+        $dberlaku = date('Y-m-d', strtotime($ddocument));
+        $dakhir = date('Y-m-d', strtotime('+1 year', strtotime($ddocument))); /*tambah tanggal sebanyak 1 tahun*/
         //$periode   = date('Ym', strtotime($ddocument));
 
         return $this->db->query("
@@ -1497,7 +1591,7 @@ class Mmaster extends CI_Model
             WHERE a.id = b.id_document AND a.id = '$id_spb' "
         );
 
-        if ($query->num_rows()>0) {
+        if ($query->num_rows() > 0) {
             $v_bruto = 0;
             $v_netto = 0;
             $v_dpp = 0;
@@ -1506,19 +1600,19 @@ class Mmaster extends CI_Model
             $n_ppn = $query->row()->n_ppn;
             foreach ($query->result() as $key) {
                 $jumlah = $key->n_quantity * $key->v_price;
-                $v_discount1 = $jumlah * ($key->n_diskon1/100);
-                $v_discount2 = ($jumlah - $v_discount1) * ($key->n_diskon2/100);
-                $v_discount3 = ($jumlah - $v_discount1 - $v_discount2) * ($key->n_diskon3/100);
+                $v_discount1 = $jumlah * ($key->n_diskon1 / 100);
+                $v_discount2 = ($jumlah - $v_discount1) * ($key->n_diskon2 / 100);
+                $v_discount3 = ($jumlah - $v_discount1 - $v_discount2) * ($key->n_diskon3 / 100);
                 // $v_discount4 = ($jumlah - $v_discount1 - $v_discount2 - $v_discount3) * ($key->n_diskon4/100);
                 $v_total_discount = $v_discount1 + $v_discount2 + $v_discount3 + $key->v_diskon_tambahan;
                 // $v_total = $jumlah - $v_total_discount;
 
                 $item = array(
-                    'v_diskon1' => $v_discount1, 
-                    'v_diskon2' => $v_discount2, 
-                    'v_diskon3' => $v_discount3, 
-                    'v_diskon_total' => $v_total_discount, 
-                    'v_total' => $jumlah, 
+                    'v_diskon1' => $v_discount1,
+                    'v_diskon2' => $v_discount2,
+                    'v_diskon3' => $v_discount3,
+                    'v_diskon_total' => $v_total_discount,
+                    'v_total' => $jumlah,
                 );
                 $this->db->where('id', $key->id_item);
                 $this->db->update('tm_spb_item', $item);
@@ -1539,6 +1633,61 @@ class Mmaster extends CI_Model
             $this->db->where('id', $id_spb);
             $this->db->update('tm_spb', $header);
         }
+    }
+
+    public function insertheader_salesforce($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $etypespb, $id_jenis_barang_keluar, $nppn, $i_area_distributor, $f_spb_stockdaerah, $idcompany, $i_spb_reff)
+    {
+        $data = array(
+            'id' => $id,
+            'id_company' => $idcompany,
+            'i_document' => $idocument,
+            'd_document' => $ddocument,
+            'i_bagian' => $ibagian,
+            'id_customer' => $idcustomer,
+            'id_area' => $idarea,
+            'id_salesman' => $idsales,
+            'i_referensi' => $ireferensi,
+            'v_bruto' => $vkotor,
+            'v_discount' => $vdiskon,
+            'v_dpp' => $vdpp,
+            'v_ppn' => $vppn,
+            'v_netto' => $vbersih,
+            'id_harga_kode' => $idharga,
+            'e_remark' => $eremarkh,
+            'e_jenis_spb' => $etypespb,
+            'd_entry' => current_datetime(),
+            'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
+            'n_ppn' => $nppn,
+            'i_area_distributor' => $i_area_distributor,
+            'i_reff_salesforce' => $i_spb_reff,
+            'f_spb_stockdaerah' => $f_spb_stockdaerah
+        );
+        $this->db->insert('produksi.tm_spb', $data);
+    }
+
+    /*----------  SIMPAN DATA ITEM  ----------*/
+
+    public function insertdetail_salesforce($id, $idproduct, $nquantity, $vprice, $ndiskon1, $ndiskon2, $ndiskon3, $vdiskon1, $vdiskon2, $vdiskon3, $vdiskonplus, $vtotaldiskon, $vtotal, $eremark, $idcompany)
+    {
+        $data = array(
+            'id_company' => $idcompany,
+            'id_document' => $id,
+            'id_product' => $idproduct,
+            'n_quantity' => $nquantity,
+            'n_quantity_sisa' => $nquantity,
+            'v_price' => $vprice,
+            'n_diskon1' => $ndiskon1,
+            'n_diskon2' => $ndiskon2,
+            'n_diskon3' => $ndiskon3,
+            'v_diskon1' => $vdiskon1,
+            'v_diskon2' => $vdiskon2,
+            'v_diskon3' => $vdiskon3,
+            'v_diskon_tambahan' => $vdiskonplus,
+            'v_diskon_total' => $vtotaldiskon,
+            'v_total' => $vtotal,
+            'e_remark' => $eremark,
+        );
+        $this->db->insert('produksi.tm_spb_item', $data);
     }
 
 }

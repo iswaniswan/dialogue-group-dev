@@ -36,6 +36,26 @@
                         </div> 
                     </div>
                     <div class="form-group row">
+                        <label class="col-sm-2">Salesman Upline</label>
+                        <label class="col-sm-4">Keterangan</label>
+                        <label class="col-sm-6"></label>
+                        <div class="col-sm-2">
+                            <input type="hidden" id="id_salesman_upline" name="id_salesman_upline" class="form-control input-sm"
+                                required="" readonly
+                                value="<?= $data->id_salesman_upline ?>">
+                            <input type="hidden" id="i_sales_upline" name="i_sales_upline" class="form-control input-sm"
+                                required="" readonly
+                                value="<?= $data->i_sales_upline ?>">
+                            <input type="text" id="e_sales_upline" name="e_sales_upline" class="form-control input-sm"
+                                required="" readonly
+                                value="<?= $data->e_sales_upline ?>">
+                        </div>
+                        <div class="col-sm-4">
+                            <textarea class="form-control input-sm" name="eremark" id="eremark" placeholder="Keterangan" readonly><?= $data->e_remark ?></textarea>
+                        </div>
+                        <div class="col-sm-6"></div>
+                    </div>
+                    <div class="form-group row">
                         <div class="col-sm-12">
                             <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
                         </div>

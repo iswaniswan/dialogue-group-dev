@@ -395,14 +395,15 @@ class Mmaster extends CI_Model {
                     '$dto' AS dto
                 FROM tm_rv_item tri
                 INNER JOIN tm_rv tr ON tr.i_rv = tri.i_rv 
-                INNER JOIN tr_coa tc ON tc.id = tr.i_coa
+                INNER JOIN tr_coa tc ON (tc.id = tri.i_coa AND tc.f_alokasi_bank_masuk = 't')
                 LEFT JOIN tr_rv_refference_type trrt ON	(trrt.i_rv_refference_type = tri.i_rv_refference_type)
                 LEFT JOIN tr_area ta ON ta.id = tri.i_area
                 WHERE
                     tr.i_company = '$id_company'
+                    AND tr.i_status = '6'
                     AND tri.d_bukti BETWEEN '$dfrom' AND '$dto'
                     AND tri.v_rv_saldo > 0
-                    and tc.e_coa_name NOT LIKE '%Kas Besar%'";        
+                    AND tc.e_coa_name NOT LIKE '%Kas Besar%'";        
 
         // var_dump($sql); die();
 
@@ -1067,7 +1068,8 @@ class Mmaster extends CI_Model {
                 tnp.i_document,
                 tnp.d_document,
                 tnp.v_sisa AS v_nilai,
-                tap.v_lebih
+                tap.v_lebih,
+                tnp.v_sisa + tapi.v_Jumlah AS v_nota
                 FROM tm_alokasi_piutang_item tapi
                 INNER JOIN tm_alokasi_piutang tap ON tap.i_alokasi = tapi.i_alokasi
                 INNER JOIN tm_nota_penjualan tnp ON tnp.id = tapi.id_nota
@@ -1591,8 +1593,8 @@ class Mmaster extends CI_Model {
         $kode = 'AL';
 
         $sql = "SELECT count(*) 
-                FROM tm_alokasi_kas tt
-                INNER JOIN tr_bagian tb ON tb.id = tt.id_bagian 
+                FROM tm_alokasi_piutang tap
+                INNER JOIN tr_bagian tb ON tb.id = tap.id_bagian 
                 WHERE tb.id = '$id_bagian'
                     AND to_char(d_alokasi, 'yyyy-mm') = to_char(now(), 'yyyy-mm')";
 

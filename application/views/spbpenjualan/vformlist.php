@@ -42,6 +42,7 @@
                     <th>Customer</th>
                     <th>No. Referensi</th>
                     <th>Tipe Order</th>
+                    <th>Pemenuhan Stok</th>
                     <th>Keterangan</th>
                     <th>Status Dokumen</th>
                     <th>Action</th>

@@ -26,7 +26,7 @@ class Mmaster extends CI_Model {
 
     public function kodearea()
     {
-        return $this->db->query("SELECT DISTINCT id, i_area, e_area FROM tr_area WHERE f_status = true
+        return $this->db->query("SELECT DISTINCT a.id, a.i_area, a.e_area FROM tr_area a INNER JOIN public.tm_user_area b ON (b.i_area = a.i_area AND b.id_area = a.id) WHERE f_status = TRUE AND b.username = '$this->username' AND b.id_company = '$this->id_company';
         ", false);
     }
 
@@ -40,7 +40,7 @@ class Mmaster extends CI_Model {
             WHERE (upper(nama_rencana) LIKE '%$cari%') ", FALSE);
     }
 
-    public function datacustomer($cari){
+    public function datacustomer($cari, $iarea){
         $idcompany  = $this->session->userdata('id_company');
         return $this->db->query("SELECT  
                 a.id as id_customer,
@@ -51,7 +51,7 @@ class Mmaster extends CI_Model {
             FROM
             tr_customer a
             INNER JOIN tr_area b on (b.id = a.id_area)
-            WHERE a.id_company = '$idcompany' and a.f_status = 't'
+            WHERE a.id_company = '$idcompany' and a.f_status = 't' and b.i_area = '$iarea'
             AND (upper(a.i_customer) LIKE '%$cari%'
                 OR upper(a.e_customer_name) LIKE '%$cari%') ", FALSE);
     }
@@ -76,7 +76,7 @@ class Mmaster extends CI_Model {
         return $this->db->get()->row()->id+1;
     }
       
-    public function insertheader($id, $dok_rrkh, $ibagian, $drrkh, $kode_area, $kode_salesman){	
+    public function insertheader($id, $dok_rrkh, $ibagian, $drrkh, $kode_area, $kode_salesman, $id_salesman_upline, $e_remark){	
         $idcompany  = $this->session->userdata('id_company');
         $data = array(
                         'id_company'    => $idcompany,
@@ -86,9 +86,30 @@ class Mmaster extends CI_Model {
                         'i_bagian'      => $ibagian,
                         'id_area'       => $kode_area,
                         'id_salesman'   => $kode_salesman,
+                        'i_approve'     => $id_salesman_upline,
+                        'e_remark'      => $e_remark,
                         'd_entry'       => current_datetime(),
         );
         $this->db->insert('tm_rrkh', $data);
+    }
+
+    public function updateheader($id, $dok_rrkh, $ibagian, $drrkh, $kode_area, $kode_salesman, $id_salesman_upline, $e_remark){	
+        $idcompany  = $this->session->userdata('id_company');
+        $data = array(
+                        'id_company'    => $idcompany,
+                        'id'            => $id,
+                        'i_document'    => $dok_rrkh,
+                        'd_document'    => $drrkh,
+                        'i_bagian'      => $ibagian,
+                        'id_area'       => $kode_area,
+                        'id_salesman'   => $kode_salesman,
+                        'i_approve'     => $id_salesman_upline,
+                        'e_remark'      => $e_remark,
+                        'd_entry'       => current_datetime(),
+        );
+        $this->db->where('id',$id);
+        $this->db->where('id_company', $idcompany);
+        $this->db->update('tm_rrkh', $data);
     }
 
     // public function insertdetaidl($id, $iproduct, $icolor, $nqtyproduct, $edesc){}
@@ -120,18 +141,24 @@ class Mmaster extends CI_Model {
                 a.i_status,
                 a.i_approve,
                 a.d_approve,
+                a.e_remark,
                 d.id as id_area,
                 d.i_area,
                 d.e_area,
                 e.id as id_sales,
                 e.i_sales,
-                e.e_sales
+                e.e_sales,
+                f.id as id_salesman_upline,
+                f.i_sales as i_sales_upline,
+                f.e_sales as e_sales_upline
             FROM
                 tm_rrkh a
             INNER JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
             INNER JOIN tr_status_document c ON (c.i_status = a.i_status)
             INNER JOIN tr_area d ON (d.i_area = a.id_area)
             INNER JOIN tr_salesman e ON (e.i_sales = a.id_salesman AND a.id_company = e.id_company)
+            LEFT join tr_salesman f ON (f.id = e.id_salesman_upline)
+            left join public.tm_user_salesman g ON (g.id_salesman = e.id AND g.id_company = e.id_company AND g.username = '$this->username')
             WHERE                                        
                 a.id = '$id'
             AND
@@ -152,22 +179,136 @@ class Mmaster extends CI_Model {
                 b.id as id_customer,
                 b.i_customer,
                 b.e_customer_name,
+                b.id_city,
+                b.i_city,
+                b.e_city_name,
                 d.id as id_area,
                 d.i_area,
                 d.e_area,
                 c.nama_rencana
             FROM
                 tm_rrkh_item a 
-                inner join tr_customer b ON (a.id_customer = b.id AND a.id_company = b.id_company)
+                -- inner join tr_customer b ON (a.id_customer = b.id AND a.id_company = b.id_company)
+                inner join (SELECT ba.id, ba.i_customer, ba.e_customer_name, ba.id_company, ba.id_area, bb.id AS id_city, bb.i_city, bb.e_city_name FROM tr_customer ba INNER JOIN tr_city bb ON(bb.id = ba.id_city)) b ON (a.id_customer = b.id AND a.id_company = b.id_company)
                 INNER JOIN tr_rencana c on (a.id_rencana = c.id_rencana)
                 INNER JOIN tr_area d on (d.id = b.id_area)
             WHERE a.id_rrkh = '$id' 
             ", FALSE);
     }
 
+    public function getcustomergenerate($date, $area, $salesman) {
+        return $this->db->query("SELECT
+                a.id_ri,
+                a.id_company,
+                a.id_rrkh,
+                a.id_customer,
+                a.waktu,
+                a.id_rencana,
+                a.f_real,
+                a.f_bukti,
+                a.keterangan,
+                b.id as id_customer,
+                b.i_customer,
+                b.e_customer_name,
+                b.id_city,
+                b.i_city,
+                b.e_city_name,
+                d.id as id_area,
+                d.i_area,
+                d.e_area,
+                c.nama_rencana
+            FROM
+                tm_rrkh_item a 
+                INNER JOIN tm_rrkh ab ON (ab.id = a.id_rrkh)
+                inner join (SELECT ba.id, ba.i_customer, ba.e_customer_name, ba.id_company, ba.id_area, bb.id AS id_city, bb.i_city, bb.e_city_name FROM tr_customer ba INNER JOIN tr_city bb ON(bb.id = ba.id_city)) b ON (a.id_customer = b.id AND a.id_company = b.id_company)
+                INNER JOIN tr_rencana c on (a.id_rencana = c.id_rencana)
+                INNER JOIN tr_area d on (d.id = b.id_area)
+            WHERE a.waktu = '$date' and d.i_area = '$area' AND ab.id_salesman = '$salesman' and ab.i_status = '6';
+    ");
+    }
+
+    public function deletedetail($id){
+        $idcompany  = $this->session->userdata('id_company');  
+        $this->db->where('id_rrkh',$id);
+        $this->db->where('id_company',$idcompany);
+        $this->db->delete('tm_rrkh_item');
+    }
+
     public function kodesalesman()
     {
-        return $this->db->query("SELECT DISTINCT id, i_sales, e_sales FROM tr_salesman WHERE f_status = true
+        return $this->db->query("SELECT DISTINCT a.id, a.i_sales, a.e_sales, c.id AS id_upline, c.i_sales AS i_sales_upline, c.e_sales AS e_sales_upline FROM tr_salesman a INNER JOIN public.tm_user_salesman b ON (b.id_salesman = a.id) LEFT JOIN tr_salesman c ON (c.id = a.id_salesman_upline) WHERE a.f_status = TRUE AND b.username = '$this->username' AND b.id_company = '$this->id_company';
+        ", false);
+    }
+
+    public function estatus($istatus)
+    {
+        $this->db->select('e_status_name');
+        $this->db->from('tr_status_document');
+        $this->db->where('i_status', $istatus);
+        return $this->db->get()->row()->e_status_name;
+    }
+
+    public function changestatus($id, $istatus)
+    {
+        // if ($istatus == '6') {
+        //     $data = array(
+        //         'i_status'  => $istatus,
+        //         'i_approve' => $this->username,
+        //         'd_approve' => date('Y-m-d'),
+        //     );
+        // } else {
+        //     $data = array(
+        //         'i_status' => $istatus,
+        //     );
+        // }
+        $now = date('Y-m-d');
+        if ($istatus == '3' || $istatus == '6') {
+            $awal = $this->db->query("
+            	SELECT b.i_menu , a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut from tm_rrkh a
+				inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
+				where a.id = '$id'
+				group by 1,2", FALSE)->row();
+
+            if ($istatus == '3') {
+                if ($awal->i_approve_urutan - 1 == 0) {
+                    $data = array(
+                        'i_status'  => $istatus,
+                    );
+                } else {
+                    $data = array(
+                        'i_approve_urutan'  => $awal->i_approve_urutan - 1,
+                    );
+                }
+                $this->db->query("delete from tm_menu_approve where i_menu = '$this->i_menu' and i_level = '$this->i_level' and i_document = '$id' ", FALSE);
+            } else if ($istatus == '6') {
+                if ($awal->i_approve_urutan + 1 > $awal->n_urut) {
+                    $data = array(
+                        'i_status'  => $istatus,
+                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                        // 'i_approve' => $this->username,
+                        'd_approve' => $now,
+                    );
+                } else {
+                    $data = array(
+                        'i_approve_urutan'  => $awal->i_approve_urutan + 1,
+                    );
+                }
+                $this->db->query("
+            		INSERT INTO tm_menu_approve (i_menu,i_level,i_document,e_approve,d_approve,e_database) VALUES
+					 ('$this->i_menu','$this->i_level','$id','$this->username','$now','tm_rrkh');", FALSE);
+            }
+        } else {
+            $data = array(
+                'i_status'  => $istatus,
+            );
+        }
+        $this->db->where('id', $id);
+        $this->db->update('tm_rrkh', $data);
+    }
+
+    public function getsalesmanupline($id)
+    {
+        return $this->db->query("SELECT c.id AS id_upline, c.i_sales AS i_sales_upline, c.e_sales AS e_sales_upline FROM tr_salesman a INNER JOIN tr_salesman c ON (c.id = a.id_salesman_upline) WHERE a.f_status = TRUE AND a.i_sales = '$id';
         ", false);
     }
 
@@ -290,6 +431,7 @@ class Mmaster extends CI_Model {
                 f.i_level,
                 l.e_level_name,
                 a.id_company,
+                ea.e_sales as e_sales_upline,
                 '$i_menu' AS i_menu,
                 '$folder' AS folder,
                 '$dfrom' AS dfrom,
@@ -300,6 +442,7 @@ class Mmaster extends CI_Model {
             INNER JOIN tr_status_document c ON (c.i_status = a.i_status)
             INNER JOIN tr_area d ON (d.i_area = a.id_area)
             INNER JOIN tr_salesman e ON (e.i_sales = a.id_salesman AND a.id_company = e.id_company)
+            LEFT JOIN tr_salesman ea ON (ea.id = e.id_salesman_upline)
             LEFT JOIN tr_menu_approve f ON (a.i_approve_urutan = f.n_urut AND f.i_menu = '$i_menu')
             LEFT JOIN public.tr_level l ON (f.i_level = l.i_level)
             WHERE a.i_status <> '5'
@@ -307,6 +450,14 @@ class Mmaster extends CI_Model {
                 a.id_company = '$idcompany'
                 $where
                 $bagian
+                AND (
+                e.id IN (SELECT id_salesman FROM public.tm_user_salesman WHERE id_company = '$this->id_company' AND username = '$this->username')
+                AND d.id IN (SELECT id_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username')
+                ) OR
+                (
+                e.id_salesman_upline IN (SELECT id_salesman FROM public.tm_user_salesman WHERE id_company = '$this->id_company' AND username = '$this->username')
+                AND d.id IN (SELECT id_area FROM public.tm_user_area WHERE id_company = '$this->id_company' AND username = '$this->username')
+                )
             ORDER BY
                 a.id DESC 
         ", FALSE);
@@ -314,7 +465,7 @@ class Mmaster extends CI_Model {
         $datatables->edit('e_status_name', function ($data) {
             $i_status = $data['i_status'];
             if ($i_status == '2') {
-                $data['e_status_name'] = $data['e_status_name']. ' '. $data['e_level_name']  ;
+                $data['e_status_name'] = $data['e_status_name']. ' '. $data['e_level_name']. ' (' . $data['e_sales_upline'] . ')'  ;
             }
             return '<span class="label label-'.$data['label_color'].' label-rouded">'.$data['e_status_name'].'</span>';
         });
@@ -361,6 +512,7 @@ class Mmaster extends CI_Model {
         $datatables->hide('id_company');
 		$datatables->hide('i_level');
 		$datatables->hide('e_level_name');
+		$datatables->hide('e_sales_upline');
         
         return $datatables->generate();
     }

@@ -393,13 +393,13 @@ class Mmaster extends CI_Model {
                     '0' AS i_area
                 FROM tm_rv_item tri
                 INNER JOIN tm_rv tr ON tr.i_rv = tri.i_rv 
-                INNER JOIN tr_coa tc ON tc.id = tr.i_coa
+                INNER JOIN tr_coa tc ON (tc.id = tr.i_coa AND tc.f_alokasi_kas_masuk = 't')
                 LEFT JOIN tr_rv_refference_type trrt ON	(trrt.i_rv_refference_type = tri.i_rv_refference_type)
                 WHERE
                     tr.i_company = '$id_company'
                     AND tri.d_bukti BETWEEN '$dfrom' AND '$dto'
                     AND tri.v_rv_saldo > 0
-                    and tc.e_coa_name ILIKE '%Kas Besar%'";        
+                    AND tc.e_coa_name ILIKE '%Kas Besar%'";        
 
         // var_dump($sql); die();
 
@@ -1064,7 +1064,8 @@ class Mmaster extends CI_Model {
                 tnp.i_document,
                 tnp.d_document,
                 tnp.v_sisa AS v_nilai,
-                tak.v_lebih
+                tak.v_lebih,
+                tnp.v_sisa + tapi.v_Jumlah AS v_nota
                 FROM tm_alokasi_kas_item taki
                 INNER JOIN tm_alokasi_kas tak ON tak.i_alokasi = taki.i_alokasi
                 INNER JOIN tm_nota_penjualan tnp ON tnp.id = taki.id_nota

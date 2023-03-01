@@ -12,8 +12,9 @@
                         <div class="form-group row">
                             <label class="col-md-2">Kode Sales</label>
                             <label class="col-md-4">Nama Sales</label>
-                            <label class="col-md-3">Area</label>
-                            <label class="col-md-3">Role</label>
+                            <label class="col-md-2">Area</label>
+                            <label class="col-md-2">Role</label>
+                            <label class="col-md-2">Salesman Upline</label>
                             <div class="col-sm-2">
                                 <input type="hidden" readonly="" name="id" value="<?= $data->id; ?>">
                                 <input type="text" name="isales" id="isales" class="form-control input-sm" required="" value="<?= $data->i_sales; ?>" readonly>
@@ -21,14 +22,19 @@
                             <div class="col-sm-4">
                                 <input type="text" name="esales" id="esales" class="form-control input-sm" value="<?= $data->e_sales; ?>" readonly>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <select name="iarea" id="iarea" class="form-control select2" disabled="">
                                     <option value="<?=$data->id_area;?>"><?=$data->e_area;?></option>
                                 </select>
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                 <select name="irole" id="irole" class="form-control select2" disabled="">
                                     <option value="<?=$data->i_role;?>"><?=$data->e_role_name;?></option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select name="isalesman_upline" id="isalesman_upline" class="form-control select2" disabled="">
+                                    <option value="<?=$data->id_salesman_upline;?>"><?=$data->e_sales_upline;?></option>
                                 </select>
                             </div>
                         </div>  

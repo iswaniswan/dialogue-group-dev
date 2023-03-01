@@ -82,6 +82,7 @@
                                 <select name="id_customer" id="id_customer" class="form-control select2"></select>                                
                             </div>
                             <div class="col-md-6">
+                                <input type="hidden" name="v_sisa" id="v_sisa" value="0"/>
                                 <input type="text" name="v_jumlah" id="v_jumlah"
                                         class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ",", ".") ?>" readonly>
                             </div>
@@ -313,7 +314,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
+                        <input type="text" readonly class="form-control input-sm text-left input-nilai" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
                     </div>                    
                 </td>`;
         cols += `<td>
@@ -321,7 +322,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem"
+                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem input-bayar"
                             onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\'
                             autocomplete="off" name="items[${i}][vbayar]" value="0">
                     </div>
@@ -331,7 +332,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
+                    <input type="text" readonly class="form-control input-sm text-left input-sisa" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
                     </div>
                 </td>`;
         cols += `<td>
@@ -339,7 +340,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
+                    <input type="text" readonly class="form-control input-sm text-left input-lebih" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
                     </div>
                 </td>`;
         cols += `<td>
@@ -379,15 +380,8 @@
             }
         });
 
-        $('#vbayar'+i).bind('keyup', function() {
-            const elementNilai = $('#vnilai'+i);
-            const elementSisa = $('#vsisa'+i);
-            const elementLebih = $('#vlebih'+i);
-            calculateBayar(this, elementNilai, elementSisa, elementLebih);
-        });
-
         for (const opsi of OPSI_KETERANGAN) {
-            let option = `<option value=${opsi.id}>${opsi.text}</option>`;
+            let option = `<option value="${opsi.id}">${opsi.text}</option>`;
             $('#eremark'+i).append(option);
         }
 
@@ -397,7 +391,12 @@
             width: "100%",
         }).val("").trigger("change");
 
-        
+        $('#vbayar'+i).on('keyup', function() {
+            const elementNilai = $(this).closest('tr').find('.input-nilai');
+            const elementSisa = $(this).closest('tr').find('.input-sisa');
+            const elementLebih = $(this).closest('tr').find('.input-lebih');
+            calculateBayar(this, elementNilai, elementSisa, elementLebih);
+        });
     });    
     
     /*----------  HAPUS TR  ----------*/    
@@ -575,6 +574,19 @@
     });
 
     function calculateBayar(eBayar, eNilai, eSisa, eLebih) {
+        let vJumlah = $('#v_jumlah').val().replaceAll("Rp.", "");
+        vJumlah = currencyTextToNumber(vJumlah);
+
+        let totalBayar = 0;
+        $('.input-bayar').each(function() {
+            let _bayar = $(this).val();
+            _bayar = currencyTextToNumber(_bayar);
+            totalBayar += _bayar;
+        });
+        
+        let vAvailable = vJumlah - totalBayar;
+        $('#v_sisa').val(vAvailable);
+
         let vNilai = $(eNilai).val();
         vNilai = currencyTextToNumber(vNilai);
 
@@ -582,27 +594,26 @@
         vBayar = currencyTextToNumber(vBayar);        
 
         let vSisa = vNilai - vBayar;
-        let vLebih = 0;
+        let vLebih = vAvailable;
         
         if (vBayar > vNilai) {
             vSisa = 0;
-            vLebih = vBayar - vNilai;
         }
 
         $(eBayar).val(formatRupiah(vBayar.toString()));
         $(eSisa).val(formatRupiah(vSisa.toString()));
-        $(eLebih).val(formatRupiah(vLebih.toString()));
+        $(eLebih).val(formatRupiah(vLebih.toString()));        
     }
 
     const OPSI_KETERANGAN = [
-        {id: 'Retur', text: 'Retur'},
-        {id: 'Biaya Promo', text: 'Biaya Promo'},
-        {id: 'Kurang Bayar', text: 'Kurang Bayar'},
-        {id: 'Cicil', text: 'Cicil'},
-        {id: 'Pembulatan', text: 'Pembulatan'},
-        {id: 'Lebih Bayar', text: 'Lebih Bayar'},
-        {id: 'Biaya Ekspedisi', text: 'Biaya Ekspedisi'},
-        {id: 'Biaya Administrasi', text: 'Biaya Administrasi'},
+        {id: "Retur", text: "Retur"},
+        {id: "Biaya Promo", text: "Biaya Promo"},
+        {id: "Kurang Bayar", text: "Kurang Bayar"},
+        {id: "Cicil", text: "Cicil"},
+        {id: "Pembulatan", text: "Pembulatan"},
+        {id: "Lebih Bayar", text: "Lebih Bayar"},
+        {id: "Biaya Ekspedisi", text: "Biaya Ekspedisi"},
+        {id: "Biaya Administrasi", text: "Biaya Administrasi"},
     ];
 
     function currencyTextToNumber (_text) {
@@ -629,6 +640,49 @@
     
         rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
         return rupiah;
+    }
+
+    function hetang() {
+        var vjmlbyr = parseFloat(formatulang($("#vjumlah").val()));
+        var vlebihitem = vjmlbyr;
+        for (a = 1; a <= $('#jml').val(); a++) {
+            if (typeof $("#vjumlah" + a).val() !== 'undefined') {
+                vnota = parseFloat(formatulang($("#vsisa" + a).val()));
+                vjmlitem = parseFloat(formatulang($("#vjumlah" + a).val()));
+                /* if (vjmlitem == 0) {
+                    bbotol();
+                } */
+                vsisaitem = vnota - vjmlitem;
+                if (vsisaitem < 0) {
+                    Swal.fire({
+                        type: "error",
+                        title: g_maaf,
+                        text: "Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!",
+                        confirmButtonClass: "btn btn-danger",
+                    });
+                    $("#vjumlah" + a).val(0);
+                    vjmlitem = parseFloat(formatulang($("#vjumlah" + a).val()));
+                    vsisaitem = parseFloat(formatulang($("#vsisa" + a).val()));
+                }
+                vlebihitem = vlebihitem - vjmlitem;
+                if (vlebihitem < 0) {
+                    vlebihitem = vlebihitem + vjmlitem;
+                    vsisaitem = vnota - vlebihitem;
+                    Swal.fire({
+                        type: "error",
+                        title: g_maaf,
+                        text: "Jumlah item tidak bisa lebih besar dari nilai bayar !!!!!",
+                        confirmButtonClass: "btn btn-danger",
+                    });
+                    $("#vjumlah" + a).val(formatcemua(vlebihitem));
+                    vjmlitem = parseFloat(formatulang($("#vjumlah" + a).val()));
+                    vlebihitem = 0;
+                }
+                $("#vsesa" + a).val(formatcemua(vsisaitem));
+                $("#vlebih" + a).val(formatcemua(vlebihitem));
+            }
+        }
+        $("#vlebih").val(formatcemua(vlebihitem));
     }
     
 </script>

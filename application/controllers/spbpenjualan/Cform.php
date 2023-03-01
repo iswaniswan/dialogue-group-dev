@@ -92,7 +92,7 @@ class Cform extends CI_Controller {
             'title_list' => 'List '.$this->global['title'],
             'bagian'     => $this->mmaster->bagian()->result(),
             'area'       => $this->mmaster->area()->result(),
-            'salesman'   => $this->mmaster->sales()->result(),
+            // 'salesman'   => $this->mmaster->sales()->result(),
             'dfrom'      => $this->uri->segment(4),
             'dto'        => $this->uri->segment(5),
             'number'     => "SPB-".date('ym')."-123456",
@@ -163,6 +163,37 @@ class Cform extends CI_Controller {
         //         'text' => 'Pilih Area',
         //     );
         // }
+        echo json_encode($filter);
+    }
+
+
+    /*----------  CARI SALESMAN  ----------*/
+    
+    public function salesman()
+    {
+        $filter = [];
+        $icustomer  = $this->input->get('icustomer');
+        if($icustomer!=''){
+            $data   = $this->mmaster->salesman(str_replace("'", "", $this->input->get('q')),$icustomer);
+            if ($data->num_rows()>0) {
+                foreach($data->result() as  $key){
+                    $filter[] = array(
+                        'id'   => $key->id,  
+                        'text' => $key->e_sales." (".$key->i_sales.") "
+                    );
+                }          
+            }else{
+                $filter[] = array(
+                    'id'   => null,  
+                    'text' => 'Salesman by customer belum ada',
+                );
+            }
+        }else{
+            $filter[] = array(
+                'id'   => null,  
+                'text' => 'Pilih customer terlebih dahulu',
+            );
+        }
         echo json_encode($filter);
     }
 
@@ -292,6 +323,15 @@ class Cform extends CI_Controller {
         $eremarkh       = $this->input->post('eremarkh', TRUE);
         $vdpp           = str_replace(",","",$this->input->post('vdpp', TRUE));
         $jml            = $this->input->post('jml', TRUE);
+
+        $f_spb_stockdaerah            = $this->input->post('f_spb_stockdaerah', TRUE);
+
+        if ($f_spb_stockdaerah == "on") {
+            $f_spb_stockdaerah = 't';
+        } else {
+            $f_spb_stockdaerah = 'f';
+        }
+
         if ($idocument!='' && $ddocument!='' && $ibagian!='' && $idcustomer!='' && $jml>0) {
             $cekkode = $this->mmaster->cek_kode($idocument,$ibagian);
             if ($cekkode->num_rows()>0) {
@@ -303,7 +343,7 @@ class Cform extends CI_Controller {
             }else{
                 $this->db->trans_begin();
                 $id = $this->mmaster->runningid();
-                $this->mmaster->insertheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,$idsales,$ireferensi,$vdiskon,$vkotor,$vppn,$vbersih,$eremarkh,$vdpp,$idharga,$etypespb,$id_jenis_barang_keluar,$nppn);
+                $this->mmaster->insertheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,$idsales,$ireferensi,$vdiskon,$vkotor,$vppn,$vbersih,$eremarkh,$vdpp,$idharga,$etypespb,$id_jenis_barang_keluar,$nppn, '', $f_spb_stockdaerah);
                 for ($i = 0; $i < $jml; $i++) {
                     $idproduct    = $this->input->post('idproduct'.$i, TRUE);
                     $nquantity    = str_replace(",","",$this->input->post('nquantity'.$i, TRUE));
@@ -410,6 +450,15 @@ class Cform extends CI_Controller {
         $eremarkh       = $this->input->post('eremarkh', TRUE);
         $vdpp           = str_replace(",","",$this->input->post('vdpp', TRUE));
         $jml            = $this->input->post('jml', TRUE);
+
+        $f_spb_stockdaerah            = $this->input->post('f_spb_stockdaerah', TRUE);
+
+        if ($f_spb_stockdaerah == "on") {
+            $f_spb_stockdaerah = 't';
+        } else {
+            $f_spb_stockdaerah = 'f';
+        }
+
         if ($id!='' && $idocument!='' && $ddocument!='' && $ibagian!='' && $idcustomer!='' && $jml>0) {
             $cekkode = $this->mmaster->cek_kode_edit($idocument,$ibagian,$idocumentold,$ibagianold);
             if ($cekkode->num_rows()>0) {
@@ -420,7 +469,7 @@ class Cform extends CI_Controller {
                 );
             }else{
                 $this->db->trans_begin();
-                $this->mmaster->updateheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,$idsales,$ireferensi,$vdiskon,$vkotor,$vppn,$vbersih,$eremarkh,$vdpp,$idharga,$id_jenis_barang_keluar,$nppn);
+                $this->mmaster->updateheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,$idsales,$ireferensi,$vdiskon,$vkotor,$vppn,$vbersih,$eremarkh,$vdpp,$idharga,$id_jenis_barang_keluar,$nppn, $f_spb_stockdaerah);
                 $this->mmaster->delete($id);
                 for ($i = 1; $i <= $jml; $i++) {
                     $idproduct    = $this->input->post('idproduct'.$i, TRUE);
@@ -706,7 +755,7 @@ class Cform extends CI_Controller {
         $ndiskon2       = str_replace(",","",$this->input->post('vdiscount2', TRUE));
         $ndiskon3       = str_replace(",","",$this->input->post('vdiscount3', TRUE));
         $idharga        = $this->input->post('idharga', TRUE);
-        $idarea         = $this->input->post('idarea', TRUE);
+        $idarea         = $this->db->query("select id_area  from tr_customer where id = $idcustomer")->row()->id_area;//$this->input->post('idarea', TRUE);
         
         $jml            = $this->input->post('jml', TRUE);
         $xdocument      = '';
@@ -718,7 +767,8 @@ class Cform extends CI_Controller {
             $group_ref = '';
             for ($i = 0; $i <= $jml; $i++) {
                 $ireferensi = $this->input->post('iop'.$i, TRUE);
-                $idarea     = $this->input->post('idarea'.$i, TRUE);
+                //$idarea     = $this->input->post('idarea'.$i, TRUE);
+                $i_area_distributor  = $this->input->post('i_area_distributor'.$i, TRUE);
                 $idproduct  = $this->input->post('idproduct'.$i, TRUE);
                 $nquantity  = str_replace(",","",$this->input->post('qty'.$i, TRUE));
                 $vprice     = str_replace(",","",$this->input->post('harga'.$i, TRUE));
@@ -746,7 +796,7 @@ class Cform extends CI_Controller {
                         $id = $this->mmaster->runningid();
                         $idocument  = $this->mmaster->runningnumber(date('ym'),date('Y'),$ibagian,$idcustomer);
                         $ddocument  = date('Y-m-d');
-                        $this->mmaster->insertheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,1,$ireferensi,0,0,0,0,'',0,$idharga,'Transfer',1,$nppn);
+                        $this->mmaster->insertheader($id,$idocument,$ddocument,$ibagian,$idcustomer,$ecustomername,$idarea,1,$ireferensi,0,0,0,0,'',0,$idharga,'Transfer',1,$nppn, $i_area_distributor, 'f');
                     }
                     $jumlah   = $nquantity * $vprice;
                     $vdiskon1 = $jumlah * ($ndiskon1/100);

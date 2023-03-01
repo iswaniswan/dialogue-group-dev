@@ -128,6 +128,20 @@ class Cform extends CI_Controller {
         echo json_encode($filter);
     }
 
+    public function salesman_upline(){
+        $filter = [];
+        $cari = strtoupper($this->input->get('q'));
+        $id = $this->input->get('id');
+        $data = $this->mmaster->salesman_upline($cari, $id);
+        foreach($data->result() as  $key){
+                $filter[] = array(
+                'id'   => $key->id,  
+                'text' => $key->e_sales . ' - [' . $key->e_role_name . ']',
+            );
+        }          
+        echo json_encode($filter);
+    }
+
     public function simpan()
     {
 
@@ -140,6 +154,7 @@ class Cform extends CI_Controller {
         $esales    = $this->input->post('esales', TRUE); 
         $iarea     = $this->input->post('iarea', TRUE);
         $irole     = $this->input->post('irole', TRUE);
+        $isalesman_upline     = $this->input->post('isalesman_upline', TRUE);
         $ekota     = $this->input->post('ekota', TRUE); 
         $etelepon  = $this->input->post('etelepon', TRUE); 
         $ealamat   = $this->input->post('ealamat', TRUE);
@@ -154,7 +169,7 @@ class Cform extends CI_Controller {
                 );
             }else{
                 $this->db->trans_begin();
-                $this->mmaster->insert($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon);
+                $this->mmaster->insert($id, $isales, $esales, $iarea, $irole, $isalesman_upline, $ekota, $ealamat, $ekodepos, $etelepon);
                 if($this->db->trans_status() === False){
                     $this->db->trans_rollback();
                     $data = array(
@@ -213,6 +228,7 @@ class Cform extends CI_Controller {
         $esales    = $this->input->post('esales', TRUE); 
         $iarea     = $this->input->post('iarea', TRUE);
         $irole     = $this->input->post('irole', TRUE);
+        $isalesman_upline  = $this->input->post('isalesman_upline', TRUE);
         $ekota     = $this->input->post('ekota', TRUE); 
         $etelepon  = $this->input->post('etelepon', TRUE); 
         $ealamat   = $this->input->post('ealamat', TRUE);
@@ -220,7 +236,7 @@ class Cform extends CI_Controller {
 
         if ($id != '' && $isales != '' && $esales != ''){            
             $this->db->trans_begin();       
-            $this->mmaster->update($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon);
+            $this->mmaster->update($id, $isales, $esales, $iarea, $irole, $isalesman_upline, $ekota, $ealamat, $ekodepos, $etelepon);
             if($this->db->trans_status() === False){
                 $this->db->trans_rollback();
                 $data = array(

@@ -99,14 +99,46 @@ class Mmaster extends CI_Model {
     }
 
 	public function cek_data($iuserold, $idcompany){
-        $this->db->select('a.*, d.i_level, d.e_level_name');
-        $this->db->from('public.tm_user as a');
-        $this->db->join('public.tm_user_deprole as c', 'c.id_company = a.id_company and c.username=a.username', 'left');
-        $this->db->join('public.tr_level as d', 'd.i_level = c.i_level', 'left');
-        $this->db->where('a.username', $iuserold);
-        $this->db->where('a.id_company', $idcompany);
+        // $this->db->select('a.*, d.i_level, d.e_level_name');
+        // $this->db->from('public.tm_user as a');
+        // $this->db->join('public.tm_user_deprole as c', 'c.id_company = a.id_company and c.username=a.username', 'left');
+        // $this->db->join('public.tr_level as d', 'd.i_level = c.i_level', 'left');
+        // $this->db->where('a.username', $iuserold);
+        // $this->db->where('a.id_company', $idcompany);
 
-        return $this->db->get();
+        // return $this->db->get();
+        return $this->db->query("SELECT a.*, d.i_level, d.e_level_name, e.iuser_area, e.e_area, f.id_salesman, f.e_sales, g.i_rv_type, g.e_rv_type_name
+        FROM public.tm_user AS a
+        LEFT JOIN public.tm_user_deprole AS c ON
+            (c.id_company = a.id_company AND c.username = a.username)
+        LEFT JOIN public.tr_level AS d ON
+            (d.i_level = c.i_level)
+        LEFT JOIN (
+            SELECT ea.id_company, ea.username, jsonb_agg(ea.i_area || '|' || ea.id_area) AS iuser_area, jsonb_agg(eb.e_area) AS e_area
+            FROM public.tm_user_area ea
+            INNER JOIN tr_area eb ON
+                (eb.id = ea.id_area AND eb.i_area = ea.i_area AND ea.id_company = ANY(eb.id_company))
+            GROUP BY 1,2
+        ) e ON
+            (e.id_company = a.id_company AND e.username = a.username)
+        LEFT JOIN (
+            SELECT fa.id_company, fa.username, jsonb_agg(fa.id_salesman) AS id_salesman, jsonb_agg(fb.e_sales) AS e_sales
+            FROM public.tm_user_salesman fa
+            INNER JOIN tr_salesman fb ON
+                (fb.id = fa.id_salesman AND fa.id_company = fb.id_company)
+            GROUP BY 1,2
+        ) f ON
+            (f.id_company = a.id_company AND f.username = a.username)
+        LEFT JOIN (
+            SELECT ga.i_company, ga.username, jsonb_agg(ga.i_rv_type) AS i_rv_type, jsonb_agg(gb.e_rv_type_name) AS e_rv_type_name
+            FROM public.tm_user_kas_rv ga
+            INNER JOIN public.tr_rv_type gb ON
+                (gb.i_rv_type = ga.i_rv_type AND ga.i_company = gb.i_company)
+            GROUP BY 1,2
+        ) g ON
+            (g.i_company = a.id_company AND g.username = a.username) 
+        WHERE a.username = '$iuserold' AND a.id_company = '$idcompany'
+        ");
     }
 
     public function bacadept(){
@@ -116,6 +148,27 @@ class Mmaster extends CI_Model {
 
     public function bacalevel(){
         $this->db->select(" * from public.tr_level where f_status = 't' ",false);
+        return $this->db->get();
+    }
+
+    public function bacauserarea()
+    {
+        $id_company = $this->session->userdata('id_company');
+        $this->db->select(" * from tr_area WHERE '$id_company' = any(id_company)", false);
+        return $this->db->get();
+    }
+
+    public function bacausersalesman()
+    {
+        $id_company = $this->session->userdata('id_company');
+        $this->db->select(" * from tr_salesman WHERE id_company = '$id_company'", false);
+        return $this->db->get();
+    }
+
+    public function bacauserkasrv()
+    {
+        $id_company = $this->session->userdata('id_company');
+        $this->db->select(" * from tr_rv_type WHERE i_company = '$id_company'", false);
         return $this->db->get();
     }
         
@@ -149,6 +202,58 @@ class Mmaster extends CI_Model {
         $this->db->insert('public.tm_user_deprole', $data);        
     }
 
+    public function insertuserarea($idcompany, $eusername, $i_area, $id_area)
+    {
+        $data = [
+            'id_company' => $idcompany,
+            'username' => $eusername,
+            'i_area' => $i_area,
+            'id_area' => $id_area
+        ];
+
+        $this->db->insert('public.tm_user_area', $data);
+    }
+
+    public function insertusersalesman($idcompany, $eusername, $id_salesman)
+    {
+        $data = [
+            'id_company' => $idcompany,
+            'username' => $eusername,
+            'id_salesman' => $id_salesman
+        ];
+
+        $this->db->insert('public.tm_user_salesman', $data);
+    }
+
+    public function insertuserkasrv($idcompany, $eusername, $i_rv_type)
+    {
+        $data = [
+            'i_company' => $idcompany,
+            'username' => $eusername,
+            'i_rv_type' => $i_rv_type
+        ];
+
+        $this->db->insert('public.tm_user_kas_rv', $data);
+    }
+
+    public function delete_user_area($idcompany, $iuserold)
+    {
+        $this->db->where('id_company', $idcompany);
+        $this->db->where('username', $iuserold);
+        $this->db->delete('public.tm_user_area');
+    }
+    public function delete_user_salesman($idcompany, $iuserold)
+    {
+        $this->db->where('id_company', $idcompany);
+        $this->db->where('username', $iuserold);
+        $this->db->delete('public.tm_user_salesman');
+    }
+    public function delete_user_kas_rv($idcompany, $iuserold)
+    {
+        $this->db->where('i_company', $idcompany);
+        $this->db->where('username', $iuserold);
+        $this->db->delete('public.tm_user_kas_rv');
+    }
     public function update($iuser, $eusername, $idcompany, $iuserold){
         $data = array(
             'username'   => $iuser,

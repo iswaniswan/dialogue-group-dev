@@ -112,6 +112,7 @@
                                     <td><input readonly class="form-control input-sm" type="text" id="i_product<?=$i;?>" name="i_product<?=$i;?>" value="<?= $key->i_product;?>">
                                         <input type="hidden" id="iop<?=$i;?>" name="iop<?=$i;?>" value="<?= $key->i_op;?>">
                                         <input type="hidden" name="idarea<?=$i;?>" value="<?= $key->id_area;?>">
+                                        <input type="hidden" name="i_area_distributor<?=$i;?>" value="<?=$key->i_area;?>">
                                         <input type="hidden" id="idproduct<?=$i;?>" name="idproduct<?=$i;?>" value="<?= $key->id_product_base;?>">
                                         <input class="form-control input-sm" type="hidden" value="<?= $key->e_color_name;?>">
                                         <input class="form-control input-sm text-right" type="hidden" id="fc<?=$i;?>" value="<?= $key->fc;?>">

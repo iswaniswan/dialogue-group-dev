@@ -159,6 +159,27 @@ class Mmaster extends CI_Model {
         return $this->db->get();
     }
 
+    public function salesman_upline($cari, $id){
+        $idcompany  = $this->session->userdata('id_company');
+        $where = '';
+        if($id) {
+            $where = "AND id <> '$id'";
+        }
+        $this->db->select("
+                            * 
+                            FROM
+                                tr_salesman a
+                            left join tr_salesman_role c
+                                ON (c.i_role = a.i_role)
+                            WHERE
+                                a.f_status = 't' AND a.id_company = '$idcompany' $where
+                            AND
+                                (a.e_sales ILIKE '%$cari%')
+                            ORDER BY 
+                                a.id ASC", FALSE);
+        return $this->db->get();
+    }
+
     public function cek_data($id)
     {
         $idcompany  = $this->session->userdata('id_company');
@@ -170,7 +191,7 @@ class Mmaster extends CI_Model {
         return $this->db->get();
     }    
 
-    public function insert($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon)
+    public function insert($id, $isales, $esales, $iarea, $irole, $isalesman_upline, $ekota, $ealamat, $ekodepos, $etelepon)
     {
         $idcompany  = $this->session->userdata('id_company');
 
@@ -181,7 +202,7 @@ class Mmaster extends CI_Model {
                         'e_sales'       => $esales,    
                         'id_area'       => $iarea, 
                         'i_role'        => $irole,
-                        'id_salesman_upline' => $id, 
+                        'id_salesman_upline' => ($isalesman_upline != '') ? $isalesman_upline : null, 
                         'e_kota'        => $ekota,
                         'e_telepon'     => $etelepon,
                         'e_alamat'      => $ealamat,
@@ -207,20 +228,27 @@ class Mmaster extends CI_Model {
                                 a.e_alamat,
                                 a.id_company,
                                 a.i_role,
-                                c.e_role_name
+                                c.e_role_name,
+                                a.id_salesman_upline,
+                                d.e_sales as e_sales_upline,
+                                e.e_role_name as e_role_name_upline
                             FROM
                                 tr_salesman a
                             JOIN 
                                 tr_area b
                                 ON a.id_area = b.id
-                            inner join tr_salesman_role c
+                            left join tr_salesman_role c
                                 ON (c.i_role = a.i_role)
+                            left join tr_salesman d
+                                ON (d.id = a.id_salesman_upline)
+                            left join tr_salesman_role e
+                                ON (e.i_role = d.i_role)
                             WHERE
                                 a.id_company = '$idcompany' AND a.id = '$id'", FALSE);
         return $this->db->get();
     }   
 
-    public function update($id, $isales, $esales, $iarea, $irole, $ekota, $ealamat, $ekodepos, $etelepon){
+    public function update($id, $isales, $esales, $iarea, $irole, $isalesman_upline, $ekota, $ealamat, $ekodepos, $etelepon){
         $idcompany  = $this->session->userdata('id_company');
         
         $data = array(
@@ -228,7 +256,8 @@ class Mmaster extends CI_Model {
                         'i_sales'       => $isales,
                         'e_sales'       => $esales,    
                         'id_area'       => $iarea, 
-                        'i_role'        => $irole, 
+                        'i_role'        => $irole,
+                        'id_salesman_upline' => ($isalesman_upline != '') ? $isalesman_upline : null, 
                         'e_kota'        => $ekota,
                         'e_telepon'     => $etelepon,
                         'e_alamat'      => $ealamat,

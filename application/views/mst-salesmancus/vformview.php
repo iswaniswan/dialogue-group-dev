@@ -81,12 +81,57 @@
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-12">
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/','#main'); return false;"><i class="ti-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;&nbsp;
+                            <button type="button" class="btn btn-inverse btn-block btn-sm" onclick="show('<?= $folder; ?>/cform/','#main'); return false;"><i class="ti-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;&nbsp;
                         </div>
                     </div>
                 </div>
             </form>
         </div>
+    </div>
+</div>
+
+<div class="white-box mt-4" id="detail">    
+    <div class="row">
+        <div class="col-sm-6">
+            <h3 class="box-title m-b-0 ml-1">Daftar Customer</h3>
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table id="sitabel" class="table color-table inverse-table table-bordered class" cellspacing="0" width="100%">
+            <thead>
+                <tr>
+                    <th class="text-center" width="35px">No</th>
+                    <th width="auto">Kode</th>
+                    <th width="auto">Customer</th>
+                    <th width="auto">Area</th>
+                    <th width="auto">Kota</th>
+                    <th width="auto">Alamat</th>
+                    <!-- <th class="text-center" width="35px">Act</th> -->
+                </tr>
+            </thead>     
+            <tbody>                
+                <?php $number = 1; foreach ($detail->result() as $row) { ?>
+                <tr>
+                    <td class="table-index"><?= $number ?></td>
+                    <td><span><?= $row->i_customer ?></span></td>
+                    <td>
+                        <input type="hidden" name="items[<?= $number ?>][id_customer]" value="<?= $row->id_customer ?>">
+                        <span><?= $row->e_customer_name ?></span>
+                    </td>
+                    <td><span><?= $row->e_area ?></span></td>
+                    <td><span><?= $row->e_city_name ?></span></td>
+                    <td><span><?= $row->e_customer_address ?></span></td>
+                    <?php /*
+                    <td class="text-center">
+                        <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger">
+                            <i class="ti-close"></i>
+                        </button>
+                    </td>
+                    */ ?>
+                </tr>
+                <?php $number++; } ?>                
+            </tbody>
+        </table>
     </div>
 </div>
 

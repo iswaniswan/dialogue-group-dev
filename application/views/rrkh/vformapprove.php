@@ -12,7 +12,7 @@
     font-size: 12px;
 }
 </style>
-<?php echo $this->pquery->form_remote_tag(array('url' => site_url($folder.'/cform/simpan'), 'update' => '#pesan', 'type' => 'post', 'class' => 'form-horizontal')); ?>
+<?php echo $this->pquery->form_remote_tag(array('url' => site_url($folder.'/cform/update'), 'update' => '#pesan', 'type' => 'post', 'class' => 'form-horizontal')); ?>
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-info">
@@ -33,10 +33,10 @@
 
                         <div class="col-sm-3">
                             <select name="ibagian" id="ibagian" class="form-control select2" required=""
-                                onchange="number();">
+                                onchange="number();" disabled>
                                 <?php if ($bagian) {
                                     foreach ($bagian as $row):?>
-                                <option value="<?= $row->i_bagian;?>" <?= ($row->i_bagian == 'PJ001') ? 'selected' : '' ?>>
+                                <option value="<?= $row->i_bagian;?>" <?= ($row->i_bagian == $data->i_bagian) ? 'selected' : '' ?>>
                                     <?= $row->e_bagian_name;?>
                                 </option>
                                 <?php endforeach; 
@@ -45,43 +45,34 @@
                         </div>
                         <div class="col-sm-3">
                             <div class="input-group">
-                                <input type="text" name="dok_rrkh" id="dok_rrkh" readonly="" autocomplete="off"
-                                    onkeyup="gede(this);" placeholder="<?= $number;?>" maxlength="17"
-                                    class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <span class="input-group-addon">
+                                <input type="hidden" name="id" id="id" value="<?= $id;?>">
+                                <input type="text" name="dok_rrkh" value="<?= $data->i_document ?>" id="dok_rrkh" readonly="" autocomplete="off"
+                                    onkeyup="gede(this);" maxlength="17"
+                                    class="form-control input-sm" aria-label="Text input with dropdown button">
+                                <!-- <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span>
+                                </span> -->
                             </div>
-                            <span class="notekode">Format : (<?= $number;?>)</span><br>
-                            <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-2">
                             <input type="text" id="drrkh" name="drrkh" class="form-control input-sm date"
                                 onchange="tanggal(this.value); number();" required="" readonly
-                                value="<?= date("d-m-Y"); ?>">
+                                value="<?= date('d-m-Y', strtotime($data->d_document)) ?>">
                         </div>
                         <div class="col-sm-2">
                             <select name="kode_area" id="kode_area" class="form-control select2" required=""
-                                onchange="number();">
-                                <?php if ($kodearea) {
-                                    foreach ($kodearea as $row):?>
-                                <option value="<?= $row->i_area;?>">
-                                    <?= $row->e_area;?>
+                                onchange="number();" disabled>
+                                <option value="<?= $data->i_area;?>">
+                                    <?= $data->e_area;?>
                                 </option>
-                                <?php endforeach; 
-                                } ?>
                             </select>
                         </div>
                         <div class="col-sm-2">
                             <select name="kode_salesman" id="kode_salesman" class="form-control select2" required=""
-                                onchange="number();">
-                                <?php if ($kodesalesman) {
-                                    foreach ($kodesalesman as $row):?>
-                                <option value="<?= $row->i_sales;?>">
-                                    <?= $row->e_sales;?>
+                                onchange="number();" disabled>
+                                <option value="<?= $data->i_sales;?>">
+                                    <?= $data->e_sales;?>
                                 </option>
-                                <?php endforeach; 
-                                } ?>
                             </select>
                         </div>
                     </div>
@@ -92,31 +83,25 @@
                         <div class="col-sm-2">
                             <input type="hidden" id="id_salesman_upline" name="id_salesman_upline" class="form-control input-sm"
                                 required="" readonly
-                                value="<?= $id_salesman_upline ?>">
+                                value="<?= $data->id_salesman_upline ?>">
                             <input type="hidden" id="i_sales_upline" name="i_sales_upline" class="form-control input-sm"
                                 required="" readonly
-                                value="<?= $i_sales_upline ?>">
+                                value="<?= $data->i_sales_upline ?>">
                             <input type="text" id="e_sales_upline" name="e_sales_upline" class="form-control input-sm"
                                 required="" readonly
-                                value="<?= $e_sales_upline ?>">
+                                value="<?= $data->e_sales_upline ?>">
                         </div>
                         <div class="col-sm-4">
-                            <textarea class="form-control input-sm" name="eremark" id="eremark" placeholder="Keterangan"></textarea>
+                            <textarea class="form-control input-sm" name="eremark" id="eremark" placeholder="Keterangan" readonly><?= $data->e_remark ?></textarea>
                         </div>
                         <div class="col-sm-6"></div>
                     </div>
                     <div class="form-group row">
                         <div class="col-sm-12">
-                            <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2"><i
-                                    class="fa fa-save mr-2"></i>Simpan</button>
-                            <button type="button" id="addrow" class="btn btn-rounded btn-info btn-sm mr-2"><i
-                                    class="fa fa-plus mr-2"></i>Item</button>
-                            <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2"
-                                onclick="show('<?= $folder;?>/cform/index/<?= $dfrom."/".$dto;?>','#main')"> <i
-                                    class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <button type="button" id="send" hidden="true"
-                                class="btn btn-primary btn-rounded btn-sm mr-2"><i
-                                    class="fa fa-paper-plane-o mr-2"></i>Send</button>
+                            <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
+                            <button type="button" class="btn btn-warning btn-rounded btn-sm" onclick="statuschange('<?= $folder . "','" . $data->id; ?>','1','<?= $dfrom . "','" . $dto; ?>');"> <i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;Change Requested</button>&nbsp;
+                            <button type="button" class="btn btn-danger btn-rounded btn-sm" onclick="statuschange('<?= $folder . "','" . $data->id; ?>','4','<?= $dfrom . "','" . $dto; ?>');"> <i class="fa fa-times"></i>&nbsp;&nbsp;Reject</button>&nbsp;
+                            <button type="button" onclick="approve()" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Approve</button>&nbsp;
                         </div>
                     </div>
                 </div>
@@ -135,14 +120,14 @@
             </div>
         </div> -->
     </div>
-    <div class="row mb-4">
+    <!-- <div class="row mb-4">
         <div class="col-sm-2">
             <input type="text" id="dfrom" name="dfrom" class="form-control input-sm date ml-2" readonly placeholder="Pilih Tanggal Item" value="">
         </div>
         <div class="col-sm-2">
             <button type="button" onclick="generateitem()" class="btn btn-info btn-rounded btn-sm mr-2 cari"> <i class="fa fa-gear fa-lg mr-2"></i>Generate</button>
         </div>
-    </div>
+    </div> -->
     <div class="col-sm-12">
         <div class="table-responsive">
             <table id="tabledatax" class="table color-table font-11 success-table table-bordered class" cellpadding="8"
@@ -158,25 +143,89 @@
                         <th class="text-center" style="width: 5%;">Real</th>
                         <th class="text-center" style="width: 5%;">Bukti</th>
                         <th class="text-center" style="width: 25%;">Keterangan</th>
-                        <th class="text-center" style="width: 3%;">Act</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <?php
+                    if($detail) {
+                    $counter = 0;
+                    $count = 0;
+                    foreach($detail as $d) {
+                        $counter++;
+                        $count++;
+                        ?>
+                        <tr>
+                            <td style="text-align: center;"><spanx id="snum<?= $counter ?>"><?= $count ?></spanx></td>
+                            <td><input type="hidden" readonly id="idcust<?= $counter ?>" name="idcust<?= $counter ?>" value="<?= $d->id_customer ?>" class="form-control input-sm"><input type="text" readonly id="icust<?= $counter ?>" name="icust<?= $counter ?>" value="<?= $d->i_customer ?>" class="form-control input-sm"></td>
+                            <td><select data-urut="<?= $counter ?>" id="ecust<?= $counter ?>" name="ecust<?= $counter ?>" onchange="getcustomer(<?= $counter ?>);" class="form-control input-sm" disabled>
+                                <option value="<?= $d->id_customer ?>" selected><?= $d->i_customer ?> - <?= $d->e_customer_name ?> - <?= $d->e_area ?></option>
+                            </select></td>
+                            <td><input type="text" id="waktu<?= $counter ?>" name="waktu<?= $counter ?>" value="<?= $d->waktu ?>" placeholder="klik untuk pilih" class="form-control input-sm dates" onchange="tanggal(this.value); number();" required="" readonly></td>
+                            <td><input type="text" readonly id="idcity<?= $counter ?>" name="idcity<?= $counter ?>" value="<?= $d->e_city_name ?>" class="form-control text-right input-sm inputitem" autocomplete="off"></td>
+                            <td><select data-urut="<?= $counter ?>" id="idrencana<?= $counter ?>" name="idrencana<?= $counter ?>" class="form-control input-sm" disabled>
+                                <option value="<?= $d->id_rencana ?>" selected><?= $d->nama_rencana ?></option>
+                            </select></td>
+                            <td><input type="checkbox" id="real<?= $counter ?>" <?= ($d->f_real == 't') ? 'checked' : '' ?> name="real<?= $counter ?>" disabled  /></td>
+                            <td><input type="checkbox" id="bukti<?= $counter ?>" <?= ($d->f_bukti == 't') ? 'checked' : '' ?> name="bukti<?= $counter ?>" disabled /></td>
+                            <td><input type="text" id="eremark<?= $counter ?>" name="eremark<?= $counter ?>" value="<?= $d->keterangan ?>" placeholder="Keterangan Detail" class="form-control input-sm" readonly/></td>
+                        </tr>
+                    <?php }
+                    } ?>
                 </tbody>
             </table>
         </div>
     </div>
 </div>
-<input type="hidden" name="jml" id="jml" value="0">
+<input type="hidden" name="jml" id="jml" value="<?= $count ?>">
 </from>
-<script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#dok_rrkh').mask('SSSS-0000-000000S');
     $('.select2').select2();
-    showCalendar('.date');
-    number();
+    // showCalendar('.date');
+    for(let i = 1; i<=$('#jml').val();i++) {
+        $('#ecust' + i).select2({
+            placeholder: 'Cari Berdasarkan Nama Customer',
+            // templateSelection: formatSelection,
+            allowClear: true,
+            width: "100%",
+            ajax: {
+                url: '<?= base_url($folder.'/cform/datacustomer'); ?>',
+                dataType: 'json',
+                delay: 250,
+                data: function(params) {
+                    var query = {
+                        q: params.term,
+                        iarea: $('#kode_area').val(),
+                    }
+                    return query;
+                },
+                processResults: function(data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
 
+        $('#idrencana' + i).select2({
+            placeholder: 'Cari Berdasarkan Nama',
+            // templateSelection: formatSelection,
+            allowClear: true,
+            width: "100%",
+            ajax: {
+                url: '<?= base_url($folder.'/cform/datarencana'); ?>',
+                dataType: 'json',
+                delay: 250,
+                processResults: function(data) {
+                    return {
+                        results: data
+                    };
+                },
+                cache: true
+            }
+        });
+    }
     $('#kode_salesman').change(function() {
         $.ajax({
             type: 'post',
@@ -242,15 +291,16 @@ function number() {
     });
 }
 
-$('#ceklis').click(function(event) {
-    if ($('#ceklis').is(':checked')) {
-        $("#dok_rrkh").attr("readonly", false);
-    } else {
-        $("#dok_rrkh").attr("readonly", true);
-        $("#ada").attr("hidden", true);
-        number();
-    }
-});
+// $('#ceklis').click(function(event) {
+//     console.log('teing');
+//     if ($('#ceklis').is(':checked')) {
+//         $("#dok_rrkh").attr("readonly", false);
+//     } else {
+//         $("#dok_rrkh").attr("readonly", true);
+//         $("#ada").attr("hidden", true);
+//         number();
+//     }
+// });
 
 $('#send').click(function(event) {
     statuschange('<?= $folder;?>', $('#id').val(), '2', '<?= $dfrom."','".$dto;?>');
@@ -270,6 +320,7 @@ var counter = 0;
 $("#addrow").on("click", function() {
     var counter = $('#jml').val();
     var counterx = counter - 1;
+    console.log(counterx)
     counter++;
     counterx++;
     
@@ -306,7 +357,7 @@ $("#addrow").on("click", function() {
     // cols += '<td><input type="text" id="idcity'+i+'" name="idcity[]" class="form-control text-right input-sm inputitem" autocomplete="off"  onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\' value="0" onkeyup="angkahungkul(this);cek('+i+')"></td>';
     cols += '<td><input type="checkbox" id="real' + counter + '" name="real' + counter + '"  /></td>';
     cols += '<td><input type="checkbox" id="bukti' + counter + '" name="bukti' + counter + '" /></td>';
-    cols += '<td><input type="text" id="e_remark' + counter + '" name="e_remark' + counter +
+    cols += '<td><input type="text" id="eremark' + counter + '" name="eremark' + counter +
         '" placeholder="Keterangan Detail" class="form-control input-sm"/></td>';
     cols +=
         '<td><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>';
@@ -493,6 +544,12 @@ $("#submit").click(function(event) {
 //         $('#nquantity_kirim' + i).val($('#nquantity' + i).val());
 //     }
 // }
+
+function approve()
+{
+    statuschange('<?= $folder."','".$id;?>','6','<?= $dfrom."','".$dto;?>');
+}
+
 function tanggal(d) {
     $('#dbp').val(maxDate(d));
 }
@@ -501,6 +558,7 @@ function generateitem() {
     let date = $('#dfrom').val();
     let area = $('#kode_area').val();
     let salesman = $('#kode_salesman').val();
+    console.log(date, area, salesman);
     $.ajax({
         type: "post",
         data: {
@@ -526,9 +584,7 @@ function generateitem() {
                             </select></td>
                             <td><input type="text" readonly id="waktu${counter}" name="waktu${counter}" value="${date}" placeholder="klik untuk pilih" class="form-control input-sm dates" onchange="tanggal(this.value); number();" required="" readonly></td>
                             <td><input type="text" readonly id="idcity${counter}" name="idcity${counter}" value="${d.e_city_name}" class="form-control text-right input-sm inputitem" autocomplete="off"></td>
-                            <td><select data-urut="${counter}" id="idrencana${counter}" name="idrencana${counter}" class="form-control input-sm">
-                            <option value="${d.id_rencana}" selected>${d.nama_rencana}</option>
-                            </select></td>
+                            <td><select data-urut="${counter}" id="idrencana${counter}" name="idrencana${counter}" class="form-control input-sm"></td>
                             <td><input type="checkbox" id="real${counter}" name="real${counter}"  /></td>
                             <td><input type="checkbox" id="bukti${counter}" name="bukti${counter}" /></td>
                             <td><input type="text" id="eremark${counter}" name="eremark${counter}" placeholder="Keterangan Detail" class="form-control input-sm"/></td>
@@ -562,7 +618,7 @@ function generateitem() {
     
                     $('#idrencana' + counter).select2({
                         placeholder: 'Cari Berdasarkan Nama',
-                        // templateSelection: formatSelection,
+                        templateSelection: formatSelection,
                         allowClear: true,
                         width: "100%",
                         ajax: {

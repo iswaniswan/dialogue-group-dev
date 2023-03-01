@@ -12,22 +12,27 @@
                     <div class="col-md-12">
                         <div class="form-group row">
                             <label class="col-md-2">Kode Sales</label>
-                            <label class="col-md-4">Nama Sales</label>
-                            <label class="col-md-3">Area</label>
-                            <label class="col-md-3">Role</label>
+                            <label class="col-md-3">Nama Sales</label>
+                            <label class="col-md-2">Area</label>
+                            <label class="col-md-2">Role</label>
+                            <label class="col-md-3">Salesman Upline</label>
                             <div class="col-sm-2">
                                 <input type="text" name="isales" id="isales" autocomplete="off" class="form-control input-sm" required="" maxlength="2" onkeyup="gede(this); clearcode(this);" value="" placeholder="Kode Sales">
                                 <span class="notekode" hidden="true"><b> * Kode Sudah Ada!</b></span>
                             </div>
-                            <div class="col-sm-4">
+                            <div class="col-sm-3">
                                 <input type="text" name="esales" id="esales" onkeyup="gede(this); clearname(this);" class="form-control input-sm" value="" maxlength="100" placeholder="Nama Sales">
                             </div>
-                            <div class="col-sm-3">
+                            <div class="col-sm-2">
                                <select name="iarea" id="iarea" class="form-control select2">
                             </select>
                             </div>
+                            <div class="col-sm-2">
+                                <select name="irole" id="irole" class="form-control select2">
+                                </select>
+                            </div>
                             <div class="col-sm-3">
-                               <select name="irole" id="irole" class="form-control select2">
+                               <select name="isalesman_upline" id="isalesman_upline" class="form-control select2">
                             </select>
                             </div>
                         </div>  
@@ -96,6 +101,22 @@
             allowClear: true,
             ajax: {
             url: '<?= base_url($folder.'/cform/role'); ?>',
+            dataType: 'json',
+            delay: 250,          
+            processResults: function (data) {
+                return {
+                results: data
+                };
+            },
+            cache: true
+            }
+        });
+
+        $('#isalesman_upline').select2({
+            placeholder: 'Pilih Salesman Upline',
+            allowClear: true,
+            ajax: {
+            url: '<?= base_url($folder.'/cform/salesman_upline'); ?>',
             dataType: 'json',
             delay: 250,          
             processResults: function (data) {

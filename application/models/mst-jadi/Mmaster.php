@@ -509,11 +509,23 @@ class Mmaster extends CI_Model
             $this->db->where('id_company', $idcompany);
             $this->db->update('tr_product_base', $data);
 
-            $this->db->set('i_color', $icolor);
+            // $this->db->set('i_color', $icolor);
+            // $this->db->where('i_product_wip', strtoupper($iproductbase));
+            // $this->db->where('id_company', $idcompany);
+            // $this->db->where('i_color', $icolor_old);
+            // $this->db->update('tr_product_wip');
+            $data_wip = [
+                'e_product_wipname' => strtoupper($eproductbasename),
+                'i_color' => $icolor,
+                'i_satuan_code' => $isatuancode,
+                'i_brand' => $ibrand,
+                'i_style' => $istyle
+            ];
+            
             $this->db->where('i_product_wip', strtoupper($iproductbase));
             $this->db->where('id_company', $idcompany);
             $this->db->where('i_color', $icolor_old);
-            $this->db->update('tr_product_wip');
+            $this->db->update('tr_product_wip', $data_wip);
         }
 
     }

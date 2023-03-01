@@ -117,7 +117,7 @@
                                         <div class="input-group-prepend">
                                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                                         </div>
-                                        <span><?= number_format($item->v_nilai, 0, ",", ".") ?></span>
+                                        <span><?= number_format($item->v_nota, 0, ",", ".") ?></span>
                                     </div>
                                 </td>
                                 <td>

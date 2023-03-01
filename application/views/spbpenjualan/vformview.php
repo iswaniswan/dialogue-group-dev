@@ -13,6 +13,148 @@
     .nowrap {
         white-space:nowrap !important;
     }
+
+    .toggle-button-cover
+    {
+        display: table-cell;
+        position: relative;
+        width: 125px;
+        box-sizing: border-box;
+    }
+
+    .button-cover
+    {
+        height: 30px;
+        margin: 2px;
+        background-color: #fff;
+        box-shadow: 0 10px 20px -8px #c5d6d6;
+        border-radius: 4px;
+    }
+
+    .button-cover:before
+    {
+        counter-increment: button-counter;
+        content: counter(button-counter);
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        color: #d7e3e3;
+        font-size: 12px;
+        line-height: 1;
+        padding: 5px;
+    }
+
+    .button-cover, .knobs, .layer
+    {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+    }
+
+    .button
+    {
+        position: relative;
+        top: 50%;
+        width: 120px;
+        height: 36px;
+        margin: -20px auto 0 auto;
+        overflow: hidden;
+    }
+
+    .button.r, .button.r .layer
+    {
+        border-radius: 100px;
+    }
+
+    .button.b2
+    {
+        border-radius: 2px;
+    }
+
+    .checkbox
+    {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 3;
+    }
+
+    .knobs
+    {
+        z-index: 2;
+    }
+
+    .layer
+    {
+        width: 100%;
+        background-color: #ebf7fc;
+        transition: 0.3s ease all;
+        z-index: 1;
+    }
+
+    /* Button 10 */
+    #button-10 .knobs:before, #button-10 .knobs:after, #button-10 .knobs span
+    {
+        position: absolute;
+        width: 54px;
+        height: 50px;
+        font-size: 10px;
+        font-weight: bold;
+        text-align: center;
+        line-height: 1;
+        padding: 9px 0px 9px 0px;
+        border-radius: 2px;
+        transition: 0.3s ease all;
+    }
+
+    #button-10 .knobs:before
+    {
+        content: '';
+        left: 0px;
+        background-color: #03A9F4;
+    }
+
+    #button-10 .knobs:after
+    {
+        content: 'Stok Daerah';
+        right: 1px;
+        color: #4e4e4e;
+    }
+
+    #button-10 .knobs span
+    {
+        display: inline-block;
+        left: 0px;
+        color: #fff;
+        z-index: 1;
+    }
+
+    #button-10 .checkbox:checked + .knobs span
+    {
+        color: #4e4e4e;
+    }
+
+    #button-10 .checkbox:checked + .knobs:before
+    {
+        left: 65px;
+        background-color: #F44336;
+    }
+
+    #button-10 .checkbox:checked + .knobs:after
+    {
+        color: #fff;
+    }
+
+    #button-10 .checkbox:checked ~ .layer
+    {
+        background-color: #fcebeb;
+    }
 </style>
 <div class="row">
     <div class="col-lg-12">
@@ -45,19 +187,36 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label class="col-md-4">Customer</label>
+                        <label class="col-md-3">Customer</label>
                         <label class="col-md-2">Kelompok Harga</label>
-                        <label class="col-md-3">Salesman</label>
+                        <label class="col-md-2">Salesman</label>
+                        <label class="col-md-2">Penentuan Stok</label>
                         <label class="col-md-3">Nomor Referensi</label>
-                        <div class="col-sm-4">
+
+                        <div class="col-sm-3">
                             <input type="text" class="form-control input-sm" readonly value="<?= $data->e_customer_name;?>">
                         </div>              
                         <div class="col-sm-2">
                             <input type="text" readonly="" class="form-control input-sm" value="<?= $data->i_harga.' - '.$data->e_harga;?>">
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-2">
                             <input type="text" readonly="" class="form-control input-sm" value="<?= $data->e_sales;?>">
-                        </div>                                            
+                        </div>
+
+                        <div class="col-sm-2">
+                            <div class="toggle-button-cover">
+                              <div class="button-cover">
+                                <div class="button b2" id="button-10">
+                                  <input type="checkbox" class="checkbox" name="f_spb_stockdaerah" <?= ($data->f_spb_stockdaerah == 't') ? "checked" : "";?> disabled>
+                                  <div class="knobs">
+                                    <span>Stok Pusat</span>
+                                  </div>
+                                  <div class="layer"></div>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+
                         <div class="col-sm-3">
                             <input type="text" readonly="" class="form-control input-sm" value="<?= $data->i_referensi;?>">
                         </div>                                          
