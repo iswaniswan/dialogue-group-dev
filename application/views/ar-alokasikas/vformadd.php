@@ -82,6 +82,8 @@
                                 <select name="id_customer" id="id_customer" class="form-control select2"></select>                                
                             </div>
                             <div class="col-md-6">
+                                <input type="hidden" id="v_alokasi_saldo_sisa" value="0">
+                                <input type="hidden" id="v_alokasi_saldo" value="<?= $data->v_rv_saldo ?>">
                                 <input type="text" name="v_jumlah" id="v_jumlah"
                                         class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ",", ".") ?>" readonly>
                             </div>
@@ -313,7 +315,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
+                        <input type="text" readonly class="form-control input-sm text-left input-nilai" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
                     </div>                    
                 </td>`;
         cols += `<td>
@@ -321,7 +323,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem"
+                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem input-bayar"
                             onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\'
                             autocomplete="off" name="items[${i}][vbayar]" value="0">
                     </div>
@@ -331,7 +333,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
+                    <input type="text" readonly class="form-control input-sm text-left input-sisa" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
                     </div>
                 </td>`;
         cols += `<td>
@@ -339,7 +341,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                    <input type="text" readonly class="form-control input-sm text-left" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
+                    <input type="text" readonly class="form-control input-sm text-left input-lebih" name="items[${i}][vlebih]" id="vlebih${i}" value="0"/>
                     </div>
                 </td>`;
         cols += `<td>
@@ -377,13 +379,6 @@
                 },
                 cache: true
             }
-        });
-
-        $('#vbayar'+i).bind('keyup', function() {
-            const elementNilai = $('#vnilai'+i);
-            const elementSisa = $('#vsisa'+i);
-            const elementLebih = $('#vlebih'+i);
-            calculateBayar(this, elementNilai, elementSisa, elementLebih);
         });
 
         for (const opsi of OPSI_KETERANGAN) {
@@ -442,17 +437,38 @@
                         $('#dnota'+id).val(data[0].d_document);
                         $('#groupfaktur'+id).val(data[0].groupfaktur);
                         $('#vnilai'+id).val(formatRupiah(data[0].v_sisa));
-                        
-                        // if (parseInt(formatulang($('#vjumlahsisa').val())) > parseInt(formatulang(data[0].v_sisa))) {
-                        //     $('#vbayar'+id).val(formatcemua(data[0].v_sisa));
-                        // }else if ((parseInt(formatulang($('#vjumlahsisa').val())) < parseInt(formatulang(data[0].v_sisa))) && (parseInt(formatulang($('#vjumlahsisa').val())) > 0)) {
-                        //     $('#vbayar'+id).val(formatcemua($('#vjumlahsisa').val()));
-                        // }else{
-                        //     $('#vbayar'+id).val(0);
-                        // }
 
+                        /** tentukan saldo */
+                        const v_alokasi_saldo = $('#v_alokasi_saldo').val();
+                        const v_alokasi_saldo_sisa = $('#v_alokasi_saldo_sisa').val();
+                        let alokasi_saldo = parseFloat(v_alokasi_saldo);
+                        if (parseFloat(v_alokasi_saldo_sisa) > alokasi_saldo) {
+                            alokasi_saldo = parseFloat(v_alokasi_saldo_sisa);
+                        }
+                        
+                        /** jika nilai nota lebih besar dari alokasi kas */
+                        if (parseFloat(data[0].v_sisa) > alokasi_saldo) {
+                            swal("Maaf :(", "Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!", "error");
+                            return;
+                        }
+                        
+                        /** otomatis input bayar sejumlah nilai nota */
+                        $('#vbayar'+id).val(formatRupiah(data[0].v_sisa));
                         $('#vbayar'+id).focus();
-                        // hitung();
+                        $('#vsisa'+id).val(0);
+                        const v_lebih = alokasi_saldo - data[0].v_sisa;
+                        $('#vlebih'+id).val(formatRupiah(v_lebih.toString()));
+
+                        /** update total sisa saldo */
+                        $('#v_alokasi_saldo_sisa').val(v_lebih);
+
+                        /** binding function */
+                        $('#vbayar'+id).bind('keyup', function() {;
+                            const elementNilai = $(this).closest('tr').find('.input-nilai');
+                            const elementSisa = $(this).closest('tr').find('.input-sisa');
+                            const elementLebih = $(this).closest('tr').find('.input-lebih');
+                            calculateBayar(this, elementNilai, elementSisa, elementLebih, alokasi_saldo);
+                        });
                     }else{
                         $('#idnota'+id).html('');
                         $('#idnota'+id).val('');
@@ -574,20 +590,25 @@
         return false;     
     });
 
-    function calculateBayar(eBayar, eNilai, eSisa, eLebih) {
+    function calculateBayar(eBayar, eNilai, eSisa, eLebih, vRowSaldo) {
         let vNilai = $(eNilai).val();
         vNilai = currencyTextToNumber(vNilai);
 
         let vBayar = $(eBayar).val();
-        vBayar = currencyTextToNumber(vBayar);        
+        vBayar = currencyTextToNumber(vBayar);
 
         let vSisa = vNilai - vBayar;
         let vLebih = 0;
         
+        vLebih = vRowSaldo - vBayar;
+
         if (vBayar > vNilai) {
             vSisa = 0;
-            vLebih = vBayar - vNilai;
+            vLebih = vRowSaldo - vNilai;
+            vBayar = vNilai;
+            swal("Maaf :(", "Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!", "error");            
         }
+        
 
         $(eBayar).val(formatRupiah(vBayar.toString()));
         $(eSisa).val(formatRupiah(vSisa.toString()));

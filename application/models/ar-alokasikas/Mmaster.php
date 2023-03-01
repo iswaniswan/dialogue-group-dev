@@ -1065,7 +1065,7 @@ class Mmaster extends CI_Model {
                 tnp.d_document,
                 tnp.v_sisa AS v_nilai,
                 tak.v_lebih,
-                tnp.v_sisa + tapi.v_Jumlah AS v_nota
+                tnp.v_sisa + taki.v_Jumlah AS v_nota
                 FROM tm_alokasi_kas_item taki
                 INNER JOIN tm_alokasi_kas tak ON tak.i_alokasi = taki.i_alokasi
                 INNER JOIN tm_nota_penjualan tnp ON tnp.id = taki.id_nota
@@ -1624,6 +1624,7 @@ class Mmaster extends CI_Model {
     public function get_detail_nota($id_nota)
     {
         $sql = "SELECT
+                    i_document,
                     to_char(d_document, 'DD FMMonth YYYY') AS dnota,
                     d_document,
                     v_bersih,
