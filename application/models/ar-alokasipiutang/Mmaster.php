@@ -46,9 +46,9 @@ class Mmaster extends CI_Model {
 
         $datatables = new Datatables(new CodeigniterAdapter);
 
-        $sql = "SELECT 
-                0 AS NO,
+        $sql = "SELECT DISTINCT 
                 tap.i_alokasi AS id,
+                0 AS NO,
                 tap.d_alokasi,
                 tap.i_alokasi_id,
                 tc.e_customer_name,
@@ -78,7 +78,7 @@ class Mmaster extends CI_Model {
                     tap.i_status <> '5'AND
                     tap.d_alokasi BETWEEN to_date('$dfrom','yyyy-mm-dd') AND to_date('$dto','yyyy-mm-dd')
                     $bagian
-                ORDER BY tap.d_alokasi DESC";
+                ORDER BY tap.i_alokasi DESC";
 
         // var_dump($sql); die();
         
@@ -395,7 +395,8 @@ class Mmaster extends CI_Model {
                     '$dto' AS dto
                 FROM tm_rv_item tri
                 INNER JOIN tm_rv tr ON tr.i_rv = tri.i_rv 
-                INNER JOIN tr_coa tc ON (tc.id = tri.i_coa AND tc.f_alokasi_bank_masuk = 't')
+                INNER JOIN tr_coa tc ON tc.id = tr.i_coa
+                INNER JOIN tr_coa tc2 ON tc2.id = tri.i_coa AND tc2.f_alokasi_bank_masuk = 't'
                 LEFT JOIN tr_rv_refference_type trrt ON	(trrt.i_rv_refference_type = tri.i_rv_refference_type)
                 LEFT JOIN tr_area ta ON ta.id = tri.i_area
                 WHERE
@@ -1050,14 +1051,20 @@ class Mmaster extends CI_Model {
                     tr.d_rv,
                     tb.e_bagian_name,
                     ta.e_area,
-                    tc.e_customer_name
+                    tc.e_customer_name,
+                    tc2.e_coa_name,
+                    tri.v_rv_saldo + tap.v_jumlah AS v_rv_saldo
                 FROM tm_alokasi_piutang tap
                 INNER JOIN tm_alokasi_piutang_item tapi ON tapi.i_alokasi = tap.i_alokasi
-                LEFT JOIN tm_rv tr ON tr.i_rv = tap.i_rv
-                LEFT JOIN tr_bagian tb ON tb.id = tap.id_bagian
-                LEFT JOIN tr_area ta ON ta.id = tap.id_area
-                LEFT JOIN tr_customer tc ON tc.id = tap.id_customer
+                INNER JOIN tm_rv tr ON tr.i_rv = tap.i_rv
+                INNER JOIN tm_rv_item tri ON tri.i_rv_item = tap.i_rv_item
+                INNER JOIN tr_bagian tb ON tb.id = tap.id_bagian
+                INNER JOIN tr_area ta ON ta.id = tap.id_area
+                INNER JOIN tr_customer tc ON tc.id = tap.id_customer
+                INNER JOIN tr_coa tc2 ON tc2.id = tr.i_coa
                 WHERE tap.i_alokasi = '$id'";
+
+        // var_dump($sql); die();
 
         return $this->db->query($sql);
     }

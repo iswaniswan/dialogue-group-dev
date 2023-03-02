@@ -46,9 +46,9 @@ class Mmaster extends CI_Model {
 
         $datatables = new Datatables(new CodeigniterAdapter);
 
-        $sql = "SELECT 
-                0 AS NO,
+        $sql = "SELECT DISTINCT                
                 tak.i_alokasi AS id,
+                0 AS NO,
                 tak.d_alokasi,
                 tak.i_alokasi_id,
                 tc.e_customer_name,
@@ -393,8 +393,10 @@ class Mmaster extends CI_Model {
                     '0' AS i_area
                 FROM tm_rv_item tri
                 INNER JOIN tm_rv tr ON tr.i_rv = tri.i_rv 
-                INNER JOIN tr_coa tc ON (tc.id = tr.i_coa AND tc.f_alokasi_kas_masuk = 't')
+                INNER JOIN tr_coa tc ON tc.id = tr.i_coa
+                INNER JOIN tr_coa tc2 ON tc2.id = tri.i_coa AND tc2.f_alokasi_bank_masuk = 't'
                 LEFT JOIN tr_rv_refference_type trrt ON	(trrt.i_rv_refference_type = tri.i_rv_refference_type)
+                LEFT JOIN tr_area ta ON ta.id = tri.i_area
                 WHERE
                     tr.i_company = '$id_company'
                     AND tri.d_bukti BETWEEN '$dfrom' AND '$dto'

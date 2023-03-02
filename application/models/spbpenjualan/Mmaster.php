@@ -208,7 +208,7 @@ class Mmaster extends CI_Model
                 AND i_document ILIKE '$kode%'
             ", false);
         } elseif (strlen($kode) == 3) {
-            $sql = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max 
+            $sql = $this->db->query("SELECT max(substring(i_document, 10, 4)) AS max
                 FROM tm_spb
                 WHERE to_char (d_document, 'yymm') = '$thbl'
                 AND i_status <> '5'

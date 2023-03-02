@@ -69,6 +69,7 @@ class Mmaster extends CI_Model
                 a.i_document,
                 to_char(a.d_document, 'dd-mm-yyyy') as d_document,
                 to_char(a.d_terima_faktur, 'dd-mm-yyyy') as d_terima_faktur,
+                a.id_customer,
                 b.e_customer_name,
                 a.v_bersih,
                 a.v_sisa,
@@ -127,6 +128,7 @@ class Mmaster extends CI_Model
             $i_menu   = $data['i_menu'];
             $folder   = $data['folder'];
             $i_status = $data['i_status'];
+            $id_customer = $data['id_customer'];
             $dfrom    = $data['dfrom'];
             $dto      = $data['dto'];
             $data     = '';
@@ -146,7 +148,7 @@ class Mmaster extends CI_Model
             }
 
             if (check_role($i_menu, 5)  && ($i_status == '6')) {
-                $data .= "<a href=\"#\" title='Cetak SPB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-print mr-3 text-warning fa-lg'></i></a>";
+                $data .= "<a href=\"#\" title='Cetak Nota' onclick='cetak(\"$id\",\"y\",\"$id_customer\",); return false;'><i class='ti-printer mr-3 text-warning fa-lg'></i></a>";
             }
 
             if (check_role($i_menu, 4)  && ($i_status == '1')) {
@@ -163,6 +165,7 @@ class Mmaster extends CI_Model
         $datatables->hide('dto');
         $datatables->hide('label_color');
         $datatables->hide('i_level');
+        $datatables->hide('id_customer');
         $datatables->hide('e_level_name');
         return $datatables->generate();
     }
@@ -380,10 +383,11 @@ class Mmaster extends CI_Model
         $this->db->select(" 
             a.id_company, a.id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') as d_document, to_char(a.d_terima_faktur, 'dd-mm-yyyy') as d_terima_faktur, 
             a.n_customer_toplength, b.f_pkp, to_char(a.d_jatuh_tempo, 'dd-mm-yyyy') as d_jatuh_tempo, a.i_pajak,  to_char(a.d_pajak, 'dd-mm-yyyy') as d_pajak,
-            a.i_bagian, a.id_customer, a.e_customer_name, a.v_kotor, a.v_diskon, a.v_ppn, a.v_dpp, a.v_bersih, a.e_remark, a.i_status, c.e_bagian_name
+            a.i_bagian, a.id_customer, a.e_customer_name, a.v_kotor, a.v_diskon, a.v_ppn, a.v_dpp, a.v_bersih, a.e_remark, a.i_status, c.e_bagian_name, coalesce(a.v_meterai,0) as v_meterai, coalesce(com.v_meterai_limit,0) as v_meterai_limit, com.f_plus_meterai
             from tm_nota_penjualan a
             inner join tr_customer b on (a.id_customer = b.id) 
             inner join tr_bagian c on (a.i_bagian = c.i_bagian and a.id_company = c.id_company)
+            inner join public.company com ON (com.id = a.id_company)
             where a.id = '$id'
       ", FALSE);
         return $this->db->get();
@@ -405,6 +409,94 @@ class Mmaster extends CI_Model
         order by b.id , c.e_product_basename
       ", FALSE);
         return $this->db->get();
+    }
+
+    public function baca_header($id,$id_customer)
+    {
+        return $this->db->query("SELECT DISTINCT
+                a.id,
+                a.id_company,
+                a.i_document,
+                to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
+                to_char(a.d_terima_faktur, 'dd-mm-yyyy') AS d_terima_faktur,
+                to_char(a.d_jatuh_tempo, 'dd-mm-yyyy') AS d_jatuh_tempo,
+                a.i_bagian,
+                e.e_bagian_name,
+                c.i_bagian AS ibagian_reff,
+                ca.id_document_reff,
+                c.i_document AS i_referensi_do,
+                to_char(c.d_document, 'dd-mm-yyyy') AS d_referensi,
+                a.id_customer,
+                i_customer,
+                b.e_customer_name,                    
+                e_city_name,e_customer_address,
+                a.i_status,
+                d.e_status_name,
+                a.e_remark,
+                a.n_customer_toplength,
+                coalesce(a.v_diskon,0) as v_diskon,
+                coalesce(a.v_kotor,0) as v_kotor,
+                coalesce(a.v_ppn,0) as v_ppn,
+                coalesce(a.v_bersih,0) as v_bersih,
+                coalesce(a.v_dpp,0) as v_dpp,
+                f.e_jenis_spb,
+                f.id as id_spb,
+                f.n_ppn,
+                id_jenis_barang_keluar,
+                f.i_document as i_referensi_op,
+                coalesce(a.v_meterai,0) as v_meterai,
+                coalesce(a.v_meterai_sisa,0) as v_meterai_sisa,
+                com.name,
+                coalesce(com.v_meterai,0) as v_meterai_root,
+                coalesce(com.v_meterai_limit,0) as v_meterai_limit,
+                com.f_plus_meterai,
+                com.logo
+            FROM
+                tm_nota_penjualan a
+            INNER JOIN tm_nota_penjualan_item ab ON
+                ab.id_document = a.id
+            INNER JOIN tm_sj_item ca ON
+                ca.id = ab.id_document_reff
+            INNER JOIN tr_customer b ON
+                a.id_customer = b.id
+                AND a.id_company = b.id_company
+            INNER JOIN tm_sj c ON
+                ca.id_document = c.id
+                AND a.id_company = c.id_company
+            INNER JOIN tm_spb f ON
+                f.id = c.id_document_reff
+            INNER JOIN tr_status_document d ON
+                d.i_status = a.i_status
+            INNER JOIN tr_bagian e ON
+                e.i_bagian = a.i_bagian
+                AND a.id_company = e.id_company
+            INNER JOIN tr_city h ON 
+                (h.id = b.id_city)
+            INNER JOIN public.company com ON 
+                (com.id = a.id_company)
+            WHERE
+                a.id = '$id'
+        ", FALSE);
+    }
+
+    public function baca_detail_cetak($id)
+    {
+        return $this->db->query("
+            SELECT
+                a.*,
+                b.*,
+                c.i_product_base,
+                c.e_product_basename,
+                co.e_color_name,
+                c.i_satuan_code
+            FROM
+                tm_nota_penjualan_item a
+            JOIN tm_nota_penjualan b on b.id = a.id_document
+            JOIN tr_product_base c on a.id_product = c.id
+            JOIN tr_satuan s on s.i_satuan_code = c.i_satuan_code AND c.id_company = s.id_company
+            JOIN tr_color co on c.i_color = co.i_color AND c.id_company = co.id_company
+            where b.id = '$id' AND a.n_quantity > 0   
+        ", FALSE);
     }
 
     /*----------  CEK DOKUMEN SUDAH ADA  ----------*/

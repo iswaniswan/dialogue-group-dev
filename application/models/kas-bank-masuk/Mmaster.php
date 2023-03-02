@@ -164,7 +164,7 @@ class Mmaster extends CI_Model
         return $this->db->query(
             "SELECT i_rv_type, i_rv_type_id , initcap(e_rv_type_name) AS e_rv_type_name
             FROM tr_rv_type
-            WHERE i_company = '4' AND f_rv_type_active = 'true' 
+            WHERE i_company = '$this->id_company' AND f_rv_type_active = 'true' 
             AND i_rv_type IN (SELECT i_rv_type FROM tm_user_kas_rv WHERE username = '$this->username' AND i_company = '$this->id_company')
             ORDER BY 3 ASC"
         );

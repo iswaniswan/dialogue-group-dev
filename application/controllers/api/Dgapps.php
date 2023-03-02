@@ -2,7 +2,7 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 class Dgapps extends CI_Controller
 {
-    public $url_api = 'http://202.150.150.58/dgapps_demo/index.php/rest/';
+    public $url_api = 'http://192.168.0.4/dgapps/index.php/rest/';
 
     public function __construct()
     {
@@ -216,7 +216,7 @@ class Dgapps extends CI_Controller
                 if (strlen($key->i_company_dgapps) > 0 && strlen($key->api_key) > 0) {
                     $product = $this->db->query(
                         "SELECT DISTINCT a.i_product_base AS i_product, a.e_product_basename AS e_product_name, b.i_brand AS i_product_group,
-                        c.f_stp as status_product 
+                        a.f_status as status_product 
                         from produksi.tr_product_base a
                         INNER JOIN produksi.tr_brand b ON (a.i_brand = b.i_brand AND b.id_company = a.id_company)
                         INNER JOIN produksi.tr_status_produksi c ON (c.i_status_produksi = a.i_status_produksi)
@@ -362,7 +362,12 @@ class Dgapps extends CI_Controller
                                     $nquantity = $raw['n_order'];
                                     $i_product = $raw['i_product'];
                                     $idproduct = $this->db->query("SELECT DISTINCT id FROM produksi.tr_product_base WHERE i_product_base = '$i_product' AND id_company = '$key->id' ORDER BY id LIMIT 1 ")->row()->id;
-                                    $vprice = $raw['v_unit_price'];
+                                    $getharga = $this->db->query("SELECT v_price FROM produksi.tr_harga_jualbrgjd WHERE id_product_base = '$idproduct' AND f_status = TRUE AND id_company = '$key->id' AND id_harga_kode = '$idharga' AND (current_date BETWEEN d_berlaku AND d_akhir OR d_akhir ISNULL ) ORDER BY d_berlaku DESC LIMIT 1");
+                                    if ($getharga->num_rows()>0) {
+                                        $vprice = $getharga->row()->v_price;
+                                    }else{
+                                        $vprice = round($raw['v_unit_price'] / (($nppn + 100)/100));
+                                    }
                                     $eremark = $raw['e_remark'];
                                     $vdiskon1 = 0;
                                     $vdiskon2 = 0;

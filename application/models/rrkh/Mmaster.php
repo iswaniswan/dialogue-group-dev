@@ -63,10 +63,12 @@ class Mmaster extends CI_Model {
                 a.i_customer,
                 a.e_customer_name,
                 a.id_area,
-                b.e_area as area
+                b.e_area as area,
+                c.e_city_name
             FROM
             tr_customer a
             INNER JOIN tr_area b on (b.id = a.id_area)
+            INNER JOIN tr_city c ON (a.id_city = c.id)
             WHERE a.id_company = '$idcompany' AND a.id = '$ecust'
         ", FALSE);
     }

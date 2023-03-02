@@ -52,7 +52,7 @@
                                 <input type="text" class="form-control input-sm" value="<?= $data->d_rv ?>" readonly="">
                             </div>
                             <div class="col-md-4">
-                                <input type="text" class="form-control input-sm" value="<?= $data->e_bank_name ?>" readonly="">                                
+                                <input type="text" class="form-control input-sm" value="<?= $data->e_coa_name ?>" readonly="">                                
                             </div>                            
                         </div>
                     </div>
@@ -66,7 +66,7 @@
                                 <input type="text" class="form-control input-sm" value="<?= $data->e_customer_name ?>" readonly>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control input-sm" value="Rp. <?= number_format($data->v_jumlah, 0, ",", ".") ?>" readonly="">                                
+                                <input type="text" class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ",", ".") ?>" readonly="">                                
                             </div>                           
                         </div>
                     </div>
@@ -98,8 +98,8 @@
                             <th class="text-center" width="11%;">Tgl. Nota</th>
                             <th class="text-center" width="12%;">Nilai</th>
                             <th class="text-center" width="12%;">Bayar</th>
-                            <th class="text-center" width="12%;">Sisa</th>
-                            <th class="text-center" width="12%;">Lebih</th>
+                            <!-- <th class="text-center" width="12%;">Sisa</th>
+                            <th class="text-center" width="12%;">Lebih</th> -->
                             <th class="text-center" width="17%;">Keterangan</th>
                             <!-- <th class="text-center" width="3%">Act</th> -->
                         </tr>
@@ -128,6 +128,7 @@
                                         <span><?= number_format($item->v_jumlah, 0, ",", ".") ?></span>
                                     </div>
                                 </td>
+                                <?php /*
                                 <td>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -144,6 +145,7 @@
                                         <span><?= number_format($item->v_lebih, 0, ",", ".") ?></span>
                                     </div>
                                 </td>
+                                */ ?>
                                 <td><?= $item->e_remark ?></td>
                             </tr>
                         <?php } ?>

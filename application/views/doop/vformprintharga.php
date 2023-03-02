@@ -11,6 +11,11 @@
       padding: 0px 8px !important;
    }
 
+   .border {
+      border-collapse: collapse;
+      border: 1px solid #8d9ea7;
+   }
+
    .table-bordered tbody td {
       font-size: 11px; padding: 1px 8px !important;
    }
@@ -71,6 +76,10 @@
    #kotak {
       border-collapse: collapse;
       border: 1px solid black;
+   }
+   .border {
+      border-collapse: collapse;
+      border: 1px solid #8d9ea7;
    }
    .noDisplay{
       display:none;
@@ -221,18 +230,40 @@ foreach($data->result() as $row){?>
                               ?>
                               </tbody>
                               <tfoot>
-                                 <tr>
-                                    <th colspan="5" class="text-right">Total : </th>
-                                    <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
-                                 </tr>
-                                 <tr>
-                                    <th colspan="5" class="text-right">Diskon : </th>
-                                    <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
-                                 </tr>
-                                 <tr>
-                                    <th colspan="5" class="text-right">DPP : </th>
-                                    <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
-                                 </tr>
+                                 <?php if($row->f_plus_meterai = 't' && $row->v_bersih >= $row->v_meterai_limit) { ?>
+                                    <tr>
+                                       <th rowspan="3" colspan="4">
+                                          <div class="border p-2 m-1 w-50">
+                                             <span class="font-weight-semibold">Catatan:</span>
+                                             <br>
+                                             <span class="font-weight-semibold">Nilai belum termasuk Bea Meterai Rp. <?= number_format($row->v_meterai) ?></span>
+                                          </div>
+                                       </th>
+                                       <th colspan="1" class="text-right">Total : </th>
+                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
+                                    </tr>
+                                    <tr>
+                                       <th colspan="1" class="text-right">Diskon : </th>
+                                       <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
+                                    </tr>
+                                    <tr>
+                                       <th colspan="1" class="text-right">DPP : </th>
+                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
+                                    </tr>
+                                 <?php } else { ?>
+                                    <tr>
+                                       <th colspan="5" class="text-right">Total : </th>
+                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
+                                    </tr>
+                                    <tr>
+                                       <th colspan="5" class="text-right">Diskon : </th>
+                                       <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
+                                    </tr>
+                                    <tr>
+                                       <th colspan="5" class="text-right">DPP : </th>
+                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
+                                    </tr>
+                                 <?php } ?>
                                  <tr>
                                     <th colspan="5" class="text-right">PPN (<?= $row->n_ppn;?>%) : </th>
                                     <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_ppn,2,',','.');?></u></th>

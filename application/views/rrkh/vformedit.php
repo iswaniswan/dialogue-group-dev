@@ -165,7 +165,7 @@
                         <th class="text-center" style="width: 7%;">Id Cust.</th>
                         <th class="text-center" style="width: 20%;">Nama Cust.</th>
                         <th class="text-center" style="width: 10%;">Waktu</th>
-                        <th class="text-center" style="width: 10%;">Area Cust.</th>
+                        <th class="text-center" style="width: 10%;">City</th>
                         <th class="text-center" style="width: 10%;">Rencana</th>
                         <th class="text-center" style="width: 5%;">Real</th>
                         <th class="text-center" style="width: 5%;">Bukti</th>
@@ -269,9 +269,9 @@ $(document).ready(function() {
                     $('#i_sales_upline').val(data.i_sales_upline);
                     $('#e_sales_upline').val(data.e_sales_upline);
                 } else {
-                    $('#id_salesman_upline').val();
-                    $('#i_sales_upline').val();
-                    $('#e_sales_upline').val();
+                    $('#id_salesman_upline').val('');
+                    $('#i_sales_upline').val('');
+                    $('#e_sales_upline').val('');
                 }
             }
         })
@@ -475,7 +475,7 @@ function getcustomer(id) {
                 $('#idcust' + id).val(data[0].id_customer);
                 $('#icust' + id).val(data[0].i_customer);
                 // $('#idcolorproduct'+id).val(data[0].id_color);
-                $('#idcity' + id).val(data[0].area);
+                $('#idcity' + id).val(data[0].e_city_name);
                 // $('#nquantity'+id).focus();
             },
             error: function() {
@@ -664,6 +664,8 @@ function generateitem() {
                     $('#jml').val(counter);
                 });
                 showCalendar('.dates');
+            } else {
+                swal('Tidak ada data!');
             }
         },
         error: function() {

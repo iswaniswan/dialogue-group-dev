@@ -142,8 +142,8 @@
                             <th class="text-center" width="11%;">Tgl. Nota</th>
                             <th class="text-center" width="12%;">Nilai</th>
                             <th class="text-center" width="12%;">Bayar</th>
-                            <th class="text-center" width="12%;">Sisa</th>
-                            <th class="text-center" width="12%;">Lebih</th>
+                            <!-- <th class="text-center" width="12%;">Sisa</th>
+                            <th class="text-center" width="12%;">Lebih</th> -->
                             <th class="text-center" width="17%;">Keterangan</th>
                             <!-- <th class="text-center" width="3%">Act</th> -->
                         </tr>
@@ -173,6 +173,7 @@
                                         <span><?= number_format($item->v_jumlah, 0, ",", ".") ?></span>
                                     </div>
                                 </td>
+                                <?php /*
                                 <td>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
@@ -189,6 +190,7 @@
                                         <span><?= number_format($item->v_lebih, 0, ",", ".") ?></span>
                                     </div>
                                 </td>
+                                */ ?>
                                 <td>
                                     <select class="form-control input-sm input-select2-eremark" name="items[<?= $i ?>][eremark]" id="eremark<?= $i ?>">
                                         <option value="<?= $item->e_remark ?>"><?= $item->e_remark ?></option>

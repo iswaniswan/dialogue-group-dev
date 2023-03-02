@@ -82,4 +82,9 @@
     function refreshview() {
         show('<?= $folder;?>/cform','#main');
     }
+    function cetak(id, typeharga, id_customer) {
+        var lebar = 1024;
+        var tinggi = 768;
+        eval('window.open("<?= site_url($folder); ?>"+"/cform/cetak/"+id+"/"+typeharga+"/"+id_customer,"","width="+lebar+"px,height="+tinggi+"px,resizable=1,menubar=1,scrollbars=1,top=' + (screen.height - tinggi) / 2 + ',left=' + (screen.width - lebar) / 2 + '")');
+    }
 </script>

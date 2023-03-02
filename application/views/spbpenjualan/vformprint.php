@@ -166,15 +166,9 @@
                                  <?php 
                                  $no = 0;
                                  if ($datadetail) {
-                                    $hasiltotal = 0;
-                                    $total = 0;
-                                    $qty   = 0;
                                     foreach ($datadetail->result() as $rowi) {
                                        $no++;
-                                       $total = $rowi->n_quantity * $rowi->v_price;
-                                       $total = (int)$total;
-                                       $qty   = $qty + $rowi->n_quantity;
-                                       $hasiltotal = $hasiltotal + $total;?>
+                                       ?>
                                        <tr>
                                           <td class="text-center"><?= $no;?></td>
                                           <td>
@@ -192,7 +186,7 @@
                                           <td class="text-left"><?= $rowi->e_satuan_name;?></td>
                                           <td class="text-right"> Rp. <?= number_format($rowi->v_price,2,',','.');?></td>
                                           <td class="text-right"> Rp. <?= number_format($rowi->v_diskon_total,2,',','.');?></td>
-                                          <td class="text-right"> Rp. <?= number_format($total,2,',','.');?></td>
+                                          <td class="text-right"> Rp. <?= number_format($rowi->v_total,2,',','.');?></td>
                                           <td><?= $rowi->e_remark;?></td>
                                        </tr>
                                        <?php 

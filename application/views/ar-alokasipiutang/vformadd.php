@@ -82,9 +82,11 @@
                                 <select name="id_customer" id="id_customer" class="form-control select2"></select>                                
                             </div>
                             <div class="col-md-6">
-                                <input type="hidden" name="v_sisa" id="v_sisa" value="0"/>
-                                <input type="text" name="v_jumlah" id="v_jumlah"
-                                        class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ",", ".") ?>" readonly>
+                            <input type="hidden" name="jml" id="jml" value="0">
+                                <input type="hidden" id="vlebih" name="v_lebih" value="0">
+                                <input type="hidden" id="vsisa" name="vsisa" value="<?= $data->v_rv_saldo; ?>">
+                                <input type="text" name="v_jumlah" id="vjumlah"
+                                        class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ".", ",") ?>" readonly>
                             </div>
                         </div>
                     </div>
@@ -314,7 +316,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" readonly class="form-control input-sm text-left input-nilai" name="items[${i}][vnilai]" id="vnilai${i}" value="0"/>
+                        <input type="text" readonly class="form-control input-sm text-left input-nilai" name="items[${i}][vnilai]" id="vnota${i}" value="0"/>
                     </div>                    
                 </td>`;
         cols += `<td>
@@ -322,9 +324,13 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                        <input type="text" id="vbayar${i}" class="form-control text-left input-sm inputitem input-bayar"
-                            onblur=\'if(this.value==""){this.value="0";}\' onfocus=\'if(this.value=="0"){this.value="";}\'
-                            autocomplete="off" name="items[${i}][vbayar]" value="0">
+                        <input autocomplete="off" class="form-control form-control-sm text-right" type="text" id="vjumlah${i}" name="items[${i}][vjumlah]" value="0" 
+                                onkeydown="reformat(this);hetang();" 
+                                onkeyup="onlyangka(this); reformat(this); 
+                                hetang();" 
+                                onpaste="return false;" 
+                                onblur=\"if(this.value==''){this.value='0';hetang();}\" 
+                                onfocus=\"if(this.value=='0'){this.value='';}\">
                     </div>
                 </td>`;
         cols += `<td>
@@ -332,7 +338,8 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text" style="padding: 0px 5px">Rp.</span>
                         </div>
-                    <input type="text" readonly class="form-control input-sm text-left input-sisa" name="items[${i}][vsisa]" id="vsisa${i}" value="0"/>
+                    <input type="hidden" id="vsisa${i}" name="vsisa${i}" value="0">
+                    <input type="text" readonly class="form-control input-sm text-left input-sisa" name="items[${i}][vsesa]" id="vsesa${i}" value="0"/>
                     </div>
                 </td>`;
         cols += `<td>
@@ -391,12 +398,6 @@
             width: "100%",
         }).val("").trigger("change");
 
-        $('#vbayar'+i).on('keyup', function() {
-            const elementNilai = $(this).closest('tr').find('.input-nilai');
-            const elementSisa = $(this).closest('tr').find('.input-sisa');
-            const elementLebih = $(this).closest('tr').find('.input-lebih');
-            calculateBayar(this, elementNilai, elementSisa, elementLebih);
-        });
     });    
     
     /*----------  HAPUS TR  ----------*/    
@@ -407,11 +408,27 @@
             id = value.id;
             $('#'+id).html(key+1);
         });        
-        hitung();
+        hetang();
     })
 
     /*----------  GET DETAIL  ----------*/    
     function get_detail_nota(id){
+        /** validasi nota sudah dipilih */
+        const selectedValue = $('#idnota'+id).val();
+        for (let i = 1; i <= $("#jml").val(); i++) {
+            if (i==id) {
+                continue;
+            }
+            const selectValue = $('#idnota'+i).val();
+            if (selectValue != null && selectValue !== undefined && selectValue == selectedValue) {
+                swal('Nota sudah ada');
+                setTimeout(function() {
+                    $('#idnota'+id).closest('tr').find('.ibtnDel').trigger('click');
+                }, 1500)                
+                return;
+            }            
+        }        
+
         $.ajax({
             type: "post",
             data: {
@@ -420,42 +437,55 @@
             },
             url: '<?= base_url($folder.'/cform/get_detail_nota'); ?>',
             dataType: "json",
-            success: function (data) {
+            success: function (data) {                
                 if(typeof data[0] != 'undefined'){
-                    console.log(data[0]);
+                    $("#d_nota" + id).val(data[0]['d_nota']);
+                    $("#dnota" + id).val(data[0]['dnota']);
+                    $("#vsesa" + id).val(formatcemua(data[0]['v_sisa']));
+                    $("#vsisa" + id).val(formatcemua(data[0]['v_sisa']));
+                    $("#vnota" + id).val(formatcemua(data[0]['v_sisa']));
+                    tmp = formatulang($("#vjumlah").val());
+                    /** replace Rp */
+                    tmp = tmp.replaceAll("Rp. ", "");
+                    
+                    jml = $("#jml").val();
 
-                    ada = false;
-                    for(var i = 1; i <= $('#jml').val(); i++){
-                        if(($('#idnota'+id).val() == $('#idnota'+i).val()) && (i!=id)){
-                            swal ("Maaf :(","No. Nota : "+data[0].i_document+" sudah ada !!!!!","error");
-                            $("#tabledatay tbody tr td #idnota"+id).each(function() {
-                                $(this).closest("tr").remove();
-                            });
-                            ada = true;
-                            break;
-                        }else{
-                            ada = false;     
+                    if (tmp > 0) {
+                        tmp = parseFloat(tmp);
+                        sisa = 0;
+                        jumasal = tmp;
+                        jumall = jumasal;
+                        bay = 0;
+
+                        for (x = 1; x <= jml; x++) {
+                            if (typeof $("#vjumlah" + x).val() !== 'undefined') {
+                                if ($("#vjumlah" + x).val() == '') {
+                                    jum = parseFloat(formatulang($("#vsisa" + x).val()));
+                                } else {
+                                    jum = parseFloat(formatulang($("#vjumlah" + x).val()));
+                                }
+                                jumall = jumall - jum;
+                                // console.log(jumall);
+                                if (jumall > 0) {
+                                    $("#vlebih").val(formatcemua(jumall));
+                                    if (x == id) {
+                                        $("#vjumlah" + id).val(formatcemua(data[0]['v_sisa']));
+                                        by = parseFloat(formatulang($("#vjumlah" + id).val()));
+                                        bay = jumasal - by;
+                                        sis = parseFloat(formatulang($("#vsisa" + id).val()));;
+                                        $("#vlebih" + id).val(formatcemua(bay));
+                                    }
+                                    sisa = sisa + jum;
+                                } else {
+                                    $("#vlebih").val('0');
+                                    $("#vlebih" + id).val('0');
+                                    $("#vjumlah" + id).val(formatcemua(jumasal - sisa));
+                                    $("#vlebih" + id).val('0');
+                                }
+                            }
                         }
                     }
-                    if(!ada){
-                        $('#dnota'+id).val(data[0].d_document);
-                        $('#groupfaktur'+id).val(data[0].groupfaktur);
-                        $('#vnilai'+id).val(formatRupiah(data[0].v_sisa));
-                        
-                        // if (parseInt(formatulang($('#vjumlahsisa').val())) > parseInt(formatulang(data[0].v_sisa))) {
-                        //     $('#vbayar'+id).val(formatcemua(data[0].v_sisa));
-                        // }else if ((parseInt(formatulang($('#vjumlahsisa').val())) < parseInt(formatulang(data[0].v_sisa))) && (parseInt(formatulang($('#vjumlahsisa').val())) > 0)) {
-                        //     $('#vbayar'+id).val(formatcemua($('#vjumlahsisa').val()));
-                        // }else{
-                        //     $('#vbayar'+id).val(0);
-                        // }
-
-                        $('#vbayar'+id).focus();
-                        // hitung();
-                    }else{
-                        $('#idnota'+id).html('');
-                        $('#idnota'+id).val('');
-                    }
+                    hetang();                  
                 }else{
                     swal('Data tidak ada!');
                 }
@@ -465,46 +495,6 @@
             }
         });
     }
-
-    /*----------  HITUNG NILAI  ----------*/
-    function hitung(){
-        return;
-        var vjmlbyr     = parseFloat(formatulang($('#vjumlah').val()));
-        var vlebihitem  = vjmlbyr;
-        var vjmlsisa    = 0;
-        for (var i = 1; i <= $('#jml').val(); i++) {
-            if(typeof $('#idnota'+i).val() != 'undefined'){
-                vnota = parseFloat(formatulang($('#vnilai'+i).val()));
-                if (!isNaN(parseFloat($('#vbayar'+i).val()))){
-                    vjmlitem = parseFloat(formatulang($('#vbayar'+i).val()));
-                }else{
-                    vjmlitem = 0;
-                }
-                vsisaitem = vnota - vjmlitem;
-                if (vsisaitem < 0) {
-                    swal("Maaf :(","Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!","error");
-                    $('#vbayar'+i).val(0);
-                    vjmlitem = parseFloat(formatulang($('#vbayar'+i).val()));
-                    vsisaitem = parseFloat(formatulang($('#vnilai'+i).val()));
-                }
-                vlebihitem = vlebihitem - vjmlitem;
-                if (vlebihitem < 0) {
-                    vlebihitem = vlebihitem + vjmlitem;
-                    vsisaitem = vnota - vlebihitem;
-                    swal("Maaf :(","Jumlah item tidak bisa lebih besar dari nilai bayar !!!!!","error");
-                    $('#vbayar'+i).val(formatcemua(vlebihitem));
-                    vjmlitem = parseFloat(formatulang($('#vbayar'+i).val()));
-                    vlebihitem = 0;
-                }
-                vjmlsisa += vjmlitem; 
-                $('#vsisa'+i).val(formatcemua(vsisaitem));
-                $('#vlebih'+i).val(formatcemua(vlebihitem));
-            }
-        }
-        $("#vjumlahsisa").val(formatcemua(vjmlbyr-vjmlsisa));
-        $("#vjumlahlebih").val(formatcemua(vlebihitem));
-    }
-    /*----------  END HITUNG NILAI  ----------*/    
 
     /*----------  VALIDASI UPDATE DATA  ----------*/    
     $( "#submit" ).click(function(event) {
@@ -516,18 +506,16 @@
                 return false;
             }else{
                 $("#tabledatay tbody tr").each(function() {
-                    $(this).find("td select").each(function() {
-                        if ($(this).val()=='' || $(this).val()==null) {
-                            swal('Maaf :(','No. Nota tidak boleh kosong!','error');
-                            ada = true;
-                        }
-                    });
-                    $(this).find("td .inputitem").each(function() {
-                        if ($(this).val()=='' || $(this).val()==null || $(this).val()==0) {
-                            swal('Maaf :(','Jumlah Bayar Tidak Boleh Kosong Atau 0!','error');
-                            ada = true;
-                        }
-                    });
+                    const nota = $(this).find('select');
+                    if (nota.val()=='' || nota.val()==null) {
+                        swal('Maaf :(','No. Nota tidak boleh kosong!','error');
+                        ada = true;
+                    }
+                    const bayar = $(this).find(".input-nilai");
+                    if (bayar.val()=='' || bayar.val()==null || bayar.val()==0) {
+                        swal('Maaf :(','Jumlah Bayar Tidak Boleh Kosong Atau 0!','error');
+                        ada = true;
+                    }
                 });
                 if (!ada) {
                     swal({   
@@ -616,34 +604,12 @@
         {id: "Biaya Administrasi", text: "Biaya Administrasi"},
     ];
 
-    function currencyTextToNumber (_text) {
-        let _number = _text.replaceAll(".", "");
-        if (isNaN(_number) || _text == '' || _text === undefined) {
-            return 0;
-        }
-
-        return parseFloat(_number);
-    };
-
-    function formatRupiah(angka, prefix) {
-        var number_string = angka.replace(/[^,\d]/g, "").toString(),
-        split = number_string.split(","),
-        sisa = split[0].length % 3,
-        rupiah = split[0].substr(0, sisa),
-        ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-    
-        // tambahkan titik jika yang di input sudah menjadi angka ribuan
-        if (ribuan) {
-        separator = sisa ? "." : "";
-        rupiah += separator + ribuan.join(".");
-        }
-    
-        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
-        return rupiah;
-    }
-
     function hetang() {
-        var vjmlbyr = parseFloat(formatulang($("#vjumlah").val()));
+        const eJumlah = $("#vjumlah");
+        let vJumlah = eJumlah.val().toString();
+        vJumlah = vJumlah.replaceAll("Rp. ", "");
+        var vjmlbyr = parseFloat(formatulang(vJumlah));
+        
         var vlebihitem = vjmlbyr;
         for (a = 1; a <= $('#jml').val(); a++) {
             if (typeof $("#vjumlah" + a).val() !== 'undefined') {
@@ -654,12 +620,7 @@
                 } */
                 vsisaitem = vnota - vjmlitem;
                 if (vsisaitem < 0) {
-                    Swal.fire({
-                        type: "error",
-                        title: g_maaf,
-                        text: "Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!",
-                        confirmButtonClass: "btn btn-danger",
-                    });
+                    swal('"Jumlah bayar tidak bisa lebih besar dari nilai nota !!!!!"');                    
                     $("#vjumlah" + a).val(0);
                     vjmlitem = parseFloat(formatulang($("#vjumlah" + a).val()));
                     vsisaitem = parseFloat(formatulang($("#vsisa" + a).val()));
@@ -668,12 +629,7 @@
                 if (vlebihitem < 0) {
                     vlebihitem = vlebihitem + vjmlitem;
                     vsisaitem = vnota - vlebihitem;
-                    Swal.fire({
-                        type: "error",
-                        title: g_maaf,
-                        text: "Jumlah item tidak bisa lebih besar dari nilai bayar !!!!!",
-                        confirmButtonClass: "btn btn-danger",
-                    });
+                    swal("Jumlah item tidak bisa lebih besar dari nilai bayar !!!!!");
                     $("#vjumlah" + a).val(formatcemua(vlebihitem));
                     vjmlitem = parseFloat(formatulang($("#vjumlah" + a).val()));
                     vlebihitem = 0;
@@ -684,5 +640,92 @@
         }
         $("#vlebih").val(formatcemua(vlebihitem));
     }
+
+    function onlyangka(x) {
+        x.value = x.value.replace(/[^\d.-]/g, '');
+    }
+
+    function reformat(input) {
+        /* var num = input.value.replace(/\,/g, ""); */
+        var num = input.value.replace(/[^\d.-]/g, '');
+        if (!isNaN(num)) {
+            if (num.indexOf(".") > -1) {
+                num = num.split(".");
+                num[0] = num[0]
+                    .toString()
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/(?=\d*\.?)(\d{3})/g, "$1,")
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/^[\,]/, "");
+                if (num[1].length > 2) {
+                    alert("maksimum 2 desimal !!!");
+                    num[1] = num[1].substring(0, num[1].length - 1);
+                }
+                input.value = num[0] + "." + num[1];
+            } else {
+                input.value = num
+                    .toString()
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/(?=\d*\.?)(\d{3})/g, "$1,")
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/^[\,]/, "");
+            }
+        } else {
+            alert("input harus numerik !!!");
+            input.value = input.value.substring(0, input.value.length - 1);
+        }
+    }
+
+    function formatulang(a) {
+        var s = a.replace(/\,/g, "");
+        return s;
+    }
+
+    function formatcemua(input) {
+        var num = input.toString();
+        if (!isNaN(num)) {
+            if (num.indexOf(".") > -1) {
+                num = num.split(".");
+                num[0] = num[0]
+                    .toString()
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/(?=\d*\.?)(\d{3})/g, "$1,")
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/^[\,]/, "");
+                if (num[1].length > 2) {
+                    while (num[1].length > 2) {
+                        num[1] = num[1].substring(0, num[1].length - 1);
+                    }
+                }
+                input = num[0];
+            } else {
+                input = num
+                    .toString()
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/(?=\d*\.?)(\d{3})/g, "$1,")
+                    .split("")
+                    .reverse()
+                    .join("")
+                    .replace(/^[\,]/, "");
+            }
+        }
+        return input;
+    }
+
+    
     
 </script>

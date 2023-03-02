@@ -549,5 +549,33 @@ class Cform extends CI_Controller {
 
         $this->load->view($this->global['folder'].'/vformapprove', $data);
     }
+
+    /*----------  CETAK NOTA  ----------*/
+    /*
+    * Jika type = 'y' maka cetak yang harga;
+    * Jika type = 't' maka cetak yang non harga;
+    */
+
+    public function cetak()
+    {
+        $id         = $this->uri->segment(4);
+        $type       = $this->uri->segment(5);
+        $id_customer = $this->uri->segment(6);
+        $data = array(
+            'folder'        => $this->global['folder'],
+            'title'         => "Cetak " . $this->global['title'],
+            'id'            => $id,
+            'data'          => $this->mmaster->baca_header($id, $id_customer),
+            'datadetail'    => $this->mmaster->baca_detail_cetak($id),
+        );
+
+        if ($type == 'y') {
+            $this->Logger->write('Cetak ' . $this->global['title'] . ' + Harga, ID : ' . $id);
+            $this->load->view($this->global['folder'] . '/vformprint', $data);
+        } /* else {
+            $this->Logger->write('Cetak ' . $this->global['title'] . ' Non Harga, ID : ' . $id);
+            $this->load->view($this->global['folder'] . '/vformprintnonharga', $data);
+        } */
+    }
 }
 /* End of file Cform.php */

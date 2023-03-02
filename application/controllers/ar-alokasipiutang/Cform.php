@@ -328,6 +328,7 @@ class Cform extends CI_Controller {
 
         $v_jumlah = $this->input->post('v_jumlah');
         $v_jumlah = str_replace("Rp. ", "", $v_jumlah);
+        $v_jumlah = str_replace(",", "", $v_jumlah);
         $v_jumlah = str_replace(".", "", $v_jumlah);
 
         $items = $this->input->post('items');        
@@ -351,17 +352,20 @@ class Cform extends CI_Controller {
             
             $v_nilai = $item['vnilai'];
             $v_nilai = str_replace(".", "", $v_nilai);
+            $v_nilai = str_replace(",", "", $v_nilai);
 
-            $v_bayar = $item['vbayar'];
-            $v_bayar = str_replace(".", "", $v_bayar);
-            $v_jumlah = $v_bayar;
+            $v_jumlah = $item['vjumlah'];
+            $v_jumlah = str_replace(".", "", $v_jumlah);
+            $v_jumlah = str_replace(",", "", $v_jumlah);
 
-            $v_sisa = $item['vsisa'];
+            $v_sisa = $item['vsesa'];
             $v_sisa = str_replace(".", "", $v_sisa);
+            $v_sisa = str_replace(",", "", $v_sisa);
 
             $v_lebih = $item['vlebih'];
             $v_lebih = str_replace(".", "", $v_lebih);
-
+            $v_lebih = str_replace(",", "", $v_lebih);
+            
             $e_remark = $item['eremark'];
 
             $this->mmaster->insert_alokasi_piutang_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
@@ -560,7 +564,6 @@ class Cform extends CI_Controller {
     
     public function view()
     {
-
         $data = check_role($this->i_menu, 2);
         if(!$data){
             redirect(base_url(),'refresh');

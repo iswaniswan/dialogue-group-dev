@@ -181,9 +181,9 @@ class Cform extends CI_Controller {
         $area = $this->input->post('area', true);
         $salesman = $this->input->post('salesman', true);
         $data = $this->mmaster->getcustomergenerate($date, $area, $salesman);
-        if($data->num_rows()>0) {
-            echo json_encode($data->result());
-        }
+        // if($data->num_rows()>0) {
+        echo json_encode($data->result());
+        // }
     }
 
     public function getsalesman(){

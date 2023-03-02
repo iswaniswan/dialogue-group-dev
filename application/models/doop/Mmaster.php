@@ -609,7 +609,10 @@ class Mmaster extends CI_Model
                 c.id as id_spb,
                 c.n_ppn,
                 id_jenis_barang_keluar,
-                c.i_referensi as i_referensi_op
+                c.i_referensi as i_referensi_op,
+                com.v_meterai,
+                com.v_meterai_limit,
+                com.f_plus_meterai
             FROM
                 tm_sj a
             INNER JOIN tr_area f ON
@@ -627,6 +630,8 @@ class Mmaster extends CI_Model
                 AND a.id_company = e.id_company
             INNER JOIN tr_city h ON 
                 (h.id = b.id_city)
+            INNER JOIN public.company com ON 
+                (com.id = a.id_company)
             WHERE
                 a.id = '$id'
         ", FALSE);
