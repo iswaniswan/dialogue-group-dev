@@ -404,7 +404,8 @@ class Mmaster extends CI_Model {
                     AND tr.i_status = '6'
                     AND tri.d_bukti BETWEEN '$dfrom' AND '$dto'
                     AND tri.v_rv_saldo > 0
-                    AND tc.e_coa_name NOT LIKE '%Kas Besar%'";        
+                    AND tc.e_coa_name NOT LIKE '%Kas Besar%'
+                ORDER BY tri.i_rv_item DESC";     
 
         // var_dump($sql); die();
 
@@ -875,7 +876,7 @@ class Mmaster extends CI_Model {
         $this->db->insert('tm_alokasi_kas_bank', $data);
     }
 
-    public function insert_alokasi_piutang($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah,
+    public function insert_alokasi_piutang($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah, $v_lebih,
                                         $id_company=null, $id_area, $id_customer, $id_bagian)
     {
         $id_company = $this->session->userdata('id_company');
@@ -887,6 +888,7 @@ class Mmaster extends CI_Model {
             'd_alokasi' => $d_alokasi,
             'e_bank_name' => $e_bank_name,
             'v_jumlah' => $v_jumlah,
+            'v_lebih' => $v_lebih,
             'id_company' => $id_company,
             'id_area' => $id_area,            
             'id_customer' => $id_customer,

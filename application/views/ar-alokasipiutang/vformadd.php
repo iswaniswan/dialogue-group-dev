@@ -351,7 +351,7 @@
                     </div>
                 </td>`;
         cols += `<td>
-                    <input type="hidden" class="form-control input-sm" name="items[${i}][groupfaktur]" id="groupfaktur${i}" value=""/>
+                    <input type="hidden" class="form-control input-sm" name="items[${i}][groupfaktur]" id="groupfaktur${i}" value="" required/>
                     <select class="form-control input-sm" name="items[${i}][eremark]" id="eremark${i}"></select>
                 </td>`;
         cols += `<td class="text-center">
