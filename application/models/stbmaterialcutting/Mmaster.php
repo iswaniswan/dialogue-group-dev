@@ -125,12 +125,16 @@ class Mmaster extends CI_Model
 
     public function getbag(/* $idmaterial, $idproductwip */$idtypemakloon)
     {
-        return $this->db->query("SELECT a.id, e_bagian_name||' - '||name AS e_bagian_name
-        FROM tr_bagian a
-        JOIN public.company b ON (b.id = a.id_company)
-        WHERE a.id IN (SELECT id_bagian FROM tr_tujuan_menu WHERE i_menu = '$this->i_menu' AND id_company = '$this->id_company')
-        AND array[$idtypemakloon] && a.id_type_makloon
-        ORDER BY 2");
+        $sql = "SELECT a.id, e_bagian_name||' - '||name AS e_bagian_name
+                    FROM tr_bagian a
+                    JOIN public.company b ON (b.id = a.id_company)
+                    WHERE a.id IN (SELECT id_bagian FROM tr_tujuan_menu WHERE i_menu = '$this->i_menu' AND id_company = '$this->id_company')
+                    AND array[$idtypemakloon] && a.id_type_makloon
+                    ORDER BY 2";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql);
     }
 
     public function getbagbyid($id)

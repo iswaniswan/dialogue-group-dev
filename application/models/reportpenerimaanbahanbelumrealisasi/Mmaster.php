@@ -6,24 +6,37 @@ use Ozdemir\Datatables\DB\CodeigniterAdapter;
 
 class Mmaster extends CI_Model
 {
-	public function getbagian($search)
+	public function get_bagian($id=null)
 	{
-		$this->db->select('aa.id, a.i_bagian, e_bagian_name')->distinct();
-		$this->db->from('tr_bagian a');
-		$this->db->join('tr_departement_cover b', 'b.i_bagian = a.i_bagian', 'inner');
-		$this->db->where('i_departement', $this->session->userdata('i_departement'));
-		$this->db->where('i_level', $this->session->userdata('i_level'));
-		$this->db->where('username', $this->session->userdata('username'));
-		$this->db->where('b.id_company', $this->session->userdata('id_company'));
-		$this->db->where('a.id_company', $this->session->userdata('id_company'));
-		$this->db->where('a.i_type', '23');
-		$this->db->like('lower(e_bagian_name)', strtolower($search), 'both');
-		$this->db->order_by('e_bagian_name');
-		$query = $this->db->get();
-
-		$last_query = $this->db->last_query();
-		var_dump($last_query); die();
+		$this->db->where('id', $id);
+		return $this->db->get('tr_bagian');
 	}
+
+    public function get_list_bagian()
+    {
+        $i_level = $this->session->userdata('i_level');
+        $id_company = $this->session->userdata('id_company');
+        $username = $this->session->userdata('username');
+        $TYPE_JAHIT = '07';
+
+        $sql = "SELECT DISTINCT a.id,
+                    a.i_bagian,
+                    e_bagian_name
+                FROM tr_bagian a
+                INNER JOIN tr_departement_cover tdc ON tdc.i_bagian = a.i_bagian and tdc.id_company = a.id_company
+                WHERE i_departement = '1'
+                    AND i_level = '$i_level'
+                    AND username = '$username'
+                    AND a.id_company = '$id_company'
+                    AND a.i_type = '$TYPE_JAHIT'
+                    AND lower(e_bagian_name) LIKE '%%' ESCAPE '!'
+                ORDER BY
+                    e_bagian_name";
+        
+        // var_dump($sql);
+
+        return $this->db->query($sql);
+    }
 
 	public function getkategori($search)
 	{
@@ -122,6 +135,57 @@ class Mmaster extends CI_Model
 		$this->db->select($sql, FALSE);
 		return $this->db->get();
 	}
+
+    public function get_export_data($id_company, $id_bagian=null, $dfrom, $dto)
+    {
+        // var_dump($this->session->userdata()); die();
+        /** filter bagian */
+        $where_bagian = '';
+        if ($id_bagian != null) {
+            $sql_bagian = "SELECT i_bagian FROM tr_bagian WHERE id='$id_bagian'";
+            $where_bagian = " AND (tmmc.i_bagian = ($sql_bagian) AND tmmc.id_company = '$id_company')";
+        }
+
+        $sql_realisasi = "SELECT tsci.id_referensi 
+                            FROM tm_schedule_cutting_item tsci
+                            WHERE tsci.d_schedule_realisasi IS NOT NULL ";
+
+        /** main table */
+        $cte_penerimaan = "SELECT 
+                                STRING_AGG(tmmc.id::VARCHAR, ',') AS id, 
+                                STRING_AGG(tmmci.id::VARCHAR, ',') AS id_item, 
+                                tmmci.id_material, 
+                                STRING_AGG(tmmc.id_document_referensi::VARCHAR, ',') AS id_document_referensi, 
+                                SUM(tmmci.n_quantity) AS n_quantity
+                            FROM tm_masuk_material_cutting_item tmmci
+                            INNER JOIN tm_masuk_material_cutting tmmc ON tmmc.id = tmmci.id_document 
+                            WHERE tmmc.i_status = '6'
+                            AND (tmmc.d_document >= '$dfrom' AND tmmc.d_document <= '$dto')
+                            AND tmmc.id NOT IN ($sql_realisasi) 
+                            $where_bagian
+                            GROUP BY tmmci.id_material";
+
+        $cte_stb = "SELECT tsmc.id, tsmci.id_material, tsmci.n_quantity, tsmci.n_quantity_sisa 
+                    FROM tm_stb_material_cutting_item tsmci
+                    INNER JOIN tm_stb_material_cutting tsmc ON tsmc.id = tsmci.id_document";
+
+        /** main query */
+        $sql = "WITH CTE_PENERIMAAN AS ($cte_penerimaan) 
+                SELECT CTE_PENERIMAAN.id_material, 
+                        tm.i_material, 
+                        tm.e_material_name, 
+                        ts.e_satuan_name,
+                        CTE_PENERIMAAN.n_quantity 
+                FROM CTE_PENERIMAAN
+                LEFT JOIN ($cte_stb) AS CTE_STB ON CTE_STB.id::VARCHAR IN (CTE_PENERIMAAN.id_document_referensi)
+                LEFT JOIN tr_material tm ON tm.id = CTE_PENERIMAAN.id_Material
+                LEFT JOIN tr_satuan ts ON (ts.i_satuan_code = tm.i_satuan_code AND ts.id_company = tm.id_company)"
+                ;
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
+    }
 
 	public function get_product($i_kategori, $i_sub_kategori, $search)
 	{

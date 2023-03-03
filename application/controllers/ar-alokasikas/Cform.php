@@ -313,7 +313,10 @@ class Cform extends CI_Controller {
         $id_company = $this->session->userdata('id_company');
 
         $id_bagian = $this->input->post('ibagian');
-        $i_document = $this->input->post('i_document');
+        // $i_document = $this->input->post('i_document');
+        /** regenerate nomor dokumen */
+        $i_document = $this->mmaster->generate_nomor_dokumen($id_bagian);
+        
         $d_document = $this->input->post('d_document');
         /** reformat tanggal */
         $d_document = formatYmd($d_document);
@@ -331,6 +334,11 @@ class Cform extends CI_Controller {
         $v_jumlah = str_replace(",", "", $v_jumlah);
         $v_jumlah = str_replace(".", "", $v_jumlah);
 
+        $v_lebih = $this->input->post('v_lebih');
+        $v_lebih = str_replace("Rp. ", "", $v_lebih);
+        $v_lebih = str_replace(",", "", $v_lebih);
+        $v_lebih = str_replace(".", "", $v_lebih);
+
         $items = $this->input->post('items');        
 
         $result = [
@@ -340,11 +348,14 @@ class Cform extends CI_Controller {
         ];
 
         /** insert table */
+        /** nilai jumlah adalah total dari nilai yg dibayarkan setiap item, update setelah insert item */
         $this->db->trans_begin();            
-        $this->mmaster->insert_alokasi_kas($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah,
+        $this->mmaster->insert_alokasi_kas($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah, $v_lebih,
                                                 null, $id_area, $id_customer, $id_bagian);
 
         $insert_id = $this->db->insert_id();
+
+        $v_jumlah_bayar = 0;
 
         foreach ($items as $item) {
             $id_nota = $item['id_nota'];
@@ -360,17 +371,22 @@ class Cform extends CI_Controller {
 
             $v_sisa = $item['vsesa'];
             $v_sisa = str_replace(".", "", $v_sisa);
-            $v_jumlah = str_replace(",", "", $v_jumlah);
+            $v_sisa = str_replace(",", "", $v_sisa);
 
             $v_lebih = $item['vlebih'];
             $v_lebih = str_replace(".", "", $v_lebih);
-            $v_jumlah = str_replace(",", "", $v_jumlah);
+            $v_lebih = str_replace(",", "", $v_lebih);
             
             $e_remark = $item['eremark'];
 
             $this->mmaster->insert_alokasi_kas_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
                                                         $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company, $id_area);
-        }        
+        
+            $v_jumlah_bayar += $v_jumlah;
+        }
+
+        /** update nilai jumlah bayar */
+        $this->mmaster->update_header_jumlah_bayar($insert_id, $v_jumlah_bayar);
             
         if ($this->db->trans_status()) {
             $this->db->trans_commit();

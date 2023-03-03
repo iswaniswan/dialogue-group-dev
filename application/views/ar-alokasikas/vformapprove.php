@@ -60,7 +60,7 @@
                     <div class="col-md-12">
                         <div class="form-group row">
                             <label class="col-md-6">Customer</label>
-                            <label class="col-md-6">Jumlah</label>                            
+                            <label class="col-md-6">Jumlah Bayar</label>                            
 
                             <div class="col-md-6">
                                 <input type="text" class="form-control input-sm" value="<?= $data->e_customer_name ?>" readonly>

@@ -137,6 +137,7 @@ class Mmaster extends CI_Model {
         $datatables->hide('i_status');
         $datatables->hide('i_level');
         $datatables->hide('e_level_name');
+        $datatables->hide('v_lebih');
         return $datatables->generate();
     }
 
@@ -1055,7 +1056,8 @@ class Mmaster extends CI_Model {
                     ta.e_area,
                     tc.e_customer_name,
                     tc2.e_coa_name,
-                    tri.v_rv_saldo + tap.v_jumlah AS v_rv_saldo
+                    tap.v_jumlah
+                    /*tri.v_rv_saldo + tap.v_jumlah AS v_rv_saldo*/
                 FROM tm_alokasi_piutang tap
                 INNER JOIN tm_alokasi_piutang_item tapi ON tapi.i_alokasi = tap.i_alokasi
                 INNER JOIN tm_rv tr ON tr.i_rv = tap.i_rv
@@ -1443,6 +1445,16 @@ class Mmaster extends CI_Model {
     //     $this->db->where('id', $id);
     //     $this->db->update('tm_alokasi_kas_bank', $data);
     // }    
+
+    public function update_header_jumlah_bayar($id, $v_jumlah) 
+    {
+        $data = [
+            'v_jumlah' => $v_jumlah
+        ];
+
+        $this->db->where('i_alokasi', $id);
+        $this->db->update('tm_alokasi_piutang', $data);
+    }
 
     private function change_status_insert_menu_approve($id, $i_menu, $i_level, $username)
     {

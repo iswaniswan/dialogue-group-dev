@@ -3,7 +3,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 
 class Cform extends CI_Controller
 {
-
     public $global = array();
     public $i_menu = '2050224';
 

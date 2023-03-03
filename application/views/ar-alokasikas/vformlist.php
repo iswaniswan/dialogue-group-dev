@@ -35,8 +35,8 @@
                     <th>Area</th>
                     <th>Referensi</th>
                     <th>Bank</th>
-                    <th>Jumlah</th>
-                    <th>Lebih</th>
+                    <th>Jumlah Bayar</th>
+                    <!-- <th>Lebih</th> -->
                     <th>Status Dokumen</th>
                     <th>Action</th>
                 </tr>

@@ -169,13 +169,13 @@
                                     <!-- <select hidden class="form-control input-sm" name="id_pic_cutting<?= $i; ?>" id="id_pic_cutting<?= $i; ?>" data-placeholder="Pilih PIC">
                                         <option value="<?= $key->id_pic_cutting; ?>"><?= $key->e_pic_name_cutting; ?></option>
                                     </select> -->
-                                    <input value="<?= $key->e_pic_cutting; ?>" class="form-control input-sm"  type="text" id="e_pic_cutting<?= $i; ?>" name="e_pic_cutting<?= $i; ?>">
+                                    <input value="<?= @$key->e_pic_cutting; ?>" class="form-control input-sm"  type="text" id="e_pic_cutting<?= $i; ?>" name="e_pic_cutting<?= $i; ?>">
                                 </td>
                                 <td class="col-1">
                                     <!-- <select hidden class="form-control input-sm" name="id_pic_gelar<?= $i; ?>" id="id_pic_gelar<?= $i; ?>" data-placeholder="Pilih PIC">
                                         <option value="<?= $key->id_pic_gelar; ?>"><?= $key->e_pic_name_gelar; ?></option>
                                     </select> -->
-                                    <input value="<?= $key->e_pic_gelar; ?>" class="form-control input-sm"  type="text" id="e_pic_gelar<?= $i; ?>" name="e_pic_gelar<?= $i; ?>">
+                                    <input value="<?= @$key->e_pic_gelar; ?>" class="form-control input-sm"  type="text" id="e_pic_gelar<?= $i; ?>" name="e_pic_gelar<?= $i; ?>">
                                 </td>
                                 <td class="col-1">
                                     <input class="form-control input-sm text-right" autocomplete="off" type="text" id="n_realisasi_gelar<?= $i; ?>" name="n_realisasi_gelar<?= $i; ?>" onkeyup="angkahungkul(this); hetangproductreal(this.value, <?= $i; ?>)" value="<?= ($key->n_realisasi_gelar) ? $key->n_realisasi_gelar : 0 ?>">

@@ -60,13 +60,13 @@
                     <div class="col-md-12">
                         <div class="form-group row">
                             <label class="col-md-6">Customer</label>
-                            <label class="col-md-6">Jumlah</label>                            
+                            <label class="col-md-6">Jumlah Bayar</label>                            
 
                             <div class="col-md-6">
                                 <input type="text" class="form-control input-sm" value="<?= $data->e_customer_name ?>" readonly>
                             </div>
                             <div class="col-md-6">
-                                <input type="text" class="form-control input-sm" value="Rp. <?= number_format($data->v_rv_saldo, 0, ",", ".") ?>" readonly="">                                
+                                <input type="text" class="form-control input-sm" value="Rp. <?= number_format($data->v_jumlah, 0, ",", ".") ?>" readonly="">                                
                             </div>                           
                         </div>
                     </div>

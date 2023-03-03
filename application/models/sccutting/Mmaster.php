@@ -547,8 +547,8 @@ class Mmaster extends CI_Model
             'id_pic_gelar' => $id_pic_gelar,
             'n_realisasi_gelar' => $n_realisasi_gelar,
             'n_realisasi_product' => $n_realisasi_product,
-            'e_pic_cutting' => $e_pic_cutting,
-            'e_pic_gelar' => $e_pic_gelar,
+            // 'e_pic_cutting' => $e_pic_cutting,
+            // 'e_pic_gelar' => $e_pic_gelar,
         );
         $this->db->where('id', $id_item);
         $this->db->update('tm_schedule_cutting_item', $data);

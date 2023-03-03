@@ -40,7 +40,15 @@ class Mmaster extends CI_Model
             SELECT a.id_company, '$ibagian', '$periodenext', b.i_product_wip, b.i_color, a.n_saldo_akhir, a.id_product_wip
             FROM f_mutasi_saldoawal_pengadaan_newbie ($id_company,'$periodeclosing','9999-12-01','9999-12-31','$awal','$akhir','$ibagian') a
             INNER JOIN tr_product_wip b ON (b.id = a.id_product_wip)"
-        );
+        );        
+
+        /*----------  Mutasi Pengesettan  ----------*/
+        $this->db->query("DELETE FROM tm_mutasi_saldoawal_base_pengesettan WHERE id_company = $id_company AND i_bagian = '$ibagian' AND e_mutasi_periode = '$periodenext'");
+        $this->db->query("INSERT INTO produksi.tm_mutasi_saldoawal_base_pengesettan
+            (id_company, i_bagian, e_mutasi_periode, i_product_wip, i_color, id_panel_item, n_saldo_awal)
+            SELECT a.id_company, '$ibagian' AS i_bagian, '$periodenext' AS e_mutasi_periode, b.i_product_wip, b.i_color, id_panel_item, n_saldo_akhir 
+            FROM f_mutasi_saldoawal_pengesettan($id_company,'$periodeclosing','9999-12-01','9999-12-31','$awal','$akhir','$ibagian') a
+            INNER JOIN tr_product_wip b ON (b.id = a.id_product_wip)");
 
         /*----------  Mutasi Unit Jahit  ----------*/
         $this->db->query("DELETE FROM tm_mutasi_saldoawal_base_unitjahit WHERE id_company = $id_company AND i_bagian = '$ibagian' AND e_mutasi_periode = '$periodenext'");

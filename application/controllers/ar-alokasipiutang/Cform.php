@@ -348,11 +348,14 @@ class Cform extends CI_Controller {
         ];
 
         /** insert table */
+        /** nilai jumlah adalah total dari nilai yg dibayarkan setiap item, update setelah insert item */
         $this->db->trans_begin();            
         $this->mmaster->insert_alokasi_piutang($i_document, $i_rv, $i_rv_item, $d_document, $e_bank_name, $v_jumlah, $v_lebih,
                                                 null, $id_area, $id_customer, $id_bagian);
 
         $insert_id = $this->db->insert_id();
+
+        $v_jumlah_bayar = 0;
 
         foreach ($items as $item) {
             $id_nota = $item['id_nota'];
@@ -378,7 +381,12 @@ class Cform extends CI_Controller {
 
             $this->mmaster->insert_alokasi_piutang_item($insert_id, $i_alokasi_item=null, $i_rv_item, $id_nota, $d_nota, 
                                                         $v_jumlah, $v_sisa, $n_item_no=null, $e_remark, $id_company, $id_area);
-        }        
+
+            $v_jumlah_bayar += $v_jumlah;
+        } 
+        
+        /** update nilai jumlah bayar */
+        $this->mmaster->update_header_jumlah_bayar($insert_id, $v_jumlah_bayar);
             
         if ($this->db->trans_status()) {
             $this->db->trans_commit();

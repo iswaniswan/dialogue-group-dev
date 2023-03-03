@@ -137,6 +137,7 @@ class Mmaster extends CI_Model {
         $datatables->hide('i_status');
         $datatables->hide('i_level');
         $datatables->hide('e_level_name');
+        $datatables->hide('v_lebih');
         return $datatables->generate();
     }
 
@@ -872,7 +873,7 @@ class Mmaster extends CI_Model {
         $this->db->insert('tm_alokasi_kas_bank', $data);
     }
 
-    public function insert_alokasi_kas($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah,
+    public function insert_alokasi_kas($i_alokasi_id, $i_rv, $i_rv_item, $d_alokasi, $e_bank_name, $v_jumlah, $v_lebih,
                                         $id_company=null, $id_area, $id_customer, $id_bagian)
     {
         $id_company = $this->session->userdata('id_company');
@@ -884,6 +885,7 @@ class Mmaster extends CI_Model {
             'd_alokasi' => $d_alokasi,
             'e_bank_name' => $e_bank_name,
             'v_jumlah' => $v_jumlah,
+            'v_lebih' => $v_lebih,
             'id_company' => $id_company,
             'id_area' => $id_area,            
             'id_customer' => $id_customer,
@@ -1432,6 +1434,16 @@ class Mmaster extends CI_Model {
     //     $this->db->where('id', $id);
     //     $this->db->update('tm_alokasi_kas_bank', $data);
     // }    
+
+    public function update_header_jumlah_bayar($id, $v_jumlah) 
+    {
+        $data = [
+            'v_jumlah' => $v_jumlah
+        ];
+
+        $this->db->where('i_alokasi', $id);
+        $this->db->update('tm_alokasi_kas', $data);
+    }
 
     private function change_status_insert_menu_approve($id, $i_menu, $i_level, $username)
     {
