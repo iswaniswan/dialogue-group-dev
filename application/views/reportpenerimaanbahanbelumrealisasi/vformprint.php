@@ -29,7 +29,7 @@
             <div class="panel panel-info">
                 <div class="panel-heading">
                     <?php $e_bagian = (@$bagian->e_bagian_name != null) ? $bagian->e_bagian_name: "SEMUA"; ?>
-                    <span>Nama Bagian : <?= $bagian; ?></span><br>
+                    <span>Nama Bagian : <?= $e_bagian; ?></span><br>
                     <span>Tanggal Mutasi : <?= format_bulan($dfrom) . ' s/d ' . format_bulan($dto); ?></span><br>                    
                 </div>
                 <div class="panel-body">

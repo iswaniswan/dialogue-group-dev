@@ -161,7 +161,7 @@ class Mmaster extends CI_Model
                             INNER JOIN tm_masuk_material_cutting tmmc ON tmmc.id = tmmci.id_document 
                             WHERE tmmc.i_status = '6'
                             AND (tmmc.d_document >= '$dfrom' AND tmmc.d_document <= '$dto')
-                            AND tmmc.id NOT IN ($sql_realisasi) 
+                            AND tmmci.id NOT IN ($sql_realisasi) 
                             $where_bagian
                             GROUP BY tmmci.id_material";
 
