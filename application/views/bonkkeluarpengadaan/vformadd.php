@@ -14,7 +14,7 @@
                         <label class="col-md-3">Tanggal Dokumen</label>
                         <label class="col-md-3">Tujuan</label>
                         <div class="col-sm-3">
-                            <select name="ibagian" id="ibagian" class="form-control select2">
+                            <select name="ibagian" id="ibagian" class="form-control select2" onchange="number()">
                                 <?php if ($bagian) {
                                     foreach ($bagian as $row) : ?>
                                         <option value="<?= $row->i_bagian; ?>">
@@ -25,14 +25,16 @@
                             </select>
                         </div>
                         <div class="col-sm-3">
+                            <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
+                            <?php /*
                             <div class="input-group">
-                                <input type="text" name="ibonk" id="dokumenbon" readonly="" autocomplete="off" onkeyup="gede(this);" placeholder="<?= $number; ?>" maxlength="17" class="form-control input-sm" value="" aria-label="Text input with dropdown button">
-                                <!-- <span class="input-group-addon">
+                                <span class="input-group-addon">
                                     <input type="checkbox" id="ceklis" aria-label="Checkbox for following text input">
-                                </span> -->
-                            </div>
+                                </span>
+                            </div>                            
                             <span class="notekode">Format : (<?= $number; ?>)</span><br>
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
+                            */ ?>
                         </div>
                         <div class="col-sm-3">
                             <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?php echo date("d-m-Y"); ?>">

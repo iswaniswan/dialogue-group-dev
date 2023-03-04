@@ -1081,7 +1081,7 @@ class Mmaster extends CI_Model
         ", FALSE);
 
         $sql = '';
-        if ($custransfer->num_rows() > 1) {
+        if ($custransfer->num_rows() > 0) {
             foreach ($custransfer->result() as $key) {
                 $sql .= "
                     SELECT

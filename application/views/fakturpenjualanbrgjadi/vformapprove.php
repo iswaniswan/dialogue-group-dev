@@ -180,8 +180,13 @@
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
+                                <td class="text-right bold" colspan="8">Bea Meterai :</td>
+                                <td class="text-right bold"><?= number_format($head->v_meterai); ?></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
                                 <td class="text-right bold" colspan="8">Grand Total :</td>
-                                <td class="text-right bold"><?= number_format($head->v_bersih); ?></td>
+                                <td class="text-right bold"><?= number_format($head->v_bersih + $head->v_meterai); ?></td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>

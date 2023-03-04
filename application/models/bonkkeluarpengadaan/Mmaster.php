@@ -89,7 +89,7 @@ class Mmaster extends CI_Model
                 a.d_keluar_pengadaan BETWEEN to_date('$dfrom','dd-mm-yyyy') AND to_date('$dto','dd-mm-yyyy')
                 $bagian
             ORDER BY
-                a.i_keluar_pengadaan asc
+                a.id DESC
         ", false);
 
         $datatables->edit('e_status_name', function ($data) {
@@ -125,21 +125,22 @@ class Mmaster extends CI_Model
                 if (($i_level == $this->i_level || $this->i_level == 1)) {
                     $data .= "<a href=\"#\" title='Approve' onclick='show(\"$folder/cform/approval/$id/$dfrom/$dto\",\"#main\"); return false;'><i class='ti-check-box text-primary mr-3 fa-lg'></i></a>";
                 }
+            }                    
+
+            if (check_role($i_menu, 4)  && ($i_status == '1')) {
+                $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger mr-3 fa-lg'></i></a>";
             }
 
+            /** allow semua status document untuk bisa print */
             if (check_role($i_menu, 5)) {
+                $data .= "<a href=\"".base_url($folder.'/cform/cetak/'.encrypt_url($id))."\" title='Print' target='_blank'><i class='ti-printer text-warning mr-3 fa-lg'></i></a>";
                 if ($i_status == '6' or $i_status == '4') {
                     // $data .= "<a href=\"#\" title='Print' target='_blank' onclick='cetak($id); return false;'><i class='ti-printer text-warning mr-3 fa-lg'></i></a>";
-                    $data .= "<a href=\"".base_url($folder.'/cform/cetak/'.encrypt_url($id))."\" title='Print' target='_blank'><i class='ti-printer text-warning mr-3 fa-lg'></i></a>";
                     if($id_jenis == '1') {
                         $data .= "<a href=\"".base_url($folder.'/cform/cetak2/'.encrypt_url($id))."\" title='Print Barcode' target='_blank'><i class='ti-printer text-info mr-3 fa-lg'></i></a>";
                         $data .= "<a href=\"".base_url($folder.'/cform/cetak3/'.encrypt_url($id))."\" title='Print QR Code' target='_blank'><i class='ti-printer text-success mr-3 fa-lg'></i></a>";
                     }
                 }
-            }
-
-            if (check_role($i_menu, 4)  && ($i_status == '1')) {
-                $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger mr-3 fa-lg'></i></a>";
             }
             return $data;
         });
@@ -674,7 +675,7 @@ class Mmaster extends CI_Model
                     'panel_item' AS grup, NULL AS e_satuan_name, b.id_company, a.id_keluar_pengadaan
                 FROM tm_keluar_pengadaan_item_new a
                 INNER JOIN tm_keluar_pengadaan b ON (b.id = a.id_keluar_pengadaan)
-                INNER JOIN tr_bagian ab ON (ab.i_bagian = b.i_tujuan AND b.id_company = ab.id_company)
+                INNER JOIN tr_bagian ab ON (ab.i_bagian = b.i_tujuan AND b.id_company_bagian = ab.id_company)
                 INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
                 INNER JOIN tr_color d ON (d.i_color = c.i_color AND c.id_company = d.id_company)
                 LEFT JOIN (
@@ -688,7 +689,7 @@ class Mmaster extends CI_Model
                     ab.e_bagian_name, f.i_material, upper(trim(f.e_material_name)) e_material_name, upper(trim(f.e_bagian)) bagian, round(1 / f.v_set * f.v_gelar,4) AS n_qty_penyusun, b.d_keluar_pengadaan, 'polacutting' AS grup, f.e_satuan_name, b.id_company, a.id_keluar_pengadaan
                 FROM tm_keluar_pengadaan_item_new a
                 INNER JOIN tm_keluar_pengadaan b ON (b.id = a.id_keluar_pengadaan)
-                INNER JOIN tr_bagian ab ON (ab.i_bagian = b.i_tujuan AND b.id_company = ab.id_company)
+                INNER JOIN tr_bagian ab ON (ab.i_bagian = b.i_tujuan AND b.id_company_bagian = ab.id_company)
                 INNER JOIN tr_product_wip c ON (c.id = a.id_product_wip)
                 INNER JOIN tr_color d ON (d.i_color = c.i_color AND c.id_company = d.id_company)
                 LEFT JOIN (
@@ -789,6 +790,36 @@ class Mmaster extends CI_Model
             WHERE
                 a.id_keluar_pengadaan = '$id'
                 AND b.id_jenis_barang_keluar = '1';");
+    }
+
+    public function generate_nomor_dokumen($bagian, $tujuan) {
+        $id_company = $this->id_company;
+
+        $array_tujuan = explode('|', $tujuan);
+        $id_company_tujuan = $array_tujuan[0];
+        $i_bagian_tujuan = $array_tujuan[1];        
+
+        $kode = 'STB';
+        $where = "AND id_company_bagian = '$id_company_tujuan'";
+
+        if ($id_company_tujuan != $id_company) {
+            $kode = 'SJ';
+            $where = "AND NOT id_company_bagian = '$id_company'";
+        }
+
+        $sql = "SELECT count(*) FROM tm_keluar_pengadaan tkp
+                    WHERE i_bagian = '$bagian'
+                    AND id_company = '$id_company'
+                    $where 
+                    AND to_char(d_keluar_pengadaan, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    AND i_status <> '5'";
+
+        $query = $this->db->query($sql);
+        $result = $query->row()->count;
+        $count = intval($result) + 1;
+        $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
+
+        return $generated;
     }
 }
 /* End of file Mmaster.php */

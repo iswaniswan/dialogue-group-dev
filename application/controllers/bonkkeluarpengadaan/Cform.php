@@ -103,7 +103,10 @@ class Cform extends CI_Controller
     {
         $number = "";
         if ($this->input->post('tgl', TRUE) != '') {
-            $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))), date('Y', strtotime($this->input->post('tgl', TRUE))), $this->input->post('ibagian', TRUE), $this->input->post('itujuan', TRUE), $this->input->post('id', TRUE));
+            // $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))), date('Y', strtotime($this->input->post('tgl', TRUE))), $this->input->post('ibagian', TRUE), $this->input->post('itujuan', TRUE), $this->input->post('id', TRUE));
+            $ibagian = $this->input->post('ibagian');
+            $itujuan = $this->input->post('itujuan');
+            $number = $this->mmaster->generate_nomor_dokumen($ibagian, $itujuan);
         }
         echo json_encode($number);
     }
@@ -189,7 +192,12 @@ class Cform extends CI_Controller
         }
 
         $ibagian     = $this->input->post('ibagian', TRUE);
-        $ibonk       = $this->input->post('ibonk', TRUE);
+        $itujuan      = $this->input->post('itujuan', TRUE);
+        
+        /** regenerate nomor dokumen */
+        // $ibonk       = $this->input->post('ibonk', TRUE);
+        $ibonk = $this->mmaster->generate_nomor_dokumen($ibagian, $itujuan);
+
         $dbonk       = $this->input->post('dbonk', TRUE);
         if ($dbonk) {
             $tmp   = explode('-', $dbonk);
@@ -199,8 +207,7 @@ class Cform extends CI_Controller
             $yearmonth = $year . $month;
             $datebonk  = $year . '-' . $month . '-' . $day;
         }
-
-        $itujuan      = $this->input->post('itujuan', TRUE);
+        
         $ijenis       = $this->input->post('ijenis', TRUE);
         $eremarkh     = $this->input->post('eremarkh', TRUE);
         $jml          = $this->input->post('jml', TRUE);

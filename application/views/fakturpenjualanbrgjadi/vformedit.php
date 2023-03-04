@@ -211,8 +211,13 @@
                                 <td colspan="2"></td>
                             </tr>
                             <tr>
+                                <td class="text-right" colspan="6">Bea Meterai :</td>
+                                <td><input type="text" id="vmeterai" name="vmeterai" class="form-control input-sm text-right" value="<?= number_format($head->v_meterai); ?>" readonly></td>
+                                <td colspan="2"></td>
+                            </tr>
+                            <tr>
                                 <td class="text-right" colspan="6">Grand Total :</td>
-                                <td><input type="text" id="nbersih" name="nbersih" class="form-control input-sm text-right" value="<?= number_format($head->v_bersih); ?>" readonly></td>
+                                <td><input type="text" id="nbersih" name="nbersih" class="form-control input-sm text-right" value="<?= number_format($head->v_bersih + $head->v_meterai); ?>" readonly></td>
                                 <td colspan="2"></td>
                             </tr>
                         </tfoot>

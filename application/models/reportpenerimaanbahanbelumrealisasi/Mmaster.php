@@ -140,11 +140,34 @@ class Mmaster extends CI_Model
     {
         // var_dump($this->session->userdata()); die();
         /** filter bagian */
-        $where_bagian = '';
+
+		$sql_bagian = "SELECT i_bagian FROM tr_bagian WHERE id='$id_bagian'";
+
+		$where_bagian_pengiriman = '';
         if ($id_bagian != null) {
-            $sql_bagian = "SELECT i_bagian FROM tr_bagian WHERE id='$id_bagian'";
-            $where_bagian = " AND (tmmc.i_bagian = ($sql_bagian) AND tmmc.id_company = '$id_company')";
+            $where_bagian_pengiriman = " AND (tsmc.i_bagian_receive = ($sql_bagian) AND tsmc.id_company_receive = '$id_company')";
         }
+
+        $where_bagian_penerimaan = '';
+        if ($id_bagian != null) {
+            $where_bagian_penerimaan = " AND (tmmc.i_bagian = ($sql_bagian) AND tmmc.id_company = '$id_company')";
+        }
+
+		$sql_pengiriman = "SELECT tmmc.id_document_referensi 
+							FROM tm_masuk_material_cutting tmmc
+							WHERE tmmc.i_status = '6'
+							AND (tmmc.d_document >= '$dfrom' AND tmmc.d_document <= '$dto')";
+
+		$cte_pengiriman = "SELECT
+								STRING_AGG(tsmc.id::VARCHAR, ',') AS id,
+								tsmci.id_material,
+								sum(tsmci.n_quantity) AS n_quantity 
+							FROM tm_stb_material_cutting_item tsmci
+							INNER JOIN tm_stb_material_cutting tsmc ON	tsmc.id = tsmci.id_document
+							WHERE tsmc.i_status = '6'
+								AND tsmc.id IN ($sql_pengiriman)
+								$where_bagian_pengiriman
+							GROUP BY tsmci.id_material";
 
         $sql_realisasi = "SELECT tsci.id_referensi 
                             FROM tm_schedule_cutting_item tsci
@@ -156,31 +179,35 @@ class Mmaster extends CI_Model
                                 STRING_AGG(tmmci.id::VARCHAR, ',') AS id_item, 
                                 tmmci.id_material, 
                                 STRING_AGG(tmmc.id_document_referensi::VARCHAR, ',') AS id_document_referensi, 
-                                SUM(tmmci.n_quantity) AS n_quantity
+                                SUM(tmmci.n_quantity) AS n_quantity,
+								tmmc.id_company_referensi
                             FROM tm_masuk_material_cutting_item tmmci
                             INNER JOIN tm_masuk_material_cutting tmmc ON tmmc.id = tmmci.id_document 
                             WHERE tmmc.i_status = '6'
-                            AND (tmmc.d_document >= '$dfrom' AND tmmc.d_document <= '$dto')
-                            AND tmmc.id NOT IN ($sql_realisasi) 
-                            $where_bagian
-                            GROUP BY tmmci.id_material";
+								AND (tmmc.d_document >= '$dfrom' AND tmmc.d_document <= '$dto')
+								AND tmmci.id NOT IN ($sql_realisasi) 
+                            	$where_bagian_penerimaan
+							GROUP BY tmmci.id_material, tmmc.id_company_referensi";
 
         $cte_stb = "SELECT tsmc.id, tsmci.id_material, tsmci.n_quantity, tsmci.n_quantity_sisa 
                     FROM tm_stb_material_cutting_item tsmci
                     INNER JOIN tm_stb_material_cutting tsmc ON tsmc.id = tsmci.id_document";
 
         /** main query */
-        $sql = "WITH CTE_PENERIMAAN AS ($cte_penerimaan) 
+        $sql = "WITH CTE_PENGIRIMAN AS ($cte_pengiriman), CTE_PENERIMAAN AS ($cte_penerimaan) 
                 SELECT CTE_PENERIMAAN.id_material, 
                         tm.i_material, 
                         tm.e_material_name, 
                         ts.e_satuan_name,
-                        CTE_PENERIMAAN.n_quantity 
+                        CTE_PENERIMAAN.n_quantity AS qty_terima,
+						CTE_PENGIRIMAN.n_quantity AS qty_kirim,
+						c.name AS e_company_name
                 FROM CTE_PENERIMAAN
                 LEFT JOIN ($cte_stb) AS CTE_STB ON CTE_STB.id::VARCHAR IN (CTE_PENERIMAAN.id_document_referensi)
+				LEFT JOIN CTE_PENGIRIMAN ON CTE_PENGIRIMAN.id_material = CTE_PENERIMAAN.id_material
                 LEFT JOIN tr_material tm ON tm.id = CTE_PENERIMAAN.id_Material
-                LEFT JOIN tr_satuan ts ON (ts.i_satuan_code = tm.i_satuan_code AND ts.id_company = tm.id_company)"
-                ;
+                LEFT JOIN tr_satuan ts ON (ts.i_satuan_code = tm.i_satuan_code AND ts.id_company = tm.id_company)
+				LEFT JOIN public.company c ON c.id = CTE_PENERIMAAN.id_company_referensi";
 
         // var_dump($sql); die();
 
