@@ -282,9 +282,10 @@ class Cform extends CI_Controller
                 'id' => $insert_id
             ];
             $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $insert_id);
-        } 
-
-        $this->db->trans_rollback();
+        } else {
+            $this->db->trans_rollback();
+        }
+        
         $this->load->view('pesan2', $result);
     }
 

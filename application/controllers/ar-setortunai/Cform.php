@@ -280,9 +280,10 @@ class Cform extends CI_Controller
                 'id' => $insert_id
             ];
             $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $insert_id);
-        } 
-
-        $this->db->trans_rollback();
+        } else {
+            $this->db->trans_rollback();
+        }
+        
         $this->load->view('pesan2', $result);
     }
 
@@ -368,9 +369,10 @@ class Cform extends CI_Controller
                 'id' => $id
             ];
             $this->Logger->write('Simpan Data ' . $this->global['title'] . ' Id : ' . $id);
-        } 
-
-        $this->db->trans_rollback();
+        } else {
+            $this->db->trans_rollback();
+        }
+        
         $this->load->view('pesan2', $result);
     }
 
@@ -439,6 +441,7 @@ class Cform extends CI_Controller
         $this->mmaster->changestatus($id, $istatus);
         if ($this->db->trans_status() === false) {
             $this->db->trans_rollback();
+            // var_dump($this->db->error());
             echo json_encode(false);
         } else {
             $this->db->trans_commit();
