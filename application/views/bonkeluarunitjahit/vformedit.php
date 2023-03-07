@@ -72,22 +72,34 @@
                     </div>
                     <div class="row">
                         <div class="col-sm-12">
-                            <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
-                                <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2"></i>Update</button>
-                            <?php } ?>
+                        <?php if ($data->i_status == '1' || $data->i_status == '3' || $data->i_status == '7') { ?>
+                            <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm mr-2" onclick="return konfirm();">
+                                <i class="fa fa-save mr-2"></i>Update
+                            </button>
+                        <?php } ?>
 
-                            <?php if ($data->i_status == '2') { ?>
-                                <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <? } else { ?>
-                                <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
-                            <? } ?>
+                        <?php if ($data->i_status == '2') { ?>
+                            <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2" hidden="true">
+                                <i class="fa fa-plus mr-2"></i>Item
+                            </button>
+                        <?php } else { ?>
+                            <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2">
+                                <i class="fa fa-plus mr-2"></i>Item
+                            </button>
+                        <?php } ?>
                             <button type="button" class="btn btn-inverse btn-rounded btn-sm mr-2" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main'); return false;"><i class="fa fa-arrow-circle-left mr-2"></i>Kembali</button>
-                            <?php if ($data->i_status == '1') { ?>
-                                <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-paper-plane-o mr-2"></i>Send</button>
-                                <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm mr-2"><i class="fa fa-trash mr-2"></i>Delete</button>
-                            <?php } elseif ($data->i_status == '2') { ?>
-                                <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm mr-2"><i class="fa fa-refresh mr-2"></i>Cancel</button>
-                            <?php } ?>
+                        <?php if ($data->i_status == '1') { ?>
+                            <button type="button" id="send" class="btn btn-primary btn-rounded btn-sm mr-2">
+                                <i class="fa fa-paper-plane-o mr-2"></i>Send
+                            </button>
+                            <button type="button" id="hapus" class="btn btn-danger btn-rounded btn-sm mr-2">
+                                <i class="fa fa-trash mr-2"></i>Delete
+                            </button>
+                        <?php } elseif ($data->i_status == '2') { ?>
+                            <button type="button" id="cancel" class="btn btn-primary btn-rounded btn-sm mr-2">
+                                <i class="fa fa-refresh mr-2"></i>Cancel
+                            </button>
+                        <?php } ?>
                         </div>
                     </div>
                 </div>
@@ -121,43 +133,38 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    $i = 0;
-                    if ($detail) {
-                        foreach ($detail as $row) {
-                            $i++; ?>
-                            <tr>
-                                <td class="text-center">
-                                    <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
-                                </td>
-                                <td>
-                                    <input type="hidden" value="<?= $row->id_product; ?>" id="idproduct<?= $i; ?>" name="idproduct[]">
-                                    <input type="text" value="<?= $row->i_product_base; ?>" readonly id="iproduct<?= $i; ?>" name="iproduct[]" class="form-control input-sm">
-                                </td>
-                                <td>
-                                    <select id="eproduct<?= $i; ?>" class="form-control select2" name="eproduct[]" onchange="getproduct(<?= $i; ?>);">
-                                        <option value="<?= $row->id_product; ?>"><?= $row->e_product_basename; ?></option>
-                                    </select>
-                                </td>
-                                <td>
-                                    <input type="hidden" value="<?= $row->id_color; ?>" id="idcolorproduct<?= $i; ?>" name="idcolorproduct[]">
-                                    <input type="text" value="<?= $row->e_color_name; ?>" readonly id="ecolorproduct<?= $i; ?>" name="ecolorproduct[]" class="form-control input-sm">
-                                </td>
-                                <td>
-                                    <input type="text" readonly id="stok<?= $i; ?>" class="form-control text-right input-sm" name="stok<?= $i; ?>" value=<?= $row->saldo_akhir; ?>>
-                                </td>
-                                <td>
-                                    <input type="text" value="<?= $row->n_quantity_product; ?>" id="nquantity<?= $i; ?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity[]" onkeydown="nexttab(this, event,'inputitem')" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);validasi(<?= $i; ?>)">
-                                </td>
-                                <td>
-                                    <input type="text" id="edesc<?= $i; ?>" class="form-control input-sm" value="<?= $row->e_remark; ?>" name="edesc[]">
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" title="Delete" data-i="<?= $i; ?>" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
-                                </td>
-                            </tr>
-                    <?php }
-                    } ?>
+                <?php $i = 0; foreach ($detail as $row) { $i++; ?>
+                    <tr>
+                        <td class="text-center">
+                            <spanx id="snum<?= $i; ?>"><?= $i; ?></spanx>
+                        </td>
+                        <td>
+                            <input type="hidden" value="<?= $row->id_product; ?>" id="idproduct<?= $i; ?>" name="idproduct[]">
+                            <input type="text" value="<?= $row->i_product_base; ?>" readonly id="iproduct<?= $i; ?>" name="iproduct[]" class="form-control input-sm">
+                        </td>
+                        <td>
+                            <select id="eproduct<?= $i; ?>" class="form-control select2" name="eproduct[]" onchange="getproduct(<?= $i; ?>);">
+                                <option value="<?= $row->id_product; ?>"><?= $row->e_product_basename; ?></option>
+                            </select>
+                        </td>
+                        <td>
+                            <input type="hidden" value="<?= $row->id_color; ?>" id="idcolorproduct<?= $i; ?>" name="idcolorproduct[]">
+                            <input type="text" value="<?= $row->e_color_name; ?>" readonly id="ecolorproduct<?= $i; ?>" name="ecolorproduct[]" class="form-control input-sm">
+                        </td>
+                        <td>
+                            <input type="text" readonly id="stok<?= $i; ?>" class="form-control text-right input-sm" name="stok<?= $i; ?>" value=<?= $row->saldo_akhir; ?>>
+                        </td>
+                        <td>
+                            <input type="text" value="<?= $row->n_quantity_product; ?>" id="nquantity<?= $i; ?>" class="form-control text-right input-sm inputitem" autocomplete="off" name="nquantity[]" onkeydown="nexttab(this, event,'inputitem')" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);validasi(<?= $i; ?>)">
+                        </td>
+                        <td>
+                            <input type="text" id="edesc<?= $i; ?>" class="form-control input-sm" value="<?= $row->e_remark; ?>" name="edesc[]">
+                        </td>
+                        <td class="text-center">
+                            <button type="button" title="Delete" data-i="<?= $i; ?>" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button>
+                        </td>
+                    </tr>
+                <?php } ?>
                 </tbody>
                 <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
             </table>

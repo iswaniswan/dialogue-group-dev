@@ -1383,10 +1383,11 @@ class Cform extends CI_Controller
         $id             = $this->input->post('id', TRUE);
         $ibagian        = $this->input->post('ibagian', TRUE);
         $icustomer      = $this->input->post('icustomer', TRUE);
-        $bulan          = $this->input->post('bulan', TRUE);
-        $bulan          = date("m", strtotime($bulan));
+        // $bulan          = $this->input->post('bulan', TRUE);
+        // $bulan          = date("m", strtotime($bulan));
         $tahun          = $this->input->post('tahun', TRUE);
-        $periode        = $tahun . $bulan;
+        $ibulan = $this->input->post('ibulan', TRUE);
+        $periode        = $tahun . $ibulan;
         $jml            = $this->input->post('jml', TRUE);
         $idcompany      = $this->id_company;
 

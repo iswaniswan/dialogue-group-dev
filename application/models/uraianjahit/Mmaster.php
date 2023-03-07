@@ -359,7 +359,7 @@ class Mmaster extends CI_Model
         } */
         return $this->db->query("SELECT
                 DISTINCT 
-                d.id AS id_product_wip,
+                a.id AS id_product_wip,
                 d.i_product_wip,
                 upper(d.e_product_wipname) AS e_product_name,
                 n_fc,
@@ -399,7 +399,7 @@ class Mmaster extends CI_Model
                         AND b.id_company_bagian = c.id_company)
                 WHERE
                     b.i_status IN ('1', '2', '3', '6')
-                    AND b.id_referensi = '$id'
+                    AND b.id_referensi = '$id' and b.id_company = '$this->id_company'
                 GROUP BY 1, 2) f ON
                 (f.id_referensi = a.id_forecast
                     AND a.id_product_wip = f.id_product_wip)

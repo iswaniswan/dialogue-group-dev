@@ -345,7 +345,9 @@ class Mmaster extends CI_Model
                                 WHERE e_type_makloon_name ILIKE '%makloon packing%'
                             ) && b.id_type_makloon";
 
-        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY 1 ASC";        
+        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY 1 ASC";
+        
+        // var_dump($sql);
 
         return $this->db->query($sql);
     }
@@ -904,6 +906,8 @@ class Mmaster extends CI_Model
                 AND id_company = '$tujuan_company' 
                 AND i_bagian = '$tujuan_bagian'
             ) ORDER BY id";
+
+        // var_dump($sql); die();
 
         return $this->db->query($sql);
     }

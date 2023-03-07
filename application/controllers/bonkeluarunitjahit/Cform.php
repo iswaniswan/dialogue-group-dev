@@ -283,7 +283,7 @@ class Cform extends CI_Controller {
             'jenis'         => $this->db->query(" select * from tr_jenis_barang_keluar where id in (1,2)")->result(),
             'data'          => $this->mmaster->cek_data($id, $idcompany)->row(),
             'detail'        => $this->mmaster->cek_datadetail($id, $idcompany,$i_bagian)->result(),            
-        );
+        );        
 
         $this->Logger->write('Membuka Menu Edit '.$this->global['title']);
         $this->load->view($this->global['folder'].'/vformedit', $data);

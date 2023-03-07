@@ -44,15 +44,15 @@ class Mmaster extends CI_Model
             $data       = '';
 
             if (check_role($i_menu, 2)) {
-                $data     .= "<a href=\"#\" title='Detail' onclick='show(\"$folder/cform/view/$id/$id_marker\",\"#main\"); return false;'><i class='ti-eye text-success'></i></a>&nbsp;&nbsp;&nbsp;";
+                $data     .= "<a href=\"#\" title='Detail' onclick='show(\"$folder/cform/view/$id/$id_marker\",\"#main\"); return false;'><i class='ti-eye fa-lg text-success'></i></a>&nbsp;&nbsp;&nbsp;";
             }
 
             if (check_role($i_menu, 3)) {
-                $data         .= "<a href=\"#\" title='Edit' onclick='show(\"$folder/cform/edit/$id/$dfrom/$dto/$id_marker\",\"#main\"); return false;'><i class='ti-pencil-alt '></i></a>&nbsp;&nbsp;&nbsp;";
+                $data         .= "<a href=\"#\" title='Edit' onclick='show(\"$folder/cform/edit/$id/$dfrom/$dto/$id_marker\",\"#main\"); return false;'><i class='ti-pencil-alt  fa-lg'></i></a>&nbsp;&nbsp;&nbsp;";
             }
 
             if (check_role($i_menu, 5)) {
-                $data .= "<a href=\"#\" title='Print' onclick='cetak($id); return false;'><i class='ti-printer text-warning'></i></a>&nbsp;&nbsp;&nbsp;";
+                $data .= "<a href=\"#\" title='Print' onclick='cetak($id); return false;'><i class='ti-printer fa-lg text-warning'></i></a>&nbsp;&nbsp;&nbsp;";
             }
 
             // if (check_role($i_menu, 4)) {

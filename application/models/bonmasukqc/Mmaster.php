@@ -271,6 +271,7 @@ class Mmaster extends CI_Model
                         AND a.i_status = '6'
                         AND ab.n_quantity_product <> 0
                         AND ab.n_sisa <> 0";   
+        // var_dump($sql);
 
         return $this->db->query($sql);
     }

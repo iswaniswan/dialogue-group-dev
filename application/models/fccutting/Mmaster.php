@@ -166,27 +166,31 @@ class Mmaster extends CI_Model
     public function datareferensi($folder, $i_menu, $dfrom, $dto)
     {
         $datatables = new Datatables(new CodeigniterAdapter);
-        $datatables->query("WITH CTE AS (SELECT
-                0 AS NO, a.id, a.i_document, a.d_document,
-                bulan(to_date(a.i_periode, 'YYYYmm')) || ' ' || substring(a.i_periode, 1, 4) AS i_periode,
-                substring(a.i_periode, 1, 4) AS tahun, substring(a.i_periode, 5, 6) AS bulan,
-                c.e_bagian_name, b.name as company_name, e_remark, a.i_bagian, '$i_menu' AS i_menu, '$folder' AS folder,
-                '$dfrom' AS dfrom, '$dto' AS dto, ROW_NUMBER() OVER (ORDER BY a.id) AS i
-            FROM
-                tm_schedule_jahit a
-            INNER JOIN tr_bagian c ON(
-                a.i_bagian = c.i_bagian AND a.id_company = c.id_company
-            )
-            inner join public.company b ON (b.id = a.id_company)
-            WHERE
-                to_date(a.i_periode, 'YYYYmm') BETWEEN to_date('$dfrom', '01-mm-yyyy') AND to_date('$dto', '01-mm-yyyy')
-                AND a.i_status = '6' AND (a.id_company = '$this->company' OR a.id_company_referensi = '$this->company') 
-                AND a.id NOT IN (SELECT unnest(id_referensi) FROm tm_fccutting WHERE i_status IN ('1','2','3','6'))
-            )
-            SELECT id, i, i_document, d_document, i_periode, tahun, bulan, e_bagian_name, company_name, e_remark, i_bagian,
-            i_menu, dfrom, dto, folder,
-            (select count(i) as jml from CTE) As jml from CTE
-            ", FALSE);
+
+        $sql = "WITH CTE AS (SELECT
+                    0 AS NO, a.id, a.i_document, a.d_document,
+                    bulan(to_date(a.i_periode, 'YYYYmm')) || ' ' || substring(a.i_periode, 1, 4) AS i_periode,
+                    substring(a.i_periode, 1, 4) AS tahun, substring(a.i_periode, 5, 6) AS bulan,
+                    c.e_bagian_name, b.name as company_name, e_remark, a.i_bagian, '$i_menu' AS i_menu, '$folder' AS folder,
+                    '$dfrom' AS dfrom, '$dto' AS dto, ROW_NUMBER() OVER (ORDER BY a.id) AS i
+                FROM
+                    tm_schedule_jahit a
+                INNER JOIN tr_bagian c ON(
+                    a.i_bagian = c.i_bagian AND a.id_company = c.id_company
+                )
+                inner join public.company b ON (b.id = a.id_company)
+                WHERE
+                    to_date(a.i_periode, 'YYYYmm') BETWEEN to_date('$dfrom', '01-mm-yyyy') AND to_date('$dto', '01-mm-yyyy')
+                    AND a.i_status = '6' AND (a.id_company = '$this->company' OR a.id_company_referensi = '$this->company') 
+                    AND a.id NOT IN (SELECT unnest(id_referensi) FROm tm_fccutting WHERE i_status IN ('1','2','3','6'))
+                )
+                SELECT id, i, i_document, d_document, i_periode, tahun, bulan, e_bagian_name, company_name, e_remark, i_bagian,
+                i_menu, dfrom, dto, folder,
+                (select count(i) as jml from CTE) As jml from CTE";
+
+        // var_dump($sql); die();
+
+        $datatables->query($sql, FALSE);
 
         $datatables->add('action', function ($data) {
             $id           = $data['id'];
