@@ -342,7 +342,8 @@
                     $('#iproduct'+id).val(data[0].i_product_base);
                     $('#idcolorproduct'+id).val(data[0].id_color);
                     $('#ecolorproduct'+id).val(data[0].e_color_name);
-                    $('#nquantity_stok'+id).val(data[0].n_saldo_akhir);
+                    // $('#nquantity_stok'+id).val(data[0].n_saldo_akhir);
+                    $('#nquantity_stok'+id).val(data[0].stok_repair);
                     // $('#nquantity'+id).focus();
                 },
                 error: function () {

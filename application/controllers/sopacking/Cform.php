@@ -3,12 +3,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xls;
 use PhpOffice\PhpSpreadsheet\Style\Border;
-use PhpOffice\PhpSpreadsheet\Style\Fill;
+/* use PhpOffice\PhpSpreadsheet\Style\Fill; */
 use PhpOffice\PhpSpreadsheet\Style\Style;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+/* use PhpOffice\PhpSpreadsheet\Style\Alignment; */
 use PhpOffice\PhpSpreadsheet\Style\Conditional;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Style\Protection;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
+
 
 
 class Cform extends CI_Controller {
@@ -192,9 +195,10 @@ class Cform extends CI_Controller {
             $idmaterial = $this->input->post('idmaterial' . $i, TRUE);
             $idmaterial = explode('|', $idmaterial);
             $qty        = str_replace(",","",$this->input->post('nquantity' . $i, TRUE));
+            $qty_repair = str_replace(",","",$this->input->post('nquantity_repair' . $i, TRUE));
             $eremark    = $this->input->post('eremark' . $i, TRUE);
             if ($idmaterial[0]!=null || $idmaterial[0]!='') {
-                $this->mmaster->simpandetail($idcompany, $id, $idmaterial[0], $qty, $eremark);
+                $this->mmaster->simpandetail($idcompany, $id, $idmaterial[0], $qty, $qty_repair, $eremark);
             }
         }
         if ($this->db->trans_status() === FALSE) {
@@ -447,6 +451,20 @@ class Cform extends CI_Controller {
         );
         /** End Style */
 
+        /** validation */
+        $validation = $spreadsheet->getActiveSheet()->getCell("F1")->getDataValidation();
+        $validation->setType(DataValidation::TYPE_WHOLE);
+        $validation->setErrorStyle(DataValidation::STYLE_STOP);
+        $validation->setAllowBlank(true);
+        $validation->setShowInputMessage(true);
+        $validation->setShowErrorMessage(true);
+        $validation->setErrorTitle('Input error');
+        $validation->setError('Input is not allowed!');
+        $validation->setPromptTitle('Allowed input');
+        $validation->setPrompt("Only Number Value allowed");
+        $validation->setFormula1(0);
+        $validation->setFormula2(999999999);
+
         $abjad  = range('A', 'Z');
         $satu = 1;
         $dua = 2;
@@ -456,7 +474,7 @@ class Cform extends CI_Controller {
             ->setCellValue("A2", "FORMAT UPLOAD STOCKOPNAME PACKING");
         $spreadsheet->getActiveSheet()->setTitle('Format Stockopname');
         $h = 3;
-        $header = ['#', 'ID BARANG', 'KODE BARANG', 'NAMA BARANG', 'WARNA', 'SO','KETERANGAN', 'ASAL'];
+        $header = ['#', 'ID BARANG', 'KODE BARANG', 'NAMA BARANG', 'WARNA', 'SO (BAGUS)','SO (Repair)', 'KETERANGAN', 'ASAL'];
         for ($i = 0; $i < count($header); $i++) {
             $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $h, $header[$i]);
         }
@@ -475,10 +493,13 @@ class Cform extends CI_Controller {
             foreach ($sql->result() as $row) {
                 $no++;
                 $isi = [
-                    $no, $row->id, $row->i_product_base, $row->e_product_basename, $row->e_color_name, 0, "", $row->name
+                    $no, $row->id, $row->i_product_base, $row->e_product_basename, $row->e_color_name, 0, 0, "", $row->name
                 ];
                 for ($i = 0; $i < count($isi); $i++) {
                     $spreadsheet->setActiveSheetIndex(0)->setCellValue($abjad[$i] . $j, $isi[$i]);
+                    if (($abjad[$i] == 'F') or ($abjad[$i] == 'G')) {
+                        $spreadsheet->getActiveSheet()->setDataValidation($abjad[$i].$j, $validation);
+                    }
                 }
                 $j++;
             }
@@ -487,6 +508,14 @@ class Cform extends CI_Controller {
         $spreadsheet->getActiveSheet()->duplicateStyle($sharedStyle2, $abjad[0] . $x . ":" . $abjad[count($header) - 1] . $y);
         $spreadsheet->getActiveSheet()->getStyle($abjad[0] . $j . ":" . $abjad[count($header) - 1] . $j)->getBorders()->getTop()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
         /** End Sheet */
+
+        /** protection */
+        $spreadsheet->getActiveSheet()->getProtection()->setSheet(true);
+        $spreadsheet->getActiveSheet()->getProtection()->setPassword('THEPASSWORD');
+        $hrow = $spreadsheet->getActiveSheet(0)->getHighestDataRow('A');
+        
+        $spreadsheet->getActiveSheet()->getStyle("F4:H" . $y)->getProtection()->setLocked(Protection::PROTECTION_UNPROTECTED);
+        
 
         $writer = new Xls($spreadsheet);
         $nama_file = "SO_Packing.xls";
@@ -564,21 +593,24 @@ class Cform extends CI_Controller {
         for ($n = 4; $n <= $hrow; $n++) {
             $id_product = strtoupper($spreadsheet->getActiveSheet()->getCell('B' . $n)->getValue());
             $qty        = (int)$spreadsheet->getActiveSheet()->getCell('F' . $n)->getValue();
-            if (($qty > 0) && $id_product != "") {
-
-                $company = $this->mmaster->get_company_by_product($id_product)->row();
-
-                $aray[] = array(
-                    'id'                => $id_product,
-                    'i_product_wip'     => strtoupper($spreadsheet->getActiveSheet()->getCell('C' . $n)->getValue()),
-                    'e_product_wipname' => strtoupper($spreadsheet->getActiveSheet()->getCell('D' . $n)->getValue()),
-                    'e_color_name'      => strtoupper($spreadsheet->getActiveSheet()->getCell('E' . $n)->getValue()),
-                    'qty'               => $qty,
-                    'e_remark'          => $spreadsheet->getActiveSheet()->getCell('G' . $n)->getValue(),
-                    'company'           => $spreadsheet->getActiveSheet()->getCell('H' . $n)->getValue(),
-                    'id_company' => $company->id_company,
-                );
+            $qty_repair = (int)$spreadsheet->getActiveSheet()->getCell('G' . $n)->getValue();
+            if ((($qty <= 0) and ($qty_repair <= 0 )) or ($id_product == "")) {
+                continue;
             }
+
+            $company = $this->mmaster->get_company_by_product($id_product)->row();
+
+            $aray[] = array(
+                'id'                => $id_product,
+                'i_product_wip'     => strtoupper($spreadsheet->getActiveSheet()->getCell('C' . $n)->getValue()),
+                'e_product_wipname' => strtoupper($spreadsheet->getActiveSheet()->getCell('D' . $n)->getValue()),
+                'e_color_name'      => strtoupper($spreadsheet->getActiveSheet()->getCell('E' . $n)->getValue()),
+                'qty'               => $qty,
+                'qty_repair'        => $qty_repair,
+                'e_remark'          => $spreadsheet->getActiveSheet()->getCell('H' . $n)->getValue(),
+                'company'           => $spreadsheet->getActiveSheet()->getCell('I' . $n)->getValue(),
+                'id_company' => $company->id_company,
+            );
         }
 
         $data = array(

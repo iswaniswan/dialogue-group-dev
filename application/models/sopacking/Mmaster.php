@@ -414,13 +414,14 @@ class Mmaster extends CI_Model
         $this->db->insert('tm_stockopname_unitpacking', $data);
     }
 
-    public function simpandetail($idcompany, $id, $idmaterial, $qty, $eremark)
+    public function simpandetail($idcompany, $id, $idmaterial, $qty, $qty_repair, $eremark)
     {
         $data = array(
             'id_company'      => $idcompany,
             'id_document'     => $id,
             'id_product_base' => $idmaterial,
             'n_quantity'      => $qty,
+            'n_quantity_repair' => $qty_repair,
             'e_remark'        => $eremark,
         );
         $this->db->insert('tm_stockopname_unitpacking_item', $data);

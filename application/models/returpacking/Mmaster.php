@@ -417,5 +417,96 @@ class Mmaster extends CI_Model {
         $this->db->where('id', $id);
         return $this->db->get();
     }
+
+    /**
+     * 
+     * parameter yang dipakai
+     * 
+     * @var integer $id_product
+     * @var integer $id_bagian
+     * @var String $d_from, 
+     * @var String $d_to
+     * 
+     */
+    public function get_stock_repair($params)
+    {
+        $id_product = $params['id_product'];
+        $id_bagian = $params['id_bagian'];
+        $d_from = @$params['d_from'];
+        $d_to = @$params['d_to'];        
+
+        /** default adalah bulan berjalan */
+        $current_date = date('Y-m-d');
+        $current_periode = date('Ym');
+        $current_periode_first_date = date('Y-m-01');
+        $current_periode_last_date = date("Y-m-t", strtotime($current_date));
+
+        if ($d_from == null) {
+            $d_from = $current_periode_first_date;
+        }
+
+        if ($d_to == null) {
+            $d_to = $current_periode_last_date;
+        }        
+
+        // TODO: (+) hitung dari product masuk yang dikonversi menjadi repair (product repair)
+        $sql = "SELECT id_product_base, sum(n_quantity) 
+                from tm_product_repair_item tpri 
+                INNER JOIN tm_product_repair tpr ON tpr.id=tpri.id_product_repair 
+                WHERE tpr.i_status = '6'
+                    AND tpr.id_bagian = '$id_bagian'
+                    AND tpr.d_document BETWEEN '$d_from' AND '$d_to'
+                    AND id_product_base = '$id_product'
+                GROUP BY 1";
+        $q_product_repair = $this->db->query($sql)->row();        
+
+        // TODO: (+) hitung dari saldo awal:
+        $bagian = $this->get_bagian_by_id($id_bagian)->row();
+        $sql = "SELECT id_product_base, sum(n_saldo_awal_repair)
+                FROM tm_mutasi_saldoawal_base_unitpacking tmsbu 
+                WHERE i_bagian = '$bagian->i_bagian' AND id_company = '$bagian->id_company'
+                    AND e_mutasi_periode = '$current_periode'
+                    AND id_product_base = '$id_product'
+                GROUP BY 1;";
+        $q_saldo_awal = $this->db->query($sql)->row();
+        
+
+        // TODO: (+) hitung dari stock opname repair, diambil dari upload terakhir sesuai periode
+        $sql = "SELECT id_product_base, n_quantity_repair 
+                FROM tm_stockopname_unitpacking_item tsui
+                INNER JOIN tm_stockopname_unitpacking tsu ON tsu.id = tsui.id_document 
+                WHERE tsu.i_bagian = '$bagian->i_bagian' AND tsu.id_company = '$bagian->id_company'
+                    AND tsu.i_periode = '$current_periode'
+                    AND tsu.i_status = '6'
+                    AND id_product_base = '$id_product'
+                ORDER BY tsu.d_approve DESC, tsu.d_document DESC, tsu.d_entry DESC
+                LIMIT 1";
+        $q_so = $this->db->query($sql)->row();
+
+        // TODO: (-) hitung dari STB Retur
+        $sql = "SELECT id_product, sum(n_quantity) 
+                FROM tm_retur_produksi_gdjd_item trpgi 
+                INNER JOIN tm_retur_produksi_gdjd trpg ON trpg.id = trpgi.id_document 
+                WHERE trpg.i_status = '6'
+                    AND trpg.i_bagian = '$bagian->i_bagian' AND trpg.id_company ='$bagian->id_company'
+                    AND trpg.d_document BETWEEN '$current_periode_first_date' AND '$current_periode_last_date'
+                    AND id_product = '$id_product'
+                GROUP BY 1;";
+        $q_retur = $this->db->query($sql)->row();
+
+        $qty = (@$q_product_repair->sum + @$q_saldo_awal->sum + @$q_so->sum) 
+                    - @$q_retur->sum;
+
+        return $qty;
+
+    }
+
+    public function get_bagian($i_bagian, $id_company)
+    {
+        $sql = "SELECT * FROM tr_bagian WHERE i_bagian ='$i_bagian' AND id_company='$id_company'";
+
+        return $this->db->query($sql);
+    }
+
 }
 /* End of file Mmaster.php */

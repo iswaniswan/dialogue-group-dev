@@ -70,13 +70,15 @@
                         <th width="25%">Asal</th>
                         <th width="25%">Nama Barang</th>
                         <th width="5%">Warna</th>
-                        <th class="text-right" width="5%;">Jumlah SO</th>
+                        <th class="text-right" width="5%;">SO (Bagus)</th>
+                        <th class="text-right" width="5%;">SO (Repair)</th>
                         <th width="auto">Keterangan</th>
                         <th class="text-center" width="3%" ;>Act</th>
                     </tr>
                     <tr>
                         <th colspan="4" class="text-center">TOTAL</th>
                         <th class="text-right" width="3%;" id="total" data-id="total"><?= 0; ?></th>
+                        <th class="text-right" width="3%;" id="total_repair" data-id="total_repair"><?= 0; ?></th>
                         <th colspan="2"></th>
                     </tr>
                 </thead>
@@ -109,6 +111,15 @@
                                         value="<?= $row['qty']; ?>" 
                                         onkeyup="sumo(<?= $i; ?>);">
                             </td>
+                            <td class="text-center">
+                                <input type="number" data-qty-repair="<?= $i; ?>" 
+                                        id="nquantity_repair<?= $i; ?>" 
+                                        class="form-control text-right input-sm inputitem-repair" 
+                                        autocomplete="off" 
+                                        name="nquantity_repair<?= $i; ?>" 
+                                        value="<?= $row['qty_repair']; ?>" 
+                                        onkeyup="sumo_repair(<?= $i; ?>);">
+                            </td>
                             <td><input type="text" class="form-control input-sm" name="eremark<?= $i; ?>" id="eremark<?= $i; ?>" placeholder="Isi keterangan jika ada!" value="<?= $row['e_remark']; ?>"/></td>
                             <td><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td>
                         </tr>
@@ -129,6 +140,8 @@
         }); */
 
         sumo();
+        sumo_repair();
+        
         var $table = $('#tabledatay');
 
         function buildTable(elm) {
@@ -263,10 +276,17 @@
                             class="form-control text-right input-sm inputitem" autocomplete="off" 
                             name="nquantity${i}" value="0" onkeyup="sumo();">
                 </td>`;
+        cols += `<td class="text-center">
+                    <input type="number" id="nquantity_repair${i}" 
+                            class="form-control text-right input-sm inputitem-repair" autocomplete="off" 
+                            name="nquantity_repair${i}" value="0" onkeyup="sumo_repair();">
+                </td>`;
         cols += `<td>
                     <input type="text" class="form-control input-sm" name="eremark${i}" id="eremark${i}" placeholder="Isi keterangan jika ada!"/>
                 </td>`;
-        cols += `<td class="text-center"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger text-center"><i class="ti-close"></i></button></td></tr>`;
+        cols += `<td class="text-center">
+                    <button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger text-center"><i class="ti-close"></i></button>
+                </td></tr>`;
         newRow.append(cols);
         $("#tabledatay").append(newRow);
         $('#idmaterial' + i).select2({
@@ -374,6 +394,27 @@
         console.log(total);
 
         $('#total').text(total);
+    }
+
+    function sumo_repair(){
+        
+        let total = 0;
+
+        let allQuantity = $('html .inputitem-repair');
+
+        allQuantity.each(function() {
+            let value = $(this).val();
+
+            if (isNaN(value) || value == '' || value === undefined) {
+                value = 0;
+            }
+
+            total += parseFloat(value);
+        })
+        
+        console.log(total);
+
+        $('#total_repair').text(total);
     }
     
     /**

@@ -168,6 +168,16 @@ class Cform extends CI_Controller {
         if (!empty($eproduct) and $eproduct != '') {
             $query = $this->mmaster->getproduct($eproduct, $ibagian, $itujuan);
             $data = $query->result_array();
+
+            $id_company = $this->session->userdata('id_company');
+            $q_bagian = $this->mmaster->get_bagian($ibagian, $id_company)->row();
+            $params = [
+                'id_product' => $eproduct,
+                'id_bagian' => $q_bagian->id,
+            ];
+    
+            $stock_repair = $this->mmaster->get_stock_repair($params);
+            $data[0]['stok_repair'] = $stock_repair;
         }        
 
         echo json_encode($data);
@@ -391,5 +401,33 @@ class Cform extends CI_Controller {
 
         $this->load->view($this->global['folder'].'/vformview', $data);
     }
+
+    public function get_stock_repair()
+    {
+        $id_product = $this->input->post('id_product');
+        $id_bagian = $this->input->post('id_bagian');
+
+        if ($id_bagian == null) {
+            $i_bagian = $this->input->post('ibagian');
+            return;
+        }
+
+        return;
+
+        $params = [
+            'id_product' => $id_product,
+            'id_bagian' => $id_bagian,
+        ];
+
+        $qty = $this->mmaster->get_stock_repair($params);
+
+        $result = [
+            'id_product' => $id_product,
+            'qty' => $qty
+        ];
+        
+        return json_encode($result);
+    }
+
 }
 /* End of file Cform.php */
