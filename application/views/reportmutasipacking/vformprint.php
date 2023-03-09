@@ -216,13 +216,13 @@
 								<td class="text-right <?= warna($key->n_keluar_1); ?>"><?= $key->n_keluar_1; ?></td>
 								<td class="text-right <?= warna($key->n_keluar_2); ?>"><?= $key->n_keluar_2; ?></td>
 								<td class="text-right <?= warna($key->n_keluar_3); ?>"><?= $key->n_keluar_3; ?></td>
-								<?php /** konversi dari bagus ke repair tidak dihitung sebagai pengiriman keluar */ ?>
-								<td class="text-right <?= warna($key->n_masuk_3); ?>"><?= $key->n_masuk_3 ?></td>
-								<?php $total_kirim = $key->n_keluar_1 + $key->n_keluar_2 + $key->n_keluar_3 ?>
+								<?php /** konversi dari bagus ke repair tetep dihitung sebagai pengiriman keluar */ ?>
+								<td class="text-right <?= warna($key->n_keluar_4) ?>"><?= $key->n_keluar_4 ?></td>
+								<?php $total_kirim = $key->n_keluar_1 + $key->n_keluar_2 + $key->n_keluar_3 + $key->n_keluar_4 ?>
 								<td class="text-right <?= warna($total_kirim); ?>"><?= $total_kirim?></td>
 								
 								<?php /** saldo akhir bagus */
-									$saldo_akhir_bagus = ($key->n_saldo_awal + $key->n_masuk_1 + $key->n_masuk_2) - $total_kirim; 
+									$saldo_akhir_bagus = ($key->n_saldo_awal + $total_terima) - $total_kirim - $key->n_keluar_4//repair; 
 								?>
 								<td class="text-right <?= warna($saldo_akhir_bagus); ?>"><?= $saldo_akhir_bagus; ?></td>
 
@@ -244,7 +244,7 @@
 								<td class="text-right <?= warna($total_so); ?>"><?= $total_so; ?></td>
 
 								<?php /**  selisih bagus */ 
-									$selisih_bagus = $saldo_akhir_bagus - $total_kirim - $key->n_so;
+									$selisih_bagus = $saldo_akhir_bagus - $key->n_so;
 								?>
 								<td class="text-right <?= warna($selisih_bagus); ?>"><?= $selisih_bagus; ?></td>
 
