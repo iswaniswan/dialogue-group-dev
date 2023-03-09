@@ -154,7 +154,7 @@
                                     <input type="text" value="<?= $row->e_color_name;?>" readonly id="ecolorproduct<?=$i;?>" name="ecolorproduct[]" class="form-control input-sm">
                                 </td>
                                 <td>
-                                    <input type="number" id="nquantity_stok<?=$i;?>" value="<?= $row->n_saldo_akhir;?>" class="form-control input-sm" readonly>                                    
+                                    <input type="number" id="nquantity_stok<?=$i;?>" value="<?= $row->n_saldo_akhir;?>" class="form-control input-sm input-stock-repair" readonly>                                    
                                 </td>
                                 <td>
                                 <input type="number" value="<?= $row->n_quantity;?>" id="nquantity<?=$i;?>" class="form-control text-right input-sm" autocomplete="off" name="nquantity[]" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" value="0" onkeyup="angkahungkul(this);hetang(<?=$i;?>);">
@@ -181,7 +181,15 @@
     $(document).ready(function () {
         $('.select2').select2();
         showCalendar('.date');
+        getStockEach();
     });
+
+    function getStockEach() {
+        $('.input-stock-repair').each(function() {
+            let elementSelect = $(this).closest('tr').find('.select2');
+            elementSelect.trigger('change');
+        });
+    }
 
     $("form").submit(function(event) {
         event.preventDefault();
@@ -299,7 +307,8 @@
             $.ajax({
                 type: "post",
                 data: {
-                    'eproduct'  : eproduct
+                    'eproduct'  : eproduct,
+                    'ibagian' : $('#ibagian').val(),
                 },
                 url: '<?= base_url($folder.'/cform/getproduct'); ?>',
                 dataType: "json",
@@ -308,7 +317,7 @@
                     $('#iproduct'+id).val(data[0].i_product_base);
                     $('#idcolorproduct'+id).val(data[0].id_color);
                     $('#ecolorproduct'+id).val(data[0].e_color_name);
-                    $('#nquantity_stok'+id).val(data[0].n_saldo_akhir);
+                    $('#nquantity_stok'+id).val(data[0].stok_repair);
                     $('#nquantity'+id).focus();
                 },
                 error: function () {

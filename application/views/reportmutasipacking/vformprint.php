@@ -58,52 +58,100 @@
 								<th class="table-active text-center middle" rowspan="5">Nama Barang</th>
 								<th class="table-active text-center middle" rowspan="5">Warna</th>
 								<th class="table-active text-center middle" rowspan="5">Kategori<br>Penjualan</th>
-								<th class="text-center table-warning middle" rowspan="4">Saldo<br>Awal</th>
-								<th class="table-active middle table-success text-center" colspan="3">MASUK</th>
-								<th class="table-active middle table-danger text-center" colspan="4">KELUAR</th>
-								<th class="text-center table-warning middle" rowspan="4">Saldo<br>Akhir</th>
-								<th class="text-center table-active middle" rowspan="4">SO</th>
-								<th class="text-center table-danger middle" rowspan="4">Selisih</th>
+								<th rowspan="2" colspan="3"></th>
+								<th class="table-active middle table-success text-center" colspan="4">MASUK</th>
+								<th class="table-active middle table-danger text-center" colspan="5">KELUAR</th>
+								<th rowspan="2" colspan="9"></th>								
 							</tr>
 							<tr>
 								<th class="text-center">Dari WIP</th>
 								<th class="text-center">Dari Pengisian</th>
+								<th class="text-center">Repair</th>
 								<th class="text-center table-success middle" rowspan="3">Total<br>Terima</th>
 								<th class="text-center">ke GUDANG JADI</th>
 								<th class="text-center">ke WIP</th>
 								<th class="text-center">Ke Pengisan</th>
-								<th class="text-center table-success middle" rowspan="3">Total<br>Kirim</th>
+								<th class="text-center">Repair</th>
+								<th class="text-center table-danger middle" rowspan="3">Total<br>Kirim</th>
 							</tr>
 							<tr>
+								<th class="text-center">A1</th>
+								<th class="text-center">A2</th>
+								<th class="text-center">A3</th>
 								<th class="text-center">G</th>
 								<th class="text-center">Makloon</th>
+								<th class="text-center">R</th>
 								<th class="text-center">K</th>
 								<th class="text-center">XX</th>
 								<th class="text-center">Makloon</th>
+								<th class="text-center">R</th>
+								<th class="text-center">J1</th>
+								<th class="text-center">J2</th>
+								<th class="text-center">J3</th>
+								<th class="text-center">K1</th>
+								<th class="text-center">K2</th>
+								<th class="text-center">K3</th>
+								<th class="text-center">L1</th>
+								<th class="text-center">L2</th>
+								<th class="text-center">L3</th>
 							</tr>
 							<tr>
+								<th class="text-center table-warning middle" rowspan="1">Saldo<br>Awal (Bagus)</th>
+								<th class="text-center table-warning middle" rowspan="1">Saldo<br>Awal (Repair)</th>
+								<th class="text-center table-warning middle" rowspan="1">Total<br>Saldo Awal</th>
 								<!-- <th class="table-active text-center">#</th> -->
+
 								<th class="text-center table-info">Terima untuk<br>di packing<br>(BARANG BAGUS)</th>
 								<th class="text-center table-info">Terima<br>Proses Pengisian</th>
+								<th class="text-center table-info">Konversi<br>bagus ke repair</th>
 								<th class="text-center table-info">Kirim hasil<br>packing</th>
 								<th class="text-center table-info">Kirim repair<br>(UNTUK DIPERBAIKI)</th>
 								<th class="text-center table-info">Kirim untuk<br>proses pengisian</th>
+								<th class="text-center table-info">Konversi<br>bagus ke repair</th>
+
+								<th class="text-center table-warning middle" rowspan="1">Saldo<br>Akhir (Bagus)</th>
+								<th class="text-center table-warning middle" rowspan="1">Saldo<br>Akhir (Repair)</th>
+								<th class="text-center table-warning middle" rowspan="1">Total<br>Saldo Akhir</th>
+
+								<th class="text-center table-active middle" rowspan="1">SO<br>(Bagus)</th>
+								<th class="text-center table-active middle" rowspan="1">SO<br>(Repair)</th>
+								<th class="text-center table-active middle" rowspan="1">Total<br>SO</th>
+
+								<th class="text-center table-danger middle" rowspan="1">Selisih<br>(Bagus)</th>
+								<th class="text-center table-danger middle" rowspan="1">Selisih<br>(Repair)</th>
+								<th class="text-center table-danger middle" rowspan="1">Total<br>Selisih</th>
 							</tr>
 							<?php
+							$n_saldo_awal_bagus = 0;
+							$n_saldo_awal_repair = 0;
 							$n_saldo_awal_total = 0;
-							$n_masuk_1 = 0;
-							$n_masuk_2 = 0;
+										
+							$n_masuk_1 = 0; /** dari WIP */
+							$n_masuk_2 = 0; /** dari pengisian */
+							$n_masuk_3 = 0; /** dari konversi bagus ke repair */							
 							$n_masuk_total = 0;
-							$n_keluar_1 = 0;
-							$n_keluar_2 = 0;
-							$n_keluar_3 = 0;
+
+							$n_keluar_1 = 0; /** ke gudang jadi */
+							$n_keluar_2 = 0; /** ke WIP */
+							$n_keluar_3 = 0; /** ke Pengisian */
+							$n_keluar_4 = 0; /** dari konversi bagus ke repair */							
 							$n_keluar_total = 0;
-							$n_saldo_akhir = 0;
-							$n_so = 0;
-							$n_selisih = 0;
+
+							$n_saldo_akhir_bagus = 0;
+							$n_saldo_akhir_repair = 0;
+							$n_saldo_akhir_total = 0;
+
+							$n_so_bagus = 0;
+							$n_so_repair = 0;
+							$n_so_total = 0;
+
+							$n_selisih_bagus = 0;
+							$n_selisih_repair = 0;
+							$n_selisih_total = 0;
+
 							if ($data->num_rows() > 0) {
 								foreach ($data->result() as $row) {
-									$n_saldo_awal_total += $row->n_saldo_awal;
+									$n_saldo_awal_bagus += $row->n_saldo_awal;
 									$n_masuk_1 += $row->n_masuk_1;
 									$n_masuk_2 += $row->n_masuk_2;
 									$n_masuk_total += $row->n_masuk_total;
@@ -111,51 +159,106 @@
 									$n_keluar_2 += $row->n_keluar_2;
 									$n_keluar_3 += $row->n_keluar_3;
 									$n_keluar_total += $row->n_keluar_total;
-									$n_saldo_akhir += $row->n_saldo_akhir;
-									$n_so += $row->n_so;
-									$n_selisih += $row->n_selisih;
+									// $n_saldo_akhir += $row->n_saldo_akhir;
+									// $n_so += $row->n_so;
+									// $n_selisih += $row->n_selisih;
 								}
 							} ?>
 							<tr>
-								<td class="text-right bold"><?= $n_saldo_awal_total; ?></td>
-								<td class="text-right bold"><?= $n_masuk_1; ?></td>
-								<td class="text-right bold"><?= $n_masuk_2; ?></td>
-								<td class="text-right bold"><?= $n_masuk_total; ?></td>
-								<td class="text-right bold"><?= $n_keluar_1; ?></td>
-								<td class="text-right bold"><?= $n_keluar_2; ?></td>
-								<td class="text-right bold"><?= $n_keluar_3; ?></td>
-								<td class="text-right bold"><?= $n_keluar_total; ?></td>
-								<td class="text-right bold"><?= $n_saldo_akhir; ?></td>
-								<td class="text-right bold"><?= $n_so; ?></td>
-								<td class="text-right bold"><?= $n_selisih; ?></td>
+								<td class="text-right bold"><?= $n_saldo_awal_bagus ?></td>
+								<td class="text-right bold"><?= $n_saldo_awal_repair ?></td>
+								<td class="text-right bold"><?= $n_saldo_awal_total ?></td>
+
+								<td class="text-right bold"><?= $n_masuk_1 ?></td>
+								<td class="text-right bold"><?= $n_masuk_2 ?></td>
+								<td class="text-right bold"><?= $n_masuk_3 ?></td>
+								<td class="text-right bold"><?= $n_masuk_total ?></td>
+
+								<td class="text-right bold"><?= $n_keluar_1 ?></td>
+								<td class="text-right bold"><?= $n_keluar_2 ?></td>
+								<td class="text-right bold"><?= $n_keluar_3 ?></td>
+								<td class="text-right bold"><?= $n_keluar_4 ?></td>
+								<td class="text-right bold"><?= $n_keluar_total ?></td>
+
+								<td class="text-right bold"><?= $n_saldo_akhir_bagus ?></td>
+								<td class="text-right bold"><?= $n_saldo_akhir_repair ?></td>
+								<td class="text-right bold"><?= $n_saldo_akhir_total ?></td>
+
+								<td class="text-right bold"><?= $n_so_bagus ?></td>
+								<td class="text-right bold"><?= $n_so_repair ?></td>
+								<td class="text-right bold"><?= $n_so_total ?></td>
+
+								<td class="text-right bold"><?= $n_selisih_bagus ?></td>
+								<td class="text-right bold"><?= $n_selisih_repair ?></td>
+								<td class="text-right bold"><?= $n_selisih_total ?></td>
 							</tr>
 						</thead>
 						<tbody>
-							<?php
-							$i = 0;
-							if ($data->num_rows() > 0) {
-								foreach ($data->result() as $key) {
-									$i++; ?>
-									<tr>
-										<td class="text-center"><?= $i; ?></td>
-										<td><?= $key->i_product_wip; ?></td>
-										<td><?= wordwrap($key->e_product_basename, 30, "<br>\n"); ?></td>
-										<td><?= wordwrap($key->e_color_name, 15, "<br>\n"); ?></td>
-										<td><?= $key->e_class_name; ?></td>
-										<td class="text-right <?= warna($key->n_saldo_awal); ?>"><?= $key->n_saldo_awal; ?></td>
-										<td class="text-right <?= warna($key->n_masuk_1); ?>"><?= $key->n_masuk_1; ?></td>
-										<td class="text-right <?= warna($key->n_masuk_2); ?>"><?= $key->n_masuk_2; ?></td>
-										<td class="text-right <?= warna($key->n_masuk_total); ?>"><?= $key->n_masuk_total; ?></td>
-										<td class="text-right <?= warna($key->n_keluar_1); ?>"><?= $key->n_keluar_1; ?></td>
-										<td class="text-right <?= warna($key->n_keluar_2); ?>"><?= $key->n_keluar_2; ?></td>
-										<td class="text-right <?= warna($key->n_keluar_3); ?>"><?= $key->n_keluar_3; ?></td>
-										<td class="text-right <?= warna($key->n_keluar_total); ?>"><?= $key->n_keluar_total; ?></td>
-										<td class="text-right <?= warna($key->n_saldo_akhir); ?>"><?= $key->n_saldo_akhir; ?></td>
-										<td class="text-right <?= warna($key->n_so); ?>"><?= $key->n_so; ?></td>
-										<td class="text-right <?= warna($key->n_selisih); ?>"><?= $key->n_selisih; ?></td>
-									</tr>
-							<?php }
-							} ?>
+						<?php $i = 0;foreach ($data->result() as $key) { $i++; ?>
+							<tr>
+								<td class="text-center"><?= $i; ?></td>
+								<td><?= $key->i_product_wip; ?></td>
+								<td><?= wordwrap($key->e_product_basename, 30, "<br>\n"); ?></td>
+								<td><?= wordwrap($key->e_color_name, 15, "<br>\n"); ?></td>
+								<td><?= $key->e_class_name; ?></td>
+
+								<td class="text-right <?= warna($key->n_saldo_awal); ?>"><?= $key->n_saldo_awal; ?></td>
+								<td class="text-right <?= warna($key->n_saldo_awal_repair); ?>"><?= $key->n_saldo_awal_repair; ?></td>
+								<?php $total_saldo_awal = $key->n_saldo_awal + $key->n_saldo_awal_repair; ?>
+								<td class="text-right <?= warna($total_saldo_awal); ?>"><?= $total_saldo_awal; ?></td>
+
+								<td class="text-right <?= warna($key->n_masuk_1); ?>"><?= $key->n_masuk_1; ?></td>
+								<td class="text-right <?= warna($key->n_masuk_2); ?>"><?= $key->n_masuk_2; ?></td>
+								<td class="text-right <?= warna($key->n_masuk_3); ?>"><?= $key->n_masuk_3; ?></td>
+								<?php $total_terima = $key->n_masuk_1 + $key->n_masuk_2 + $key->n_masuk_3; ?>
+								<td class="text-right <?= warna($total_terima); ?>"><?= $total_terima; ?></td>
+
+								<td class="text-right <?= warna($key->n_keluar_1); ?>"><?= $key->n_keluar_1; ?></td>
+								<td class="text-right <?= warna($key->n_keluar_2); ?>"><?= $key->n_keluar_2; ?></td>
+								<td class="text-right <?= warna($key->n_keluar_3); ?>"><?= $key->n_keluar_3; ?></td>
+								<?php /** konversi dari bagus ke repair tidak dihitung sebagai pengiriman keluar */ ?>
+								<td class="text-right <?= warna($key->n_masuk_3); ?>"><?= $key->n_masuk_3 ?></td>
+								<?php $total_kirim = $key->n_keluar_1 + $key->n_keluar_2 + $key->n_keluar_3 ?>
+								<td class="text-right <?= warna($total_kirim); ?>"><?= $total_kirim?></td>
+								
+								<?php /** saldo akhir bagus */
+									$saldo_akhir_bagus = ($key->n_saldo_awal + $key->n_masuk_1 + $key->n_masuk_2) - $total_kirim; 
+								?>
+								<td class="text-right <?= warna($saldo_akhir_bagus); ?>"><?= $saldo_akhir_bagus; ?></td>
+
+								<?php /** saldo akhir repair */ 
+									$saldo_akhir_repair = ($key->n_saldo_awal_repair + $key->n_masuk_3);
+								?>
+								<td class="text-right <?= warna($saldo_akhir_repair); ?>"><?= $saldo_akhir_repair; ?></td>
+
+								<?php /** saldo akhir total (bagus + repair) */ 
+									$saldo_akhir_total = $saldo_akhir_bagus + $saldo_akhir_repair;
+								?>
+								<td class="text-right <?= warna($saldo_akhir_total); ?>"><?= $saldo_akhir_total; ?></td>
+								
+								<td class="text-right <?= warna($key->n_so); ?>"><?= $key->n_so; ?></td>
+								<td class="text-right <?= warna($key->n_so_repair); ?>"><?= $key->n_so_repair; ?></td>
+								<?php /** total SO */ 
+									$total_so = $key->n_so + $key->n_so_repair;
+								?>
+								<td class="text-right <?= warna($total_so); ?>"><?= $total_so; ?></td>
+
+								<?php /**  selisih bagus */ 
+									$selisih_bagus = $saldo_akhir_bagus - $total_kirim - $key->n_so;
+								?>
+								<td class="text-right <?= warna($selisih_bagus); ?>"><?= $selisih_bagus; ?></td>
+
+								<?php /**  selisih repair */ 
+									$selisih_repair = $saldo_akhir_repair - $key->n_so_repair;
+								?>
+								<td class="text-right <?= warna($selisih_repair); ?>"><?= $selisih_repair; ?></td>
+
+								<?php /**  selisih total */ 
+									$selisih_total = $selisih_bagus - $selisih_repair;
+								?>
+								<td class="text-right <?= warna($selisih_total); ?>"><?= $selisih_total; ?></td>
+							</tr>
+						<?php }?>
 						</tbody>
 					</table>
 					<!-- </div> -->

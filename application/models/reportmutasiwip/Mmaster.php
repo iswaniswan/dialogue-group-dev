@@ -8,7 +8,7 @@ class Mmaster extends CI_Model
 {
 	public function getbagian($search)
 	{
-		$this->db->select('aa.id, a.i_bagian, e_bagian_name')->distinct();
+		$this->db->select('a.id, a.i_bagian, e_bagian_name')->distinct();
 		$this->db->from('tr_bagian a');
 		$this->db->join('tr_departement_cover b', 'b.i_bagian = a.i_bagian', 'inner');
 		$this->db->where('i_departement', $this->session->userdata('i_departement'));
@@ -19,10 +19,7 @@ class Mmaster extends CI_Model
 		$this->db->where('a.i_type', '23');
 		$this->db->like('lower(e_bagian_name)', strtolower($search), 'both');
 		$this->db->order_by('e_bagian_name');
-		$query = $this->db->get();
-
-		$last_query = $this->db->last_query();
-		var_dump($last_query); die();
+		return $this->db->get();
 	}
 
 	public function getkategori($search)

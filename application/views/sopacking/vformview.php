@@ -54,7 +54,8 @@
                         <th width="15%">Kode Barang</th>
                         <th width="25%">Nama Barang</th>
                         <th width="5%">Warna</th>
-                        <th class="text-right" width="5%;">Jumlah SO</th>
+                        <th class="text-right" width="5%;">SO (Bagus)</th>
+                        <th class="text-right" width="5%;">SO (Repair)</th>
                         <th width="auto">Keterangan</th>
                     </tr>
                     <tr>
@@ -63,6 +64,13 @@
                             <?php $total = 0;
                             foreach ($datadetail as $rowtotal) {
                                 $total += (float) $rowtotal['n_quantity'];
+                            }
+                            echo $total; ?>
+                        </th>
+                        <th class="text-right" id="total_repair">
+                            <?php $total = 0;
+                            foreach ($datadetail as $rowtotal) {
+                                $total += (float) $rowtotal['n_quantity_repair'];
                             }
                             echo $total; ?>
                         </th>
@@ -82,6 +90,7 @@
                             <td><?= $key['e_product_wipname']; ?></td>
                             <td><?= $key['e_color_name']; ?></td>
                             <td class="text-right"><?= $key["n_quantity"]; ?></td>
+                            <td class="text-right"><?= $key["n_quantity_repair"]; ?></td>
                             <td><?= $key["e_remark"]; ?></td>
                             <!-- <td class="col-1"><button type="button" title="Delete" class="ibtnDel btn btn-circle btn-danger"><i class="ti-close"></i></button></td> -->
                         </tr>

@@ -172,7 +172,7 @@ class Cform extends CI_Controller {
             'jnsbarang'     => $jnsbarang,
             'kategori'      => $this->mmaster->kategoribarang($ikelompok, $id_company)->row(),
             'jenis'         => $this->mmaster->jenisbarang($jnsbarang, $id_company)->row(),
-            'data2'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang)->result(),
+            // 'data2'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang)->result(),
             'data'         => $this->mmaster->get_data($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang),
         );
         $this->Logger->write('Membuka Menu Cetak '.$this->global['title']);

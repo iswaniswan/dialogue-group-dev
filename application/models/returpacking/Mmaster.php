@@ -380,10 +380,17 @@ class Mmaster extends CI_Model {
         $jangkaakhir = date('Y-m-d',strtotime("-1 days"));
         $periode = date('Ym');
         $idcompany = $this->session->userdata('id_company');
-        $sql = "SELECT a.id_document as i_retur, a.id_product,
-                    b.i_product_base, b.e_product_basename, c.id as id_color,
-                    b.i_color, c.e_color_name, a.n_quantity,
-                    a.e_remark, coalesce(n_saldo_akhir,0) n_saldo_akhir
+        $sql = "SELECT a.id_document as i_retur, 
+                    a.id_product,
+                    b.i_product_base, 
+                    b.e_product_basename, 
+                    c.id as id_color,
+                    b.i_color, 
+                    c.e_color_name, 
+                    a.n_quantity,
+                    a.e_remark, 
+                    coalesce(n_saldo_akhir,0) 
+                    n_saldo_akhir
                 FROM tm_retur_produksi_gdjd_item a 
                 JOIN tm_retur_produksi_gdjd d ON a.id_document = d.id 
                 JOIN tr_product_base b ON a.id_product = b.id /*AND d.id_company = b.id_company */
@@ -449,6 +456,8 @@ class Mmaster extends CI_Model {
             $d_to = $current_periode_last_date;
         }        
 
+        $n_stock = 0;
+
         // TODO: (+) hitung dari product masuk yang dikonversi menjadi repair (product repair)
         $sql = "SELECT id_product_base, sum(n_quantity) 
                 from tm_product_repair_item tpri 
@@ -458,7 +467,11 @@ class Mmaster extends CI_Model {
                     AND tpr.d_document BETWEEN '$d_from' AND '$d_to'
                     AND id_product_base = '$id_product'
                 GROUP BY 1";
-        $q_product_repair = $this->db->query($sql)->row();        
+        $q_product_repair = $this->db->query($sql);
+        if (@$q_product_repair->row() != null) {
+            $sum = $q_product_repair->row()->sum;
+            $n_stock += intval($sum);
+        };
 
         // TODO: (+) hitung dari saldo awal:
         $bagian = $this->get_bagian_by_id($id_bagian)->row();
@@ -468,8 +481,11 @@ class Mmaster extends CI_Model {
                     AND e_mutasi_periode = '$current_periode'
                     AND id_product_base = '$id_product'
                 GROUP BY 1;";
-        $q_saldo_awal = $this->db->query($sql)->row();
-        
+        $q_saldo_awal = $this->db->query($sql);
+        if (@$q_saldo_awal->row() != null) {
+            $sum = $q_saldo_awal->row()->sum;
+            $n_stock += intval($sum);
+        };   
 
         // TODO: (+) hitung dari stock opname repair, diambil dari upload terakhir sesuai periode
         $sql = "SELECT id_product_base, n_quantity_repair 
@@ -481,7 +497,11 @@ class Mmaster extends CI_Model {
                     AND id_product_base = '$id_product'
                 ORDER BY tsu.d_approve DESC, tsu.d_document DESC, tsu.d_entry DESC
                 LIMIT 1";
-        $q_so = $this->db->query($sql)->row();
+        $q_so = $this->db->query($sql);
+        if (@$q_so->row() != null) {
+            $sum = $q_so->row()->n_quantity_repair;
+            $n_stock += intval($sum);
+        };
 
         // TODO: (-) hitung dari STB Retur
         $sql = "SELECT id_product, sum(n_quantity) 
@@ -492,12 +512,13 @@ class Mmaster extends CI_Model {
                     AND trpg.d_document BETWEEN '$current_periode_first_date' AND '$current_periode_last_date'
                     AND id_product = '$id_product'
                 GROUP BY 1;";
-        $q_retur = $this->db->query($sql)->row();
+        $q_retur = $this->db->query($sql);
+        if (@$q_retur->row() != null) {
+            $sum = $q_retur->row()->sum;
+            $n_stock -= intval($sum);
+        };        
 
-        $qty = (@$q_product_repair->sum + @$q_saldo_awal->sum + @$q_so->sum) 
-                    - @$q_retur->sum;
-
-        return $qty;
+        return $n_stock;
 
     }
 

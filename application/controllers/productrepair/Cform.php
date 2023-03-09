@@ -286,7 +286,7 @@ class Cform extends CI_Controller {
         $d_document = $this->input->post('d_document');
         /** reformat tanggal */
         $d_document = formatYmd($d_document);
-        $e_remark = $this->input->post('e_reamrk');
+        $e_remark = $this->input->post('e_remark');
         $items = $this->input->post('items');
 
         $result = [

@@ -539,6 +539,7 @@ class Mmaster extends CI_Model
                 a.id_company,
                 c2.name,
                 a.n_quantity,
+                a.n_quantity_repair,
                 a.e_remark 
             FROM tm_stockopname_unitpacking_item a
             INNER JOIN tr_product_base x ON a.id_product_base = x.id

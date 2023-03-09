@@ -164,12 +164,17 @@ class Mmaster extends CI_Model
 		}
 
 		$sql = "SELECT a.i_product_wip,a.e_product_basename,b.e_color_name, d.e_class_name,
-			n_saldo_awal, n_saldo_awal_total,
-			n_masuk_1, n_masuk_2, n_masuk_total,			
-			n_keluar_1, n_keluar_2, n_keluar_3, n_keluar_total,
-			n_saldo_akhir, n_saldo_akhir_total,
-			n_so, n_so_total,
-			n_selisih, n_selisih_total
+			n_saldo_awal, n_saldo_awal_repair, n_saldo_awal_total,
+			n_masuk_1, n_masuk_2, n_masuk_3, n_masuk_total,			
+			n_keluar_1, n_keluar_2, n_keluar_3, n_keluar_4, n_keluar_total,
+			n_saldo_akhir AS n_saldo_akhir_bagus,
+			0 AS n_saldo_akhir_repair,
+			n_saldo_akhir_total,
+			n_so, 
+			n_so_repair,
+			n_so_total,
+			n_selisih, 
+			n_selisih_total
 			/* x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, initcap(b.e_color_name) AS e_color_name */ 
       		FROM f_mutasi_packing('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
 			INNER JOIN tr_product_base a ON (
@@ -182,8 +187,7 @@ class Mmaster extends CI_Model
 			LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
 			WHERE x.id_company is not null
 			$where $where2
-			ORDER BY d.e_class_name, a.i_product_wip, a.e_product_basename, b.e_color_name
-    	";
+			ORDER BY d.e_class_name, a.i_product_wip, a.e_product_basename, b.e_color_name";
 
 // var_dump($sql); die();
 
