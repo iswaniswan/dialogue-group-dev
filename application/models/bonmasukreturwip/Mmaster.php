@@ -192,7 +192,6 @@ class Mmaster extends CI_Model
                 INNER JOIN public.company c ON c.id = trpg.id_company 
                 WHERE trpg.id_bagian_tujuan = '$ibagian'
                     AND trpg.i_status = '6'
-                    AND (trpg.d_document >= '2023-02-01' AND  trpg.d_document <= '2023-02-28')
                     AND trpg.i_document ILIKE '%$cari%'";
 
         // var_dump($sql); die();

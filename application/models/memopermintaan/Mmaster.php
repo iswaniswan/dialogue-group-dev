@@ -77,8 +77,8 @@ class Mmaster extends CI_Model
                 LEFT join public.company h ON (h.id = a.id_company)
                 LEFT join public.company h2 ON (h2.id = a.id_company_penerima)
                 WHERE a.i_status <> '5'
-                    -- AND a.id_company_penerima = '$this->id_company' 
-                    AND g.id_company = '$this->id_company' 
+                    /* AND a.id_company_penerima = '$this->id_company' */
+                    AND a.id_company = '$this->id_company' 
                     $and $bagian
                 ORDER BY d_document DESC, a.i_document DESC";
                 

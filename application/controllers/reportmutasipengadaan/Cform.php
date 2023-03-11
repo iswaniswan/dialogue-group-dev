@@ -188,6 +188,9 @@ class Cform extends CI_Controller {
         $awal = DateTime::createFromFormat('d-m-Y', $this->uri->segment(7));
         $akhir   = DateTime::createFromFormat('d-m-Y', $this->uri->segment(8));
 
+        $i_status = $this->uri->segment(9);
+        $i_status = str_replace("-", ",", $i_status); 
+
         $dfrom = $awal->format('Y-m-d');
         $dto = $akhir->format('Y-m-d');
         $d_jangka_awal = $awal->format('Y-m-01');
@@ -207,7 +210,7 @@ class Cform extends CI_Controller {
             'dto'           => $this->uri->segment(8),
             'kategori'      => $this->mmaster->kategoribarang($ikelompok, $id_company)->row(),
             'jenis'         => $this->mmaster->jenisbarang($jnsbarang, $id_company)->row(),
-            'data'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang),
+            'data'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_status),
             // 'data2'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang)->result(),
         );
         $this->Logger->write('Membuka Menu Cetak '.$this->global['title']);

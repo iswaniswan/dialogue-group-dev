@@ -108,7 +108,7 @@
                                 <th class="text-center table-info">Terima Repair<br>(UNTUK DIPERBAIKI)</th>
                                 <th class="text-center table-success">Total<br>Terima</th>
                                 <th class="text-center table-info">Kirim untuk<br>di packing<br>(BARANG BAGUS)</th>
-                                <th class="text-center table-info">Kirim pengembalian repair<br>(HASIL PERBAIKAN)</th>
+                                <th class="text-center table-info">BAGUS <br>&<br> REPAIR</th>
                                 <th class="text-center table-info">Kirim Grade B<br>(FINAL)</th>
                                 <th class="text-center table-info">Kirim repair<br>(UNTUK DIPERBAIKI)</th>
                                 <th class="text-center table-info">Kirim Sample<br>(UNTUK SAMPLE)</th>

@@ -221,13 +221,22 @@
 								<?php $total_kirim = $key->n_keluar_1 + $key->n_keluar_2 + $key->n_keluar_3 + $key->n_keluar_4 ?>
 								<td class="text-right <?= warna($total_kirim); ?>"><?= $total_kirim?></td>
 								
-								<?php /** saldo akhir bagus */
-									$saldo_akhir_bagus = ($key->n_saldo_awal + $total_terima) - $total_kirim - $key->n_keluar_4//repair; 
+								<?php /** saldo akhir bagus 
+								 * 
+								 * (A1 + G + Makloon) - (K + Makloon + R Keluar) 
+								 * 
+								 * */
+									$saldo_akhir_bagus = ($key->n_saldo_awal + $key->n_masuk_1 + $key->n_masuk_2) 
+										- ($key->n_keluar_1 + $key->n_keluar_3 + $key->n_keluar_4);
 								?>
 								<td class="text-right <?= warna($saldo_akhir_bagus); ?>"><?= $saldo_akhir_bagus; ?></td>
 
-								<?php /** saldo akhir repair */ 
-									$saldo_akhir_repair = ($key->n_saldo_awal_repair + $key->n_masuk_3);
+								<?php /** saldo akhir repair 
+								 * 
+								 * (A2 + R Masuk) - XX
+								 * 
+								 * */ 
+									$saldo_akhir_repair = ($key->n_saldo_awal_repair + $key->n_masuk_3) - $key->n_keluar_2;
 								?>
 								<td class="text-right <?= warna($saldo_akhir_repair); ?>"><?= $saldo_akhir_repair; ?></td>
 
@@ -254,7 +263,7 @@
 								<td class="text-right <?= warna($selisih_repair); ?>"><?= $selisih_repair; ?></td>
 
 								<?php /**  selisih total */ 
-									$selisih_total = $selisih_bagus - $selisih_repair;
+									$selisih_total = abs($selisih_bagus) + abs($selisih_repair);
 								?>
 								<td class="text-right <?= warna($selisih_total); ?>"><?= $selisih_total; ?></td>
 							</tr>

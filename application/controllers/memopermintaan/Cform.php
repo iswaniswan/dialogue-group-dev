@@ -908,7 +908,8 @@ class Cform extends CI_Controller
         //     array_push($abjadBanyak, $value);
         // }
         $idforecast = $this->input->post('idforecast');
-        $id_type = $this->input->post('id_type');
+        $permintaan = explode("|", $this->input->post('id_type'));
+        $id_type = $permintaan[1];
         $filename = $this->id_company . "_Memo_Permintaan_BB.xls";
         $aray = array();
         $fc_jahit = 0;

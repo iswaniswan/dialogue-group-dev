@@ -151,8 +151,8 @@ class Mmaster extends CI_Model
     	", FALSE);
 	}
 
-	function get_data($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang)
-	{
+	function get_data($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_status)
+	{		
 		$where = '';
 		if ($jnsbarang != 'null') {
 			$where = "AND a.i_type_code = '$jnsbarang'";
@@ -162,7 +162,7 @@ class Mmaster extends CI_Model
 		if ($ikelompok != 'null') {
 			$where2 = "AND (a.i_kode_kelompok = '$ikelompok')";
 		}
-
+		
 		$sql = "SELECT a.i_product_wip,a.e_product_basename,b.e_color_name, d.e_class_name,
 			n_saldo_awal, n_saldo_awal_repair, n_saldo_awal_total,
 			n_masuk_1, n_masuk_2, n_masuk_3, n_masuk_total,			
@@ -176,7 +176,7 @@ class Mmaster extends CI_Model
 			n_selisih, 
 			n_selisih_total
 			/* x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, initcap(b.e_color_name) AS e_color_name */ 
-      		FROM f_mutasi_packing('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+      		FROM f_mutasi_packing_approval('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$i_status') x
 			INNER JOIN tr_product_base a ON (
 											/*a.id_company = x.id_company AND*/ a.id = x.id_product_base
 									)
@@ -189,7 +189,7 @@ class Mmaster extends CI_Model
 			$where $where2
 			ORDER BY d.e_class_name, a.i_product_wip, a.e_product_basename, b.e_color_name";
 
-// var_dump($sql); die();
+	// var_dump($sql); die();
 
 		return $this->db->query($sql);
 	}

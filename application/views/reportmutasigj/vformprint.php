@@ -101,7 +101,7 @@
                                 <th class="table-warning text-center">Saldo Awal<br>GRADE B</th>
                                 <th class="table-warning text-center">Total<br>Saldo Awal</th>
                                 <th class="text-center table-info">Terima<br>BJ</th>
-                                <th class="text-center table-info">Terima Repair<br>(HASIL PERBAIKAN)</th>
+                                <th class="text-center table-info">BAGUS & <br>REPAIR</th>
                                 <th class="text-center table-info">Terima Repair<br>(UNTUK DIPERBAIKI)</th>
                                 <th class="text-center table-info">Terima Grade B<br>(FINAL)</th>
                                 <th class="text-center table-success">Total<br>Terima</th>

@@ -899,13 +899,13 @@ class Mmaster extends CI_Model
         $tujuan_bagian = $tujuan[1];
 
         $sql = "SELECT * FROM tr_jenis_barang_keluar 
-            WHERE id IN (
-                SELECT UNNEST(id_jenis_barang_keluar) 
-                FROM tr_tujuan_menu 
-                WHERE i_menu = '$this->i_menu' 
-                AND id_company = '$tujuan_company' 
-                AND i_bagian = '$tujuan_bagian'
-            ) ORDER BY id";
+                WHERE id IN (
+                    SELECT UNNEST(id_jenis_barang_keluar) 
+                    FROM tr_tujuan_menu 
+                    WHERE i_menu = '$this->i_menu' 
+                    AND id_company = '$tujuan_company' 
+                    AND i_bagian = '$tujuan_bagian'
+                ) ORDER BY id";
 
         // var_dump($sql); die();
 

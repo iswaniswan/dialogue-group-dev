@@ -876,7 +876,6 @@ class Mmaster extends CI_Model
                 (d.id_referensi = c.id_document AND c.id_product_wip = d.id_product_wip AND c.id_company = a.id_company)
             WHERE
                 a.f_status = 't'
-                -- AND a.id_company = '$this->id_company'
                 AND c.id_document = '$id'
                 AND c.n_quantity > 0
             ORDER BY

@@ -83,7 +83,7 @@ class Mmaster extends CI_Model
 		return $this->db->get();
 	}
 
-	function cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang)
+	function cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_status)
 	{
 		$where = '';
 		if ($jnsbarang != 'null') {
@@ -95,22 +95,22 @@ class Mmaster extends CI_Model
 			$where2 .= "AND (a.i_kode_kelompok = '$ikelompok')";
 		}
 
-		$this->db->select("
-			x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, initcap(b.e_color_name) AS e_color_name 
-			from f_mutasi_gudang_jadi('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
-			INNER JOIN tr_product_base a ON
-				(a.id_company = x.id_company
-				AND a.id = x.id_product_base)
-			INNER JOIN tr_color b ON
-				(a.id_company = b.id_company
-				AND a.i_color = b.i_color)
-			INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
-			LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
-			WHERE x.id_company is not null
-			$where $where2
-			ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name
-			", FALSE);
-		return $this->db->get();
+		$sql = "SELECT x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, initcap(b.e_color_name) AS e_color_name 
+				from f_mutasi_gudang_jadi('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$i_status') x
+				INNER JOIN tr_product_base a ON
+					(a.id_company = x.id_company
+					AND a.id = x.id_product_base)
+				INNER JOIN tr_color b ON
+					(a.id_company = b.id_company
+					AND a.i_color = b.i_color)
+				INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
+				LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
+				WHERE x.id_company is not null
+				$where $where2
+				ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name";
+		// return $this->db->get();
+
+		return $this->db->query($sql);
 	}
 }
 /* End of file Mmaster.php */

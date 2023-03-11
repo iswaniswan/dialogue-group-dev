@@ -35,8 +35,24 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <div class="col-sm-12">
+                    <div class="form-group row mt-4">
+                        <div class="col-md-6">
+                            <div class="row justifiy-content-start">
+                                <div class="form-check mx-4">
+                                    <input class="form-check-input" type="checkbox" value="6" id="cb_approve" checked disabled>
+                                    <label class="form-check-label" for="cb_approve">
+                                        <span class="ml-2">Approve</span>
+                                    </label>
+                                </div>
+                                <div class="form-check mx-4">
+                                    <input class="form-check-input" type="checkbox" value="2" id="cb_sent">
+                                    <label class="form-check-label" for="cb_sent">
+                                    <span class="ml-2">Wait Approval</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
                             <button type="button" id="submit" class="btn btn-inverse btn-block btn-sm" onclick="print()"> <i class="fa fa-search"></i>&nbsp;&nbsp;View</button>
                         </div>
                     </div>
@@ -198,6 +214,13 @@
     });
 
     function print() {
+        let status_document = ['6'];
+        if ($('#cb_sent').is(':checked')) {
+            status_document.push($('#cb_sent').val());
+        }
+
+        var i_status = status_document.join('-');
+
         var lebar = 1024;
         var tinggi = 768;
 
@@ -210,7 +233,9 @@
         if (ibagian == "" || jnsbarang == "" || ikelompok == "" || dfrom == "" || dto == "") {
             swal("Data Header belum Lengkap !!!");
         } else {
-            eval('window.open("<?php echo site_url($folder); ?>"+"/cform/cetak/"+ibagian+"/"+jnsbarang+"/"+ikelompok+"/"+dfrom+"/"+dto,"","screenX=0,screenY=0,left=0,top=0,fullscreen=yes,width="+(screen.availWidth-5)+",height="+(screen.availHeight-(55)))');
+            const base_url = "<?php echo site_url($folder); ?>";
+            const url = `${base_url}/cform/cetak/${ibagian}/${jnsbarang}/${ikelompok}/${dfrom}/${dto}/${i_status}`;
+            eval('window.open(url,"","screenX=0,screenY=0,left=0,top=0,fullscreen=yes,width="+(screen.availWidth-5)+",height="+(screen.availHeight-(55)))');
 
             //window.open("about:blank", "", "screenX=0,screenY=0,left=0,top=0,fullscreen=yes,width="+(screen.availWidth-5)+",height="+(screen.availHeight-(55)));
         }

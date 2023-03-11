@@ -50,7 +50,6 @@
     $(document).ready(function() {
         showCalendar2('.date', null);
         datatablemod('#tabledata', base_url + '<?= $folder; ?>/Cform/data/<?= $dfrom . '/' . $dto; ?>');
-
     });
 
     $("#dfrom").change(function() {
@@ -74,4 +73,35 @@
             }
         }
     });
+
+    function _datatable(table, link) {
+        $(table).DataTable({
+            serverSide: false,
+            autoWidth: false,
+            processing: true,
+            ajax: link,
+            // dom: "Bfrtip",
+            // buttons: ["copy", "csv", "excel", "pdf", "print"],
+            language: {
+                decimal: "",
+                emptyTable: "Tidak ada data yang tersedia pada tabel ini",
+                info: "Menampilkan _START_ Sampai _END_ Dari _TOTAL_ data",
+                infoEmpty: "Menampilkan 0 Sampai 0 Dari 0 Data",
+                infoFiltered: "(disaring dari _MAX_ data keseluruhan)",
+                infoPostFix: "",
+                thousands: ".",
+                lengthMenu: "<span>Tampilkan</span> _MENU_ Data",
+                loadingRecords: "Sedang memproses...",
+                processing: "Sedang memproses...",
+                search: "Cari:",
+                zeroRecords: "Tidak ditemukan data yang sesuai",
+                paginate: {
+                    first: "Pertama",
+                    last: "Terakhir",
+                    next: "Selanjutnya",
+                    previous: "Sebelumnya"
+                }
+            }
+        });
+    }
 </script>

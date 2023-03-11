@@ -83,7 +83,7 @@ class Mmaster extends CI_Model
 		return $this->db->get();
 	}
 
-	function cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_product)
+	function cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_product, $i_status)
 	{
 		$where = '';
 		if ($jnsbarang != 'null' && $jnsbarang != '') {
@@ -100,8 +100,8 @@ class Mmaster extends CI_Model
 			$where3 = "AND (a.id = '$i_product')";
 		}
 
-		$sql = "x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, upper(b.e_color_name) AS e_color_name 
-				from f_mutasi_wip('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+		$sql = "SELECT x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name, case when e_jenis_bagian isnull then initcap(e_bagian_name) else initcap(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, upper(b.e_color_name) AS e_color_name 
+				from f_mutasi_wip('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$i_status') x
 				INNER JOIN tr_product_base a ON
 					(a.id_company = x.id_company
 					AND a.id = x.id_product_base)
@@ -116,8 +116,10 @@ class Mmaster extends CI_Model
 
 		// var_dump($sql); die();
 
-		$this->db->select($sql, FALSE);
-		return $this->db->get();
+		// $this->db->select($sql, FALSE);
+		// return $this->db->get();
+
+		return $this->db->query($sql);
 	}
 
 	public function get_product($i_kategori, $i_sub_kategori, $search)
