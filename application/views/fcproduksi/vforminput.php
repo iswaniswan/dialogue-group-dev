@@ -127,6 +127,10 @@
                     $tot_nquantity_tmp = 0;
 
                     foreach ($datadetail as $key) {
+                        //DEBUG
+                        if ($key['i_product_base'] != 'DGA4205') continue;
+                        //DEBUG
+
                         $i++;
 
                         $tot_nquantity_fc += $key["n_quantity_fc"];

@@ -41,17 +41,19 @@ class Cform extends CI_Controller
     public function gudang()
     {
         $filter = [];
-        $filter[] = array(
-            'id'    => 'null',
-            'text'  => 'SEMUA UNIT JAHIT',
-        );
+        // $filter[] = array(
+        //     'id'    => 'null',
+        //     'name' => '',
+        //     'text'  => 'SEMUA UNIT JAHIT',
+        // );
         $search = str_replace("'", "", $this->input->get('search'));
         $data = $this->mmaster->getbagian($search);
         // $data = $this->mmaster->getbagian();
         foreach ($data->result() as $ibagian) {
             $filter[] = array(
-                'id'    => $ibagian->i_bagian,
+                'id'    => $ibagian->id,
                 'text'  => $ibagian->e_bagian_name,
+                'name' => $ibagian->name,
             );
         }
         echo json_encode($filter);

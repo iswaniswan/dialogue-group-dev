@@ -327,7 +327,7 @@ class Mmaster extends CI_Model
         // var_dump($i_periode_next); die;
         // var_dump(expression)
 
-        return $this->db->query("
+        $sql = "
         WITH cte AS (
             SELECT
                 c.id_company ,
@@ -621,10 +621,11 @@ class Mmaster extends CI_Model
                     AND a.id_company = d.id_company)
             LEFT JOIN tm_forecast_produksi_item_tmp e ON
                 (e.id_product_base = a.id_product_base)
-            ORDER BY
-                kategori,
-                i_product_base
-        ");
+            ORDER BY kategori, i_product_base";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
 
         // TERBARU : 12-10-2022
         // return $this->db->query("

@@ -165,7 +165,7 @@
                             <?php if($data->i_level == 'PLV00'){?>
                                 <select disabled name="ikepalapusat" id="ikepalapusat" class="form-control select2" disabled="">
                                 </select>
-                            <?}else{?>
+                            <?php }else{?>
                                 <select name="ikepalapusat" id="ikepalapusat" class="form-control select2" disabled="">
                                    <!--  <option value="<?=$data->i_kepala_pusat?>"><?=$data->i_pusat;?></option> -->
                                     <?php foreach($kepalapusat as $row): ?>
@@ -177,7 +177,7 @@
                                     
                                     <?php endforeach; ?> 
                                 </select>
-                            <?}?>
+                            <?php }?>
                         </div>                        
                     </div>   
                     <div class="form-group row">

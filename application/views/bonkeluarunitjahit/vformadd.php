@@ -41,7 +41,7 @@
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span>
                         </div>
                         <div class="col-sm-2">
-                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<? echo date("d-m-Y"); ?>">
+                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?php echo date("d-m-Y"); ?>">
                         </div>
                         <div class="col-sm-3">
                             <select name="itujuan" id="itujuan" class="form-control select2" onchange="number();">

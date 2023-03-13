@@ -8,34 +8,85 @@ class Mmaster extends CI_Model
 {
 	public function getbagian($search)
 	{
-		$this->db->select('a.id, a.i_bagian, e_bagian_name')->distinct();
-		$this->db->from('tr_bagian a');
-		$this->db->join('tr_departement_cover b', 'b.i_bagian = a.i_bagian', 'inner');
-		$this->db->where('i_departement', $this->session->userdata('i_departement'));
-		$this->db->where('i_level', $this->session->userdata('i_level'));
-		$this->db->where('username', $this->session->userdata('username'));
-		$this->db->where('b.id_company', $this->session->userdata('id_company'));
-		$this->db->where('a.id_company', $this->session->userdata('id_company'));
-		$this->db->where('a.i_type', '10');
-		$this->db->like('lower(e_bagian_name)', strtolower($search), 'both');
-		$this->db->order_by('e_bagian_name');
-		return $this->db->get();
+		// $this->db->select('a.id, a.i_bagian, e_bagian_name')->distinct();
+		// $this->db->from('tr_bagian a');
+		// $this->db->join('tr_departement_cover b', 'b.i_bagian = a.i_bagian', 'inner');
+		// $this->db->where('i_departement', $this->session->userdata('i_departement'));
+		// $this->db->where('i_level', $this->session->userdata('i_level'));
+		// $this->db->where('username', $this->session->userdata('username'));
+		// $this->db->where('b.id_company', $this->session->userdata('id_company'));
+		// $this->db->where('a.id_company', $this->session->userdata('id_company'));
+		// $this->db->where('a.i_type', '10');
+		// $this->db->like('lower(e_bagian_name)', strtolower($search), 'both');
+		// $this->db->order_by('e_bagian_name');
+		// $this->db->get();
+
+		$id_company = $this->session->userdata('id_company');
+		$i_level = $this->session->userdata('i_level');
+		$username = $this->session->userdata('username');
+		$i_departement = $this->session->userdata('i_departement');
+
+		$sql_internal = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, c.name
+							FROM tr_bagian a
+							INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
+							INNER JOIN public.company c ON c.id = a.id_company
+							WHERE i_departement = '$i_departement'
+							AND i_level = '$i_level'
+							AND username = '$username'
+							AND a.id_company = '$id_company'
+							AND a.f_status = 't'
+							AND a.i_type = '10'
+							AND  lower(e_bagian_name) LIKE '%$search%' ESCAPE '!'";
+
+		// var_dump($sql); die();
+
+		$sql_external = "SELECT DISTINCT a.id, a.i_bagian, a.e_bagian_name, c.name
+							FROM tr_bagian a
+							INNER JOIN tr_departement_cover b ON (b.i_bagian = a.i_bagian AND b.id_company = a.id_company )
+							INNER JOIN (
+										SELECT id, UNNEST (id_type_makloon) id_type_makloon 
+										FROM tr_bagian
+										) d ON d.id = a.id
+							INNER JOIN public.company c ON c.id = a.id_company 
+							WHERE i_departement = '$i_departement'
+								AND i_level = '$i_level'
+								AND username = '$username'
+								AND a.id_company != '$id_company'
+								AND a.f_status = 't'
+								AND a.i_type = '10'
+								AND lower(e_bagian_name) LIKE '%$search%' ESCAPE '!'
+								AND d.id_type_makloon IN (
+										SELECT id FROM tr_type_makloon ttm WHERE e_type_makloon_name ILIKE '%makloon jahit%'
+								)";
+
+		$sql = "$sql_internal UNION ALL $sql_external";
+
+		// var_dump($sql); die();
+
+		return $this->db->query($sql);
 	}
 
 	public function getkategori($search)
 	{
 		$id_company = $this->session->userdata('id_company');
-		return $this->db->query("SELECT DISTINCT
-				a.i_kode_kelompok,
-				b.e_nama_kelompok
-            FROM 
-                tr_product_base a
-            INNER JOIN 
-				tr_kelompok_barang b ON (a.i_kode_kelompok = b.i_kode_kelompok)
-            WHERE
-				a.id_company = '$id_company'
-				AND b.e_nama_kelompok ILIKE '%$search%'
-			ORDER BY 2");
+		// return $this->db->query("SELECT DISTINCT
+		// 		a.i_kode_kelompok,
+		// 		b.e_nama_kelompok
+        //     FROM 
+        //         tr_product_base a
+        //     INNER JOIN 
+		// 		tr_kelompok_barang b ON (a.i_kode_kelompok = b.i_kode_kelompok)
+        //     WHERE
+		// 		a.id_company = '$id_company'
+		// 		AND b.e_nama_kelompok ILIKE '%$search%'
+		// 	ORDER BY 2");
+
+		$sql = "SELECT * 
+				FROM tr_kelompok_barang
+				WHERE id_company = '$id_company'
+					AND e_nama_kelompok ILIKE '%$search%'";
+
+		return $this->db->query($sql);
 	}
 
 	public function getjenis($ikelompok, $search)
@@ -100,28 +151,27 @@ class Mmaster extends CI_Model
 			$where3 = "AND (a.id = '$i_product')";
 		}
 
-		$sql = "x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name,
-				case when e_jenis_bagian isnull then upper(e_bagian_name) else upper(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, 
-				upper(b.e_color_name) AS e_color_name,
-				upper(d.e_nama_kelompok) AS e_nama_kelompok,
-				upper(xx.e_brand_name) AS e_brand_name,
-				upper(e.e_type_name) AS e_type_name
-			FROM f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
-			INNER JOIN tr_product_base a ON (/* a.id_company = x.id_company AND */ a.id = x.id_product_base)
-			INNER JOIN tr_color b ON (a.id_company = b.id_company AND a.i_color = b.i_color)
-			INNER JOIN tr_kelompok_barang d ON (d.i_kode_kelompok = a.i_kode_kelompok AND a.id_company = d.id_company)
-			INNER JOIN tr_item_type e ON (e.i_type_code = a.i_type_code AND a.id_company = e.id_company)
-			INNER JOIN tr_brand xx ON (xx.i_brand = a.i_brand AND a.id_company = xx.id_company)
-			INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
-			LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
-			WHERE x.id_company is not null
-			$where $where2 $where3
-			ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name";
+		$sql = "SELECT x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name,
+					case when e_jenis_bagian isnull then upper(e_bagian_name) else upper(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, 
+					upper(b.e_color_name) AS e_color_name,
+					upper(d.e_nama_kelompok) AS e_nama_kelompok,
+					upper(xx.e_brand_name) AS e_brand_name,
+					upper(e.e_type_name) AS e_type_name
+				FROM f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+				INNER JOIN tr_product_base a ON (/* a.id_company = x.id_company AND */ a.id = x.id_product_base)
+				INNER JOIN tr_color b ON (a.id_company = b.id_company AND a.i_color = b.i_color)
+				INNER JOIN tr_kelompok_barang d ON (d.i_kode_kelompok = a.i_kode_kelompok AND a.id_company = d.id_company)
+				INNER JOIN tr_item_type e ON (e.i_type_code = a.i_type_code AND a.id_company = e.id_company)
+				INNER JOIN tr_brand xx ON (xx.i_brand = a.i_brand AND a.id_company = xx.id_company)
+				INNER JOIN tr_class_product cc ON (cc.id = a.id_class_product)
+				LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
+				WHERE x.id_company is not null
+				$where $where2 $where3
+				ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name";
 
 		// var_dump($sql); die();
 
-		$this->db->select($sql, FALSE);
-		return $this->db->get();
+		return $this->db->query($sql);
 	}
 
 	public function get_product($i_kategori, $i_sub_kategori, $search)

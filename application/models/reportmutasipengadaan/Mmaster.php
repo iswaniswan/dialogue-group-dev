@@ -143,6 +143,8 @@ class Mmaster extends CI_Model
 		// $this->db->select("    ", FALSE);
 		// return $this->db->get();
 
+		// var_dump($sql); die();
+
 		return $this->db->query($sql);
 	}
 }
