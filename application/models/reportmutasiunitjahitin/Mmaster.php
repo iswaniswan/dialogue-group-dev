@@ -6,7 +6,7 @@ use Ozdemir\Datatables\DB\CodeigniterAdapter;
 
 class Mmaster extends CI_Model
 {
-	public function getbagian($search)
+	public function getbagian($search, $group_company=false)
 	{
 		// $this->db->select('a.id, a.i_bagian, e_bagian_name')->distinct();
 		// $this->db->from('tr_bagian a');
@@ -26,7 +26,7 @@ class Mmaster extends CI_Model
 		$username = $this->session->userdata('username');
 		$i_departement = $this->session->userdata('i_departement');
 
-		$sql_internal = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, c.name
+		$sql_internal = "SELECT DISTINCT a.id, a.i_bagian, e_bagian_name, c.name, a.id_company
 							FROM tr_bagian a
 							INNER JOIN tr_departement_cover b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
 							INNER JOIN public.company c ON c.id = a.id_company
@@ -40,7 +40,7 @@ class Mmaster extends CI_Model
 
 		// var_dump($sql); die();
 
-		$sql_external = "SELECT DISTINCT a.id, a.i_bagian, a.e_bagian_name, c.name
+		$sql_external = "SELECT DISTINCT a.id, a.i_bagian, a.e_bagian_name, c.name, a.id_company
 							FROM tr_bagian a
 							INNER JOIN tr_departement_cover b ON (b.i_bagian = a.i_bagian AND b.id_company = a.id_company )
 							INNER JOIN (
@@ -62,6 +62,11 @@ class Mmaster extends CI_Model
 		$sql = "$sql_internal UNION ALL $sql_external";
 
 		// var_dump($sql); die();
+
+		if ($group_company) {
+			$sql = "SELECT a.name, a.id_company FROM ($sql) a GROUP BY 1, 2";
+			return $this->db->query($sql);
+		}
 
 		return $this->db->query($sql);
 	}
@@ -103,14 +108,28 @@ class Mmaster extends CI_Model
 		return $this->db->get();
 	}
 
-	public function bacabagian($ibagian)
+	public function bacabagian($ibagian, $id_company=null)
 	{
 		$this->db->select('a.id, a.i_bagian, e_bagian_name')->distinct();
 		$this->db->from('tr_bagian a');
-		$this->db->where('a.id_company', $this->session->userdata('id_company'));
+		
 		$this->db->where('a.i_bagian', $ibagian);
+		
+		if ($id_company != null) {
+			$this->db->where('a.id_company', $id_company);
+		} else {
+			$this->db->where('a.id_company', $this->session->userdata('id_company'));
+		}
+		
 		$this->db->order_by('e_bagian_name');
 		return $this->db->get();
+	}
+
+	public function get_bagian_by_id($id_bagian)
+	{
+		$sql = "SELECT * FROM tr_bagian WHERE id = '$id_bagian'";
+
+		return $this->db->query($sql);
 	}
 
 	public function kategoribarang($ikelompok, $id_company)
@@ -151,13 +170,22 @@ class Mmaster extends CI_Model
 			$where3 = "AND (a.id = '$i_product')";
 		}
 
+		$from = "f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian')";
+		/** baca external */
+		if ($id_company != $this->session->userdata('id_company')) {
+			$id_company_tujuan = $this->session->userdata('id_company');
+			$from = "f_mutasi_unitjahit_baca_external(
+						'$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$id_company_tujuan'
+					)";
+		}
+
 		$sql = "SELECT x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name,
 					case when e_jenis_bagian isnull then upper(e_bagian_name) else upper(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, 
 					upper(b.e_color_name) AS e_color_name,
 					upper(d.e_nama_kelompok) AS e_nama_kelompok,
 					upper(xx.e_brand_name) AS e_brand_name,
 					upper(e.e_type_name) AS e_type_name
-				FROM f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian') x
+				FROM $from x
 				INNER JOIN tr_product_base a ON (/* a.id_company = x.id_company AND */ a.id = x.id_product_base)
 				INNER JOIN tr_color b ON (a.id_company = b.id_company AND a.i_color = b.i_color)
 				INNER JOIN tr_kelompok_barang d ON (d.i_kode_kelompok = a.i_kode_kelompok AND a.id_company = d.id_company)

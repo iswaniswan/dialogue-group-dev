@@ -49,13 +49,26 @@ class Cform extends CI_Controller
         $search = str_replace("'", "", $this->input->get('search'));
         $data = $this->mmaster->getbagian($search);
         // $data = $this->mmaster->getbagian();
+
+        /** option semua bagian pada company */
+        $data_company = $this->mmaster->getbagian('', $group_company=true);
+        foreach ($data_company->result() as $company) {
+            $filter[] = array(
+                'id'    => $company->id_company . '-0' ,
+                'text'  => "SEMUA BAGIAN",
+                'name' => $company->name,
+            );
+        }
+
+        /** option masing-masing bagian per company */
         foreach ($data->result() as $ibagian) {
             $filter[] = array(
-                'id'    => $ibagian->id,
+                'id'    => $ibagian->id_company . '-' . $ibagian->i_bagian,
                 'text'  => $ibagian->e_bagian_name,
                 'name' => $ibagian->name,
             );
-        }
+        }       
+
         echo json_encode($filter);
     }
 
@@ -211,9 +224,14 @@ class Cform extends CI_Controller
         if (!$data) {
             redirect(base_url(), 'refresh');
         }
-        $id_company = $this->session->userdata('id_company');
-        $ibagian    = $this->uri->segment(4);
-        $bagian = ($ibagian == 'null') ? '' : $ibagian;
+        // $id_company = $this->session->userdata('id_company');
+        
+        // $bagian = ($ibagian == 'null') ? '' : $ibagian;
+        $bagian = $this->uri->segment(4);
+        $array_bagian = explode('-', $bagian);
+        $id_company = $array_bagian[0];
+        $ibagian = ($array_bagian[1] == '0' ? '' : $array_bagian[1]);
+
         $jnsbarang  = $this->uri->segment(5);
         $ikelompok  = $this->uri->segment(6);
         $i_product  = $this->uri->segment(9);
@@ -235,13 +253,13 @@ class Cform extends CI_Controller
             'folder'        => $this->global['folder'],
             'title'         => "View " . $this->global['title'],
             'title_list'    => 'List ' . $this->global['title'],
-            'bagian'        => $this->mmaster->bacabagian($ibagian)->row(),
-            'i_bagian'      => $bagian,
+            'bagian'        => $this->mmaster->bacabagian($ibagian, $id_company)->row(),
+            'i_bagian'      => $ibagian,
             'dfrom'         => $this->uri->segment(7),
             'dto'           => $this->uri->segment(8),
             'kategori'      => $this->mmaster->kategoribarang($ikelompok, $id_company)->row(),
             'jenis'         => $this->mmaster->jenisbarang($jnsbarang, $id_company)->row(),
-            'data'          => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang, $i_product),
+            'data'          => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $ibagian, $ikelompok, $jnsbarang, $i_product),
             // 'data2'         => $this->mmaster->cek_datadet($id_company, $i_periode, $d_jangka_awal, $d_jangka_akhir, $dfrom, $dto, $bagian, $ikelompok, $jnsbarang)->result(),
         );
         $this->Logger->write('Membuka Menu Cetak ' . $this->global['title']);

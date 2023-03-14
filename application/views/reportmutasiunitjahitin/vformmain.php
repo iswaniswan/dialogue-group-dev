@@ -59,28 +59,15 @@
     });
 
     $(document).ready(function() {
-        function mergeLabel(data) {
-            let _data = data.reduce((result, item) => {
-                if (result[item.name]) {
-                    result[item.name].children.forEach((e) => {
-                        if (e.id !== item.id) {
-                            return result[item.name].children.push({
-                                id:item.id, text:item.text
-                            });
-                        }
-                    })
-                    return result;
+        function mergeLabel(array) {
+            let indexes = [];
+            return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+                if (indexes.includes(id) == false) {
+                    (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
                 }
-
-                (result[item.name] ??= { text:item.name, children: [] }).children.push({
-                    id:item.id, text:item.text
-                })
-                
-                return result;
-            }, {});
-
-            console.log(Object.values(_data));
-            return Object.values(_data);
+                indexes.push(id);
+                return obj;
+            }, {}));
         }
         
         $('#ibagian').select2({
@@ -102,7 +89,7 @@
                         results: data
                     };
                 },
-                cache: true
+                cache: false
             }
         });
 
