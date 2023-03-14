@@ -183,6 +183,11 @@
                             $i = 0;
                             if ($data->num_rows() > 0) {
                                 foreach ($data->result() as $row) {
+
+                                    // DEBUG
+                                    if ($row->i_product_wip != 'DGA4205') continue;
+                                    // DEBUG
+
                                     $i++; ?>
                                     <tr>
                                         <td class="text-center"><?= $i; ?></td>

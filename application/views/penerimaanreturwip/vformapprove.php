@@ -128,7 +128,7 @@
                         </td>                                            
                     </tr>                       
                     <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                    <?}
+                    <?php }
                     }else{
                         $i=0;
                         $read = "disabled";

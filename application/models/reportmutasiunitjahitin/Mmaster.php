@@ -170,14 +170,17 @@ class Mmaster extends CI_Model
 			$where3 = "AND (a.id = '$i_product')";
 		}
 
-		$from = "f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian')";
+		$from = "f_mutasi_unitjahit_baca_external(
+			'$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian'
+		)";
+		// $from = "f_mutasi_unitjahit('$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian')";
 		/** baca external */
-		if ($id_company != $this->session->userdata('id_company')) {
-			$id_company_tujuan = $this->session->userdata('id_company');
-			$from = "f_mutasi_unitjahit_baca_external(
-						'$id_company', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$id_company_tujuan'
-					)";
-		}
+		// if ($id_company != $this->session->userdata('id_company')) {
+		// 	$id_company_tujuan = $this->session->userdata('id_company');
+		// 	$from = "f_mutasi_unitjahit_baca_external(
+		// 				'$id_company_tujuan', '$i_periode', '$d_jangka_awal', '$d_jangka_akhir', '$dfrom', '$dto', '$ibagian', '$id_company'
+		// 			)";
+		// }
 
 		$sql = "SELECT x.*, a.i_product_wip, upper(a.e_product_basename) AS e_product_basename, e_class_name,
 					case when e_jenis_bagian isnull then upper(e_bagian_name) else upper(e_bagian_name||' - '||coalesce(e_jenis_bagian,'')) end as e_bagian_name, 
