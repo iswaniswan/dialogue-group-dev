@@ -106,6 +106,16 @@
 <!-- <script src="<?= base_url(); ?>assets/js/jquery.mask.min.js"></script> -->
 <script>
     /*----------  LOAD SAAT DOKUMEN READY  ----------*/
+    const mergeLabel = (array) => {
+        let indexes = [];
+        return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+            if (indexes.includes(id) == false) {
+                (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+            }
+            indexes.push(id);
+            return obj;
+        }, {}));
+    }
 
     $(document).ready(function() {
         // $('#ibbm').mask('SSS-0000-000000S');
@@ -118,7 +128,7 @@
             placeholder: 'Pilih Pengirim',
             allowClear: true,
             ajax: {
-                url: '<?= base_url($folder . '/cform/pengirim'); ?>',
+                url: '<?= base_url($folder . '/cform/pengirim_all'); ?>',
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
@@ -128,7 +138,8 @@
                     }
                     return query;
                 },
-                processResults: function(data) {
+                processResults: function(result) {
+                    const data = mergeLabel(result);
                     return {
                         results: data
                     };
@@ -146,7 +157,7 @@
             placeholder: 'Cari Referensi',
             allowClear: true,
             ajax: {
-                url: '<?= base_url($folder . '/cform/referensi'); ?>',
+                url: '<?= base_url($folder . '/cform/referensi_all'); ?>',
                 dataType: 'json',
                 delay: 250,
                 data: function(params) {
@@ -179,7 +190,7 @@
                     'ibagian': $('#ibagian').val(),
                     'ipengirim': $('#ipengirim').val(),
                 },
-                url: '<?= base_url($folder . '/cform/detailreferensi'); ?>',
+                url: '<?= base_url($folder . '/cform/detailreferensi_all'); ?>',
                 dataType: "json",
                 success: function(data) {
                     if (data['data'].length > 0) {

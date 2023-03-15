@@ -391,11 +391,26 @@ class Mmaster extends CI_Model
                                 WHERE
                                   a.i_menu = '$i_menu'
                                   AND a.id_company = '$idcompany'"); */
-        return $this->db->query("SELECT a.id_company, a.id, a.id_company||'|'||a.i_bagian as i_bagian, a.e_bagian_name||' - '||b.name as e_bagian_name, b.name
+        return $this->db->query("SELECT a.id_company, a.id, a.i_bagian, a.e_bagian_name, b.name
         FROM tr_bagian a
         INNER JOIN public.company b ON (b.id = a.id_company)
         WHERE a.f_status = 't' AND b.f_status = 't' AND i_type = '09'
         ORDER BY a.id_company, a.e_bagian_name ASC");
+    }
+
+    public function get_bagian_tujuan($cari = '')
+    {
+        $sql = "SELECT 
+                    a.id, 
+                    a.i_bagian,
+                    a.e_bagian_name,
+                    b.name
+                FROM tr_bagian a
+                INNER JOIN public.company b ON (b.id = a.id_company)
+                WHERE a.f_status = 't' AND b.f_status = 't' AND i_type = '09' AND a.e_bagian_name ILIKE '%$cari%'
+                ORDER BY a.id_company, a.e_bagian_name ASC";
+
+        return $this->db->query($sql);
     }
 
     public function dataproduct($cari)
@@ -443,9 +458,14 @@ class Mmaster extends CI_Model
 
     public function insertheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $eremark)
     {
-        $split = explode("|", $itujuan);
-        $id_company_tujuan = $split[0];
-        $itujuan = $split[1];
+        // $split = explode("|", $itujuan);
+        // $id_company_tujuan = $split[0];
+        // $itujuan = $split[1];
+
+        $q_bagian = $this->get_bagian_by_id($itujuan)->row();
+        $id_company_tujuan = $q_bagian->id_company;
+        $itujuan = $q_bagian->i_bagian;
+
         $idcompany = $this->session->userdata('id_company');
         $thbl  = format_ym($datebonk);
         $tahun = format_Y($datebonk);
@@ -530,9 +550,14 @@ class Mmaster extends CI_Model
 
     public function updateheader($id, $ibonk, $ibagian, $datebonk, $itujuan, $eremark)
     {
-        $split = explode("|", $itujuan);
-        $id_company_tujuan = $split[0];
-        $itujuan = $split[1];
+        // $split = explode("|", $itujuan);
+        // $id_company_tujuan = $split[0];
+        // $itujuan = $split[1];
+
+        $q_bagian = $this->get_bagian_by_id($itujuan)->row();
+        $id_company_tujuan = $q_bagian->id_company;
+        $itujuan = $q_bagian->i_bagian;
+
         $idcompany  = $this->session->userdata('id_company');
         $data = array(
             'i_document'        => $ibonk,
@@ -558,34 +583,44 @@ class Mmaster extends CI_Model
 
     public function getdataitem($ibagian, $dfrom, $dto)
     {
-        return $this->db->query("SELECT
-                a.id_document,
-                'No Reff. '||i_document||', Tgl. '||to_char(d_document,'DD FMMonth, YYYY') reff,
-                b.e_remark||' - '||a.e_remark e_remark,
-                e.id id_product_wip,
-                e.i_product_base i_product_wip,
-                e.e_product_basename e_product_wipname,
-                d.id AS id_color,
-                d.e_color_name,
-                sum(qty_sisa_bs) AS qty_sisa
-            FROM
-                tm_masuk_unitjahit_item a
-            INNER JOIN tm_masuk_unitjahit b ON
-                (b.id = a.id_document)
-            INNER JOIN tr_product_wip c ON
-                (c.id = a.id_product_wip)
-            INNER JOIN tr_product_base e ON
-                (e.i_product_wip = c.i_product_wip 
-                AND c.i_color = e.i_color AND e.id_company = c.id_company)
-            INNER JOIN tr_color d ON
-                (d.i_color = e.i_color
-                    AND e.id_company = d.id_company)
-            WHERE
-                b.i_status = '6'
-                AND b.d_document BETWEEN '$dfrom' AND '$dto' 
-                AND a.qty_sisa_bs > 0 and b.i_bagian = '$ibagian'
-            GROUP BY 1,2,3,4,5,6,7
-        ");
+        $sql = "SELECT
+                    a.id_document,
+                    'No Reff. '||i_document||', Tgl. '||to_char(d_document,'DD FMMonth, YYYY') reff,
+                    b.e_remark||' - '||a.e_remark e_remark,
+                    e.id id_product_wip,
+                    e.i_product_base i_product_wip,
+                    e.e_product_basename e_product_wipname,
+                    d.id AS id_color,
+                    d.e_color_name,
+                    sum(qty_sisa_bs) AS qty_sisa
+                FROM
+                    tm_masuk_unitjahit_item a
+                INNER JOIN tm_masuk_unitjahit b ON
+                    (b.id = a.id_document)
+                INNER JOIN tr_product_wip c ON
+                    (c.id = a.id_product_wip)
+                INNER JOIN tr_product_base e ON
+                    (e.i_product_wip = c.i_product_wip 
+                    AND c.i_color = e.i_color AND e.id_company = c.id_company)
+                INNER JOIN tr_color d ON
+                    (d.i_color = e.i_color
+                        AND e.id_company = d.id_company)
+                WHERE
+                    b.i_status = '6'
+                    AND b.d_document BETWEEN '$dfrom' AND '$dto' 
+                    AND a.qty_sisa_bs > 0 and b.i_bagian = '$ibagian'
+                GROUP BY 1,2,3,4,5,6,7";
+
+        // var_dump($sql); 
+
+        return $this->db->query($sql);
+    }
+
+    public function get_bagian_by_id($id_bagian)
+    {
+        $sql = "SELECT * FROM tr_bagian WHERE id = '$id_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

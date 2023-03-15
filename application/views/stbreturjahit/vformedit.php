@@ -44,8 +44,9 @@
                             <select name="itujuan" id="itujuan" class="form-control select2">
                                 <?php if ($tujuan) {
                                     foreach ($tujuan as $row) : ?>
-                                        <option value="<?= $row->i_bagian; ?>" <?php if ($row->i_bagian == $data->id_bagian_company.'|'.$data->i_tujuan) { ?> selected <?php } ?>>
-                                            <?= $row->e_bagian_name; ?>
+                                        <?php $selected = (($row->id_company == $data->id_company_bagian) and ($row->i_bagian == $data->i_tujuan)) ? 'selected' : ''; ?>
+                                        <option value="<?= $row->id; ?>" <?= $selected?>>
+                                            <?= $row->e_bagian_name . ' - ' . $row->name ?>
                                         </option>
                                 <?php endforeach;
                                 } ?>
@@ -65,9 +66,9 @@
 
                         <!-- <?php if ($data->i_status == '2') { ?>
                             <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2" hidden="true"><i class="fa fa-plus mr-2"></i>Item</button>
-                        <? } else { ?>
+                        <?php } else { ?>
                             <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm mr-2"><i class="fa fa-plus mr-2"></i>Item</button>
-                        <? } ?> -->
+                        <?php } ?> -->
                         <?php if ($data->i_status == '1' || $data->i_status == '3') { ?>
                             <div class="col-sm-3">
                                 <button type="submit" id="submit" class="btn btn-success btn-block btn-sm mr-2" onclick="return konfirm();"><i class="fa fa-save mr-2"></i>Update</button>
@@ -558,4 +559,40 @@
             }
         }
     }
+
+    const mergeLabel = (array) => {
+        let indexes = [];
+        return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+            if (indexes.includes(id) == false) {
+                (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+            }
+            indexes.push(id);
+            return obj;
+        }, {}));
+    }
+
+    // overriding bagian tujuan
+    $('#itujuan').select2({
+        placeholder: 'Pilih Tujuan',
+        allowClear: true,
+        width: "100%",
+        ajax: {
+            url: '<?= base_url($folder . '/cform/get_bagian_tujuan'); ?>',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                    var query = {
+                        q: params.term,
+                    }
+                    return query;
+                },
+            processResults: function(result) {
+                const data = mergeLabel(result);
+                return {
+                    results: data
+                };
+            },
+            cache: false
+        }
+    });
 </script>

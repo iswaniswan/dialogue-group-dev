@@ -345,7 +345,24 @@ class Mmaster extends CI_Model
                                 WHERE e_type_makloon_name ILIKE '%makloon packing%'
                             ) && b.id_type_makloon";
 
-        $sql = "$sql_company_internal UNION $sql_company_external ORDER BY 1 ASC";
+
+        // TODO: Testing kirim ke JKN
+        $JAHIT = 10;
+        $sql_testing_JKN = "SELECT 
+                                c.name,
+                                a.*,
+                                b.e_bagian_name 
+                            FROM 
+                                tr_tujuan_menu a
+                            JOIN tr_bagian b ON a.i_bagian = b.i_bagian AND a.id_company = b.id_company
+                            JOIN public.company c ON c.id = a.id_company
+                            WHERE
+                                a.i_menu = '$i_menu'
+                                AND a.id_company = '21'
+                                AND b.i_type = '$JAHIT'";
+        // TODO: Testing kirim ke JKN
+
+        $sql = "$sql_company_internal UNION $sql_company_external UNION $sql_testing_JKN ORDER BY 1 ASC";
         
         // var_dump($sql);
 

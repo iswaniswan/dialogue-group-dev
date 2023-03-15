@@ -116,6 +116,22 @@ class Cform extends CI_Controller
         $this->load->view($this->global['folder'] . '/vformadd', $data);
     }
 
+    public function get_bagian_tujuan()
+    {
+        $filter = [];
+        $cari = strtoupper($this->input->get('q'));
+        $data = $this->mmaster->get_bagian_tujuan($cari);
+        foreach ($data->result() as $bagian) {
+            $filter[] = array(
+                'id'    => $bagian->id,
+                'text'  => $bagian->e_bagian_name,
+                'name'  => $bagian->name,
+            );
+        }
+        echo json_encode($filter);
+        
+    }
+
     public function cekkode()
     {
         $data = $this->mmaster->cek_kode($this->input->post('kode', TRUE), $this->input->post('ibagian', TRUE));

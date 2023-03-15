@@ -182,33 +182,45 @@ class Mmaster extends CI_Model
     public function pengirim($i_menu,$ibagian,$cari)
     {
         $idcompany = $this->session->userdata('id_company');
-        return $this->db->query("SELECT
-                id,
-                e_bagian_name AS e_name
-            FROM
-                tr_bagian
-            WHERE
-                i_type IN (
-                SELECT
-                    i_type
-                FROM
-                    tr_bagian
-                WHERE
-                    i_bagian IN (
-                    SELECT
-                        i_bagian
-                    FROM
-                        tr_tujuan_menu
-                    WHERE
-                        i_menu = '$i_menu'
-                        AND id_company = '$idcompany')
-                    AND id_company = '$idcompany')
-                AND id_company = '$idcompany'
-                AND e_bagian_name ILIKE '%$cari%'
-                AND i_bagian <> '$ibagian'
-            ORDER BY
-                2
-        ", FALSE);
+
+        $sql = "SELECT
+                    id,
+                    e_bagian_name AS e_name
+                FROM tr_bagian
+                WHERE i_type IN (
+                                SELECT i_type
+                                FROM tr_bagian
+                                WHERE i_bagian IN (
+                                                    SELECT i_bagian
+                                                    FROM tr_tujuan_menu
+                                                    WHERE i_menu = '$i_menu' AND id_company = '$idcompany'
+                                                )
+                                    AND id_company = '$idcompany'
+                                )
+                    AND id_company = '$idcompany'
+                    AND e_bagian_name ILIKE '%$cari%'
+                    AND i_bagian <> '$ibagian'
+                ORDER BY 2";
+
+        // DEBUG ONLY
+        $sql = "SELECT
+                    tb.id,
+                    e_bagian_name,
+                    c.name
+                FROM tr_bagian tb
+                INNER JOIN public.company c ON c.id = tb.id_company
+                WHERE i_bagian IN (
+                                    SELECT i_bagian
+                                    FROM tr_tujuan_menu
+                                    WHERE i_menu = '$i_menu' 
+                                )
+                    AND i_bagian <> '$ibagian'
+                ORDER BY 2";
+        // DEBUG
+        
+        // var_dump($sql);
+
+        return $this->db->query($sql, FALSE);
     }    
 
     public function jeniskeluar(){
@@ -325,6 +337,43 @@ class Mmaster extends CI_Model
         ", FALSE);
     }
 
+    public function datareferensi_all($cari,$ipengirim,$ibagian)
+    {
+        $idcompany = $this->session->userdata('id_company');
+
+        $sql = "SELECT id, i_document, id_bagian
+                FROM
+                    (
+                    SELECT DISTINCT 
+                        a.id,
+                        i_document,
+                        a.id_bagian_tujuan AS id_bagian
+                    FROM tm_keluar_gudang_jadi a
+                    INNER JOIN tr_bagian b ON b.id = a.id_bagian_tujuan
+                    INNER JOIN tm_keluar_gudang_jadi_item c ON c.id_document = a.id
+                    WHERE
+                        a.id_company = '$idcompany'
+                        AND a.i_status = '6'
+                        AND c.n_quantity_sisa > 0
+                    UNION ALL
+                    SELECT DISTINCT a.id,
+                        a.i_keluar_qc AS i_document,
+                        c.id AS id_bagian
+                    FROM tm_keluar_qc a
+                    INNER JOIN tm_keluar_qc_item b ON b.id_keluar_qc = a.id
+                    INNER JOIN tr_bagian c ON c.i_bagian = a.i_bagian AND a.id_company = c.id_company
+                    WHERE i_status = '6'
+                        AND b.n_sisa > 0 
+                        AND a.i_tujuan = '$ibagian'
+                ) AS x
+                WHERE  id_bagian = '$ipengirim'
+                ORDER BY 1";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql, FALSE);
+    }
+
     /*----------  HEADER DATA REFERENSI  ----------*/    
 
     public function headerreferensi($id,$ipengirim,$ibagian)
@@ -367,6 +416,35 @@ class Mmaster extends CI_Model
             ",
             FALSE
         );
+    }
+
+    public function headerreferensi_all($id,$ipengirim,$ibagian)
+    {
+        $idcompany = $this->session->userdata('id_company');
+        $sql = "SELECT *
+                FROM (
+                        SELECT
+                            a.id,
+                            '0' AS id_jenis_barang_keluar,
+                            '' AS e_jenis_name,
+                            a.id_bagian_tujuan AS id_bagian
+                        FROM tm_keluar_gudang_jadi a INNER JOIN tr_bagian b ON b.id = a.id_bagian_tujuan
+                        WHERE a.id_company = '$idcompany' AND a.i_status = '6'
+                        UNION ALL
+                        SELECT DISTINCT 
+                            a.id,
+                            a.id_jenis_barang_keluar, 
+                            b.e_jenis_name,
+                            c.id AS id_bagian
+                        FROM tm_keluar_qc a INNER JOIN tr_bagian c ON c.i_bagian = a.i_bagian AND a.id_company = c.id_company
+                        LEFT JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
+                        WHERE /* a.id_company = '$idcompany' AND */ i_status = '6'
+                            AND a.i_tujuan = '$ibagian'
+                    ) AS x
+                WHERE id_bagian = '$ipengirim' AND id = '$id'";
+
+        // var_dump($sql); 
+        return $this->db->query($sql, FALSE);
     }
 
     /*----------  DETAIL DATA REFERENSI  ----------*/    
@@ -435,6 +513,50 @@ class Mmaster extends CI_Model
             ",
             FALSE
         );
+    }
+
+    public function detailreferensi_all($id,$ipengirim,$ibagian)
+    {
+        $idcompany = $this->session->userdata('id_company');
+
+        $sql = "SELECT *
+                FROM
+                    (
+                    SELECT
+                        a.id,
+                        a.id_bagian_tujuan AS id_bagian,
+                        id_product_base AS id_product,
+                        i_product_base AS i_product,
+                        e_product_basename AS e_product,
+                        e_color_name,
+                        n_quantity_sisa
+                    FROM tm_keluar_gudang_jadi a
+                    INNER JOIN tr_bagian b ON (b.id = a.id_bagian_tujuan)
+                    INNER JOIN tm_keluar_gudang_jadi_item c ON (c.id_document = a.id)
+                    INNER JOIN tr_product_base d ON (d.id = c.id_product_base)
+                    INNER JOIN tr_color e ON (e.i_color = d.i_color AND d.id_company = e.id_company)
+                    WHERE a.id_company = '$idcompany' AND a.i_status = '6' AND c.n_quantity_sisa > 0
+                    UNION ALL
+                    SELECT
+                        a.id,
+                        c.id AS id_bagian,
+                        id_product,
+                        i_product_base AS i_product,
+                        e_product_basename AS e_product,
+                        e_color_name,
+                        n_sisa AS n_quantity_sisa
+                    FROM tm_keluar_qc a INNER JOIN tm_keluar_qc_item b ON (b.id_keluar_qc = a.id)
+                    INNER JOIN tr_bagian c ON (c.i_bagian = a.i_bagian AND a.id_company = c.id_company)
+                    INNER JOIN tr_product_base d ON (d.id = b.id_product)
+                    INNER JOIN tr_color e ON (e.i_color = d.i_color AND d.id_company = e.id_company)
+                    WHERE /* a.id_company = '$idcompany' AND */ i_status = '6' AND b.n_sisa > 0 AND a.i_tujuan = '$ibagian'
+                ) AS x
+                WHERE id_bagian = '$ipengirim' AND id = '$id'
+                ORDER BY 4";
+        
+        // var_dump($sql);
+
+        return $this->db->query($sql, FALSE);
     }
 
     public function product($cari){

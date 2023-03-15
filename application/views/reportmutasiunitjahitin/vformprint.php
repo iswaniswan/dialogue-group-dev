@@ -137,6 +137,11 @@
                             $sum_sample = 0;
                             if ($data->num_rows() > 0) {
                                 foreach ($data->result() as $key) {
+
+                                    // DEBUG
+                                    if ($key->i_product_wip != 'DGA4205') continue;
+                                    // DEBUG
+
                                     $sum_saldo_awalb += $key->saldoawal;
                                     $sum_saldo_awalr += $key->saldoawal_repair;
                                     $sum_bb_in += $key->m_masuk;

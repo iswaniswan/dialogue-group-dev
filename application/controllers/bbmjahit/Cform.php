@@ -151,6 +151,22 @@ class Cform extends CI_Controller {
         }
         echo json_encode($filter);
     }
+
+    public function pengirim_all()
+    {
+        $filter = [];
+        $ibagian = $this->input->get('ibagian');
+        $cari = str_replace("'", "", $this->input->get('q'));
+        $data = $this->mmaster->pengirim($this->i_menu,$this->input->get('ibagian'), $cari);
+        foreach($data->result() as $key){
+            $filter[] = array(
+                'id'   => $key->id,  
+                'text' => $key->e_bagian_name,
+                'name' => $key->name
+            );
+        }
+        echo json_encode($filter);
+    }
     
     /*----------  DATA REFERENSI SESUAI SESUAI PENGIRIM  ----------*/
     
@@ -180,6 +196,22 @@ class Cform extends CI_Controller {
         }
         echo json_encode($filter);
     }
+
+    public function referensi_all()
+    {
+        $filter = [];
+        $ipengirim = $this->input->get('ipengirim');
+        $ibagian = $this->input->get('ibagian');
+        $cari = str_replace("'", "", $this->input->get('q'));
+        $data = $this->mmaster->datareferensi_all($cari, $ipengirim, $ibagian);
+        foreach($data->result() as $key){
+            $filter[] = array(
+                'id'   => $key->id,  
+                'text' => $key->i_document
+            );
+        }
+        echo json_encode($filter);
+    }
     
     /*----------  DETAIL ITEM REFERENSI  ----------*/    
     
@@ -189,6 +221,16 @@ class Cform extends CI_Controller {
         $query  = array(
             'data'   => $this->mmaster->headerreferensi($this->input->post('id',TRUE),$this->input->post('ipengirim'),$this->input->post('ibagian'))->result(),
             'detail' => $this->mmaster->detailreferensi($this->input->post('id',TRUE),$this->input->post('ipengirim'),$this->input->post('ibagian'))->result_array()
+        );
+        echo json_encode($query);  
+    }
+
+    public function detailreferensi_all()
+    {
+        header("Content-Type: application/json", true);
+        $query  = array(
+            'data'   => $this->mmaster->headerreferensi_all($this->input->post('id',TRUE),$this->input->post('ipengirim'),$this->input->post('ibagian'))->result(),
+            'detail' => $this->mmaster->detailreferensi_all($this->input->post('id',TRUE),$this->input->post('ipengirim'),$this->input->post('ibagian'))->result_array()
         );
         echo json_encode($query);  
     }

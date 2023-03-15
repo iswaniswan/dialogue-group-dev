@@ -455,25 +455,31 @@ class Mmaster extends CI_Model
                     '') f ON
                     (f.id_product_base = a.id_product_base
                         AND a.id_company = f.id_company)
+
+                /** hitung stok jahit internal + eksternal */
+                /*
                 LEFT JOIN (
                     SELECT
                         id_company ,
                         id_product_base,
                         sum(saldo_akhir) AS saldo_akhir
-                    FROM
-                        f_mutasi_unitjahit('$this->id_company',
-                        '$i_periode_now',
-                        '9999-01-01',
-                        '9999-01-31',
-                        '$dfrom',
-                        '$dto',
-                        '')
-                    GROUP BY
-                        1,
-                        2
-              ) g ON
-                    (g.id_product_base = a.id_product_base
-                        AND a.id_company = g.id_company)
+                    FROM f_mutasi_unitjahit(
+                            '$this->id_company', '$i_periode_now', '9999-01-01', '9999-01-31', '$dfrom', '$dto', ''
+                        )                        
+                    GROUP BY 1, 2
+                  ) g ON (g.id_product_base = a.id_product_base AND a.id_company = g.id_company)
+                */
+                LEFT JOIN (
+                    SELECT
+                        id_company ,
+                        id_product_base,
+                        sum(saldo_akhir) AS saldo_akhir
+                    FROM f_mutasi_unitjahit_baca_external(
+                            '$this->id_company', '$i_periode_now', '9999-01-01', '9999-01-31', '$dfrom', '$dto', ''
+                        )                        
+                    GROUP BY 1, 2
+                  ) g ON (g.id_product_base = a.id_product_base)
+                /* end stok jahit */
                 LEFT JOIN (
                     SELECT
                         a.*,
@@ -912,25 +918,27 @@ class Mmaster extends CI_Model
 
     public function datadetail_edit($id)
     {
-        return $this->db->query("
-             select a.id_company, b.id as id_product_base, b.i_product_base, b.e_product_basename, c.e_color_name, a.e_remark, a.n_quantity_fc, a.n_quantity_sisa,
-             d.e_class_name as kategori, e.e_type_name AS sub_kategori, e_brand_name AS brand, e_style_name AS style, a.n_quantity_stock , a.n_quantity_wip , a.n_quantity_unitjahit, a.n_quantity_pengadaan, a.n_quantity_packing, v_harga, a.persen_up,
-             a.qty_do , n_fc_berjalan , n_fc_next , n_quantity , 
+        $sql = "SELECT a.id_company, b.id AS id_product_base, b.i_product_base, b.e_product_basename, c.e_color_name, a.e_remark, a.n_quantity_fc, a.n_quantity_sisa,
+                d.e_class_name AS kategori, e.e_type_name AS sub_kategori, e_brand_name AS brand, e_style_name AS style, a.n_quantity_stock , a.n_quantity_wip , a.n_quantity_unitjahit, a.n_quantity_pengadaan, a.n_quantity_packing, v_harga, a.persen_up,
+                a.qty_do , n_fc_berjalan , n_fc_next , n_quantity , 
 
-              GREATEST ( 
+                GREATEST ( 
                 (COALESCE(a.n_quantity_fc,0) + GREATEST(COALESCE(qty_do,0), COALESCE(n_fc_berjalan,0)) + COALESCE(n_fc_next,0)) - 
-                 GREATEST( (n_quantity_stock + n_quantity_wip + n_quantity_unitjahit + n_quantity_pengadaan + n_quantity_packing),0)
-              ,0) as n_quantity_tmp
-             from tm_forecast_produksi_item a
-             inner join tr_product_base b on (a.id_product = b.id)
-             inner join tr_color c on (b.i_color = c.i_color and  b.id_company = c.id_company)
-             inner join tr_class_product d on (b.id_class_product = d.id)
-             inner join tr_item_type e on (b.i_type_code = e.i_type_code and e.id_company = b.id_company)
-             inner join tr_brand f on (f.i_brand = b.i_brand and f.id_company = b.id_company)
-             inner join tr_style g on (g.i_style = b.i_style and g.id_company = b.id_company)
-             where id_forecast = '$id'
-             order by d.e_class_name, b.i_product_base,c.e_color_name asc
-        ");
+                    GREATEST( (n_quantity_stock + n_quantity_wip + n_quantity_unitjahit + n_quantity_pengadaan + n_quantity_packing),0)
+                ,0) AS n_quantity_tmp
+                FROM tm_forecast_produksi_item a
+                INNER JOIN tr_product_base b ON (a.id_product = b.id)
+                INNER JOIN tr_color c ON (b.i_color = c.i_color AND  b.id_company = c.id_company)
+                INNER JOIN tr_class_product d ON (b.id_class_product = d.id)
+                INNER JOIN tr_item_type e ON (b.i_type_code = e.i_type_code AND e.id_company = b.id_company)
+                INNER JOIN tr_brand f ON (f.i_brand = b.i_brand AND f.id_company = b.id_company)
+                INNER JOIN tr_style g ON (g.i_style = b.i_style AND g.id_company = b.id_company)
+                WHERE id_forecast = '$id'
+                ORDER BY d.e_class_name, b.i_product_base,c.e_color_name ASC";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql);
     }
 
     /*----------  CARI BARANG  ----------*/

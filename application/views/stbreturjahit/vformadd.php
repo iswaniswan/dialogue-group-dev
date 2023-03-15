@@ -35,13 +35,13 @@
                             <span class="notekode" id="ada" hidden="true"><b> * No. Sudah Ada!</b></span> -->
                         </div>
                         <div class="col-sm-3">
-                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<? echo date("d-m-Y"); ?>">
+                            <input type="text" id="dbonk" name="dbonk" class="form-control input-sm date" required="" readonly value="<?php echo date("d-m-Y"); ?>">
                         </div>
                         <div class="col-sm-3">
                             <select name="itujuan" id="itujuan" class="form-control select2">
                                 <?php if ($tujuan) {
                                     foreach ($tujuan as $row) : ?>
-                                        <option value="<?= $row->i_bagian; ?>">
+                                        <option value="<?= $row->id; ?>">
                                             <?= $row->e_bagian_name; ?>
                                         </option>
                                 <?php endforeach;
@@ -448,4 +448,40 @@
             }
         }
     }
+
+    const mergeLabel = (array) => {
+        let indexes = [];
+        return Object.values(array.reduce((obj, { id: id, name: text, text: item }) => {
+            if (indexes.includes(id) == false) {
+                (obj[text] ??= { text, children: [] }).children.push({ id, text: item });
+            }
+            indexes.push(id);
+            return obj;
+        }, {}));
+    }
+
+    // overriding bagian tujuan
+    $('#itujuan').select2({
+        placeholder: 'Pilih Tujuan',
+        allowClear: true,
+        width: "100%",
+        ajax: {
+            url: '<?= base_url($folder . '/cform/get_bagian_tujuan'); ?>',
+            dataType: 'json',
+            delay: 250,
+            data: function (params) {
+                    var query = {
+                        q: params.term,
+                    }
+                    return query;
+                },
+            processResults: function(result) {
+                const data = mergeLabel(result);
+                return {
+                    results: data
+                };
+            },
+            cache: false
+        }
+    });
 </script>
