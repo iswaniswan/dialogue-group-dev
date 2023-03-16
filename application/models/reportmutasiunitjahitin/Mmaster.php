@@ -198,7 +198,7 @@ class Mmaster extends CI_Model
 				LEFT JOIN tr_bagian c ON (c.i_bagian = x.i_bagian AND x.id_company=c.id_company)
 				WHERE x.id_company is not null
 				$where $where2 $where3
-				ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name";
+				ORDER BY e_class_name, a.i_product_wip, e_product_basename, e_color_name, id_company, e_bagian_name";
 
 		// var_dump($sql); die();
 

@@ -316,7 +316,7 @@ class Mmaster extends CI_Model
                 inner join public.company cc ON (cc.id = c.id_company)
                 ORDER BY 2";
 
-        var_dump($sql); die();        
+        // var_dump($sql); die();        
 
         return $this->db->query($sql, FALSE);
     }
