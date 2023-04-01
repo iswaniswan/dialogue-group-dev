@@ -988,7 +988,7 @@ class Mmaster extends CI_Model
             $like = "AND a.id_material IN ($i_material)";
         }
         
-        return $this->db->query("WITH CTE AS (
+        $sql = "WITH CTE AS (
             SELECT 0 AS no, a.i_periode, a.i_product_wip, initcap(a.e_product_wipname) e_product_wipname,  a.id_product_wip, a.e_color_name, 
             a.id_material, a.i_material, initcap(a.e_material_name) e_material_name, initcap(a.e_satuan_name) e_satuan_name, a.n_fc_cutting, a.n_quantity, 
             (round(a.n_quantity * a.n_fc_cutting, 2) - COALESCE(h.n_quantity,0)) qty,
@@ -1013,7 +1013,11 @@ class Mmaster extends CI_Model
         SELECT no, id, i, i_periode, i_product_wip, e_product_wipname, id_product_wip, e_color_name, 
         id_material, i_material, e_material_name, e_satuan_name, n_fc_cutting, 
         n_quantity, qty, tanggal_schedule, dfrom, dto, folder, (select count(i) as jml from CTE) As jml, id_type_makloon from CTE 
-        /*where i_product_wip = 'DGT7403' and i_material = 'KAI0267'*/");
+        /*where i_product_wip = 'DGT7403' and i_material = 'KAI0267'*/";
+
+        // var_dump($sql);
+
+        return $this->db->query($sql);
     }
 
     public function schedule_detail_material($dfrom, $dto)

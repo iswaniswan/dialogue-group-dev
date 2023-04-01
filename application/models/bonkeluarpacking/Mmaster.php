@@ -681,7 +681,15 @@ class Mmaster extends CI_Model
         return $this->db->get();
     }
 
-    public function generate_nomor_dokumen($bagian, $itujuan) {
+    public function get_bagian_by_i_bagian($i_bagian, $id_company) {
+        $this->db->select();
+        $this->db->from('tr_bagian');
+        $this->db->where('i_bagian', $i_bagian);
+        $this->db->where('id_company', $id_company);
+        return $this->db->get();
+    }
+
+    public function generate_nomor_dokumen($bagian, $itujuan, $tanggal=null) {
         $id_company = $this->id_company;
         $id_company_tujuan = $id_company;
 
@@ -699,19 +707,51 @@ class Mmaster extends CI_Model
             $where = "AND NOT id_company_tujuan = '$id_company'";
         }
 
+        $where_tanggal = " AND to_char(d_keluar_qc, 'yyyy-mm') = to_char(now(), 'yyyy-mm')";
+        $periode = date('ym');
+        if ($tanggal != null) {
+            $e_periode = date('Y-m', strtotime($tanggal));
+            $where_tanggal = " AND to_char(d_keluar_qc, 'yyyy-mm') = '$e_periode'";
+            $periode = date('ym', strtotime($tanggal));
+        }
+
         $sql = "SELECT count(*) FROM tm_keluar_qc tkq
                     WHERE i_bagian = '$bagian'
                     AND id_company = '$id_company'
                     $where 
-                    AND to_char(d_keluar_qc, 'yyyy-mm') = to_char(now(), 'yyyy-mm')
+                    $where_tanggal 
                     AND i_status <> '5'";
+
+        // var_dump($sql); die();
 
         $query = $this->db->query($sql);
         $result = $query->row()->count;
         $count = intval($result) + 1;
-        $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
+        $generated = $kode . '-' . $periode . '-' . sprintf('%04d', $count);
 
         return $generated;
+    }
+
+    public function get_all_dokumen($periode=null)
+    {
+        $where = "";
+        if ($periode != null) {
+            $where = "to_char(d_keluar_qc,'yyyy-mm') = '$periode'";
+        }
+
+        $sql = "SELECT * FROM tm_keluar_qc WHERE $where";
+
+        return $this->db->query($sql);
+    }
+
+    public function update_dokumen($dokumen, $id)
+    {
+        $data = [
+            'i_keluar_qc' => $dokumen
+        ];
+
+        $this->db->where('id', $id);
+        $this->db->update('tm_keluar_qc', $data);
     }
 }
 /* End of file Mmaster.php */

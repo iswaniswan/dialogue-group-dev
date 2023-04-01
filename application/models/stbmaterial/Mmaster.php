@@ -93,6 +93,9 @@ class Mmaster extends CI_Model
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg'></i></a>";
             }
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
             return $data;
         });
         $datatables->hide('id');
@@ -323,7 +326,7 @@ class Mmaster extends CI_Model
 
     public function dataedit($id)
     {
-        $sql = "SELECT a.*, b.e_bagian_name, c.e_bagian_name e_bagian_receive_name, cc.name AS company_receive_name, to_char(a.d_document, 'dd-mm-yyyy') AS date_document
+        $sql = "SELECT a.*, b.e_bagian_name, c.e_bagian_name e_bagian_receive_name, cc.name AS e_company_receive_name, to_char(a.d_document, 'dd-mm-yyyy') AS date_document
                     FROM tm_stb_material a
                     LEFT JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
                     LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company_receive = c.id_company)
@@ -343,8 +346,8 @@ class Mmaster extends CI_Model
         $jangkaawal = date('Y-m-01');
         $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
         $periode = date('Ym');
-        return $this->db->query("SELECT a.*, ab.id_product, c.i_material, c.e_material_name, cc.e_satuan_name, coalesce(n_saldo_akhir,0) n_stock,
-        b.i_product_wip, b.e_product_wipname, bb.e_color_name, ab.n_quantity_sisa n_sisa
+        return $this->db->query("SELECT a.*, ab.id_product, c.i_material, c.e_material_name, cc.e_satuan_name, cc.i_satuan_code, coalesce(n_saldo_akhir,0) n_stock,
+        b.i_product_wip, b.e_product_wipname, bb.e_color_name, ab.n_quantity_sisa n_sisa, 0 AS show_as_product
         FROM tm_stb_material_item a
         LEFT JOIN tm_memo_permintaan_item ab ON (ab.id = a.id_referensi_item)
         LEFT JOIN tr_material c ON (c.id = a.id_material)
@@ -894,6 +897,29 @@ class Mmaster extends CI_Model
                     FROM tr_bagian tb
                     INNER JOIN public.company c on c.id = tb.id_company 
                     WHERE tb.id = '$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
 
         return $this->db->query($sql);
     }

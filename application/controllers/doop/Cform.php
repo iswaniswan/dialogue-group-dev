@@ -96,7 +96,7 @@ class Cform extends CI_Controller
             'dfrom'         => $this->uri->segment(4),
             'dto'           => $this->uri->segment(5),
             'bagian'        => $this->mmaster->bagian()->result(),
-            'number'        => "SJ-" . date('ym') . "-0001",
+            'number'        => "SJ-" . date('ym') . "-000001",
         );
 
         $this->Logger->write('Membuka Menu Tambah ' . $this->global['title']);
@@ -192,7 +192,7 @@ class Cform extends CI_Controller
                 foreach ($data->result() as $key) {
                     $filter[] = array(
                         'id'   => $key->id,
-                        'text' => $key->i_document .' ~ '. $key->e_jenis_spb,
+                        'text' => $key->i_document,
                     );
                 }
             } else {
@@ -218,43 +218,11 @@ class Cform extends CI_Controller
         $id     = $this->input->post('id');
         $d_document     = $this->input->post('d_document');
         $i_customer     = $this->input->post('i_customer');
-        $i_referensi     = $this->input->post('i_referensi');
         $query  = array(
-            'head'   => $this->mmaster->getdetailrefeks($id, $i_customer, $i_referensi)->row(),
-            'detail' => $this->mmaster->getdetailrefeks($id, $i_customer, $i_referensi, $d_document)->result_array()
+            'head'   => $this->mmaster->getdetailrefeks($id,$i_customer)->row(),
+            'detail' => $this->mmaster->getdetailrefeks($id,$i_customer,$d_document)->result_array()
         );
         echo json_encode($query);
-    }
-
-    /*----------  GET DETAIL REFERENSI  ----------*/
-
-    public function get_stock()
-    {
-        header("Content-Type: application/json", true);
-        $id_product = $this->input->post('id_product');
-        $d_document = $this->input->post('d_document');
-        $id_jenis_barang_keluar = $this->input->post('id_jenis_barang_keluar');
-        $n_quantity = $this->input->post('n_quantity');
-        $query  = $this->mmaster->get_stock($id_product, $d_document, $id_jenis_barang_keluar);
-        $data   = [];
-        if ($query->num_rows() > 0) {
-            if ((int)$n_quantity > 0) {
-                if ((int)$n_quantity > (int)$query->row()->n_saldo_akhir) {
-                    $data = array(
-                        'sukses' => false,
-                    );
-                } else {
-                    $data = array(
-                        'sukses' => true,
-                    );
-                }
-            } else {
-                $data = array(
-                    'sukses' => true,
-                );
-            }
-        }
-        echo json_encode($data);
     }
 
     /*----------  SIMPAN DATA SJ  ----------*/
@@ -350,13 +318,10 @@ class Cform extends CI_Controller
             redirect(base_url(), 'refresh');
         }
 
-        $id          = $this->uri->segment(4);
-        $d_document  = $this->uri->segment(5);
-        $dfrom       = $this->uri->segment(6);
-        $dto         = $this->uri->segment(7);
-        $id_customer = $this->uri->segment(8);
-
-        $dataHeader = $this->mmaster->baca_header($id, $id_customer)->row();
+        $id         = $this->uri->segment(4);
+        $d_document = $this->uri->segment(5);
+        $dfrom      = $this->uri->segment(6);
+        $dto        = $this->uri->segment(7);
 
         $data = array(
             'folder'        => $this->global['folder'],
@@ -364,11 +329,11 @@ class Cform extends CI_Controller
             'title_list'    => 'List ' . $this->global['title'],
             'dfrom'         => $dfrom,
             'dto'           => $dto,
-            'number'        => "BBK-" . date('ym') . "-0001",
+            'number'        => "BBK-" . date('ym') . "-000001",
             'id'            => $id,
             'bagian'        => $this->mmaster->bagian()->result(),
-            'data'          => $dataHeader,
-            'datadetail'    => $this->mmaster->baca_detail($id, $id_customer, $d_document, $dataHeader->e_jenis_spb, $dataHeader->id_spb)->result(),
+            'data'          => $this->mmaster->baca_header($id)->row(),
+            'datadetail'    => $this->mmaster->baca_detail($id,$d_document)->result(),
         );
 
         $this->Logger->write('Membuka Menu Edit ' . $this->global['title']);
@@ -477,10 +442,7 @@ class Cform extends CI_Controller
         $d_document = $this->uri->segment(5);
         $dfrom      = $this->uri->segment(6);
         $dto        = $this->uri->segment(7);
-        $id_customer = $this->uri->segment(8);
         // $idtypespb  = $this->uri->segment(8);
-
-        $dataHeader = $this->mmaster->baca_header($id, $id_customer)->row();
 
         $data = array(
             'folder'        => $this->global['folder'],
@@ -489,8 +451,8 @@ class Cform extends CI_Controller
             'dfrom'         => $dfrom,
             'dto'           => $dto,
             'id'            => $id,
-            'data'          => $dataHeader,
-            'datadetail'    => $this->mmaster->baca_detail($id, $id_customer, $d_document, $dataHeader->e_jenis_spb, $dataHeader->id_spb)->result(),
+            'data'          => $this->mmaster->baca_header($id)->row(),
+            'datadetail'    => $this->mmaster->baca_detail($id, $d_document)->result(),
         );
 
         $this->Logger->write('Membuka Menu Detail ' . $this->global['title']);
@@ -512,10 +474,7 @@ class Cform extends CI_Controller
         $d_document = $this->uri->segment(5);
         $dfrom      = $this->uri->segment(6);
         $dto        = $this->uri->segment(7);
-        $id_customer = $this->uri->segment(8);
         // $idtypespb  = $this->uri->segment(8);
-
-        $dataHeader = $this->mmaster->baca_header($id, $id_customer)->row();
 
         $data = array(
             'folder'        => $this->global['folder'],
@@ -525,8 +484,8 @@ class Cform extends CI_Controller
             'dto'           => $dto,
             'id'            => $id,
             'bagian'        => $this->mmaster->bagian()->result(),
-            'data'          => $dataHeader,
-            'datadetail'    => $this->mmaster->baca_detail($id, $id_customer, $d_document, $dataHeader->e_jenis_spb, $dataHeader->id_spb)->result(),
+            'data'          => $this->mmaster->baca_header($id)->row(),
+            'datadetail'    => $this->mmaster->baca_detail($id, $d_document)->result(),
         );
 
         $this->Logger->write('Membuka Menu Approve ' . $this->global['title']);
@@ -554,62 +513,6 @@ class Cform extends CI_Controller
         }
     }
 
-    /*----------  REDIRECT KE FORM APPROVE TRANSFER ----------*/
-
-    public function approval_transfer()
-    {
-
-        $data = check_role($this->i_menu, 7);
-        if (!$data) {
-            redirect(base_url(), 'refresh');
-        }
-
-        $id         = $this->uri->segment(4);
-        $d_document = $this->uri->segment(5);
-        $dfrom      = $this->uri->segment(6);
-        $dto        = $this->uri->segment(7);
-        $id_customer = $this->uri->segment(8);
-        // $idtypespb  = $this->uri->segment(8);
-
-        $dataHeader = $this->mmaster->baca_header($id, $id_customer)->row();
-
-        $data = array(
-            'folder'        => $this->global['folder'],
-            'title'         => "Approve " . $this->global['title'],
-            'title_list'    => 'List ' . $this->global['title'],
-            'dfrom'         => $dfrom,
-            'dto'           => $dto,
-            'id'            => $id,
-            'bagian'        => $this->mmaster->bagian()->result(),
-            'data'          => $dataHeader,
-            'datadetail'    => $this->mmaster->baca_detail($id, $id_customer, $d_document, $dataHeader->e_jenis_spb, $dataHeader->id_spb)->result(),
-        );
-
-        $this->Logger->write('Membuka Menu Approve ' . $this->global['title']);
-
-        $this->load->view($this->global['folder'] . '/vformapprove_transfer', $data);
-    }
-
-    /*----------  UPDATE STATUS DOKUMEN  ----------*/
-
-    public function changestatustransfer()
-    {
-
-        $id = $this->input->post('id', true);
-        $istatus = $this->input->post('istatus', true);
-        $estatus = $this->mmaster->estatus($istatus);
-        $this->db->trans_begin();
-        $this->mmaster->changestatustransfer($id, $istatus);
-        if ($this->db->trans_status() === false) {
-            $this->db->trans_rollback();
-            echo json_encode(false);
-        } else {
-            $this->db->trans_commit();
-            $this->Logger->write('Update Status ' . $this->global['folder'] . ' Menjadi : ' . $estatus . ' Id : ' . $id);
-            echo json_encode(true);
-        }
-    }
-
     /*----------  SIMPAN SPB TURUNAN  ----------*/
 
     public function insertspbnew()
@@ -620,18 +523,26 @@ class Cform extends CI_Controller
             redirect(base_url(), 'refresh');
         }
 
+        // var_dump($_POST);
+        // die;
+
         $id             = $this->input->post('id', TRUE);
         $ibagian        = $this->input->post('ibagianreff', TRUE);
         $ddocument      = $this->input->post('ddocument', TRUE);
         if ($ddocument) {
-            $datedocument = formatYmd($ddocument);
+            $tmp = explode('-', $ddocument);
+            $day = $tmp[0];
+            $month = $tmp[1];
+            $year = $tmp[2];
+            $datedocument = $year . '-' . $month . '-' . $day;
         }
+        $ijenis         = $this->input->post('ijenis', TRUE);
         $iarea          = $this->input->post('iarea', TRUE);
         $icustomer      = $this->input->post('icustomer', TRUE);
         $ireferensi     = $this->input->post('ireferensi', TRUE);
         $dreferensi     = $this->input->post('dreferensi', TRUE);
         if ($dreferensi) {
-            $datereferensi = formatYmd($dreferensi);
+            $datereferensi = date('Y-m-d', strtotime($dreferensi));
         }
         $ndiskontotal   = $this->input->post('ndiskontotal', TRUE);
         $nkotor         = $this->input->post('nkotor', TRUE);
@@ -669,18 +580,13 @@ class Cform extends CI_Controller
         $e_desc            = $this->input->post('edesc[]', TRUE);
 
         $this->db->trans_begin();
-        $idbaru     = $this->mmaster->runningidspb();
-        $idocument  = $this->mmaster->runningnumberspb(date('ym', strtotime($ddocument)), date('Y', strtotime($ddocument)), $ibagian, $icustomer);
+        $idbaru     = $this->mmaster->runningidspb($ijenis);
+        $idocument  = $this->mmaster->runningnumberspb(date('ym', strtotime($this->input->post('ddocument', TRUE))), date('Y', strtotime($this->input->post('ddocument', TRUE))), $this->input->post('ibagianreff', TRUE), $ijenis);
 
-        $this->mmaster->insertspbnew($idbaru, $ibagian, $idocument, $datedocument, $iarea, $icustomer, $ireferensi, $datereferensi, $ndiskontotal, $nkotor, $nbersih, $vdpp, $vppn, $eremark, $idkodeharga, $ejenisspb);
-        $this->mmaster->updatesj($id);
-        $this->mmaster->changestatus($id, '6');
-
-        /* var_dump($_POST);
-        die; */
-
-        /* $this->mmaster->updateheaderspbold($ireferensi, $datereferensi, $nkotorold, $nbersihold, $vdppold, $vppnold, $ijenis);
-        $this->mmaster->updatestatus($id); */
+        $data  = $this->mmaster->insertspbnew($idbaru, $ibagian, $idocument, $datedocument, $iarea, $icustomer, $ireferensi, $datereferensi, $ndiskontotal, $nkotor, $nbersih, $vdpp, $vppn, $eremark, $ijenis, $idkodeharga, $ejenisspb);
+        $data2 = '';
+        $data3 = $this->mmaster->updateheaderspbold($ireferensi, $datereferensi, $nkotorold, $nbersihold, $vdppold, $vppnold, $ijenis);
+        $data5 = $this->mmaster->updatestatus($id);
 
         $no = 0;
         foreach ($i_product as $iproduct) {
@@ -705,150 +611,19 @@ class Cform extends CI_Controller
             $edesc              = $e_desc[$no];
 
             if ($nsisab > 0) {
-                $this->mmaster->insertdetailspb($ireferensi, $idbaru, $iproduct, $nsisa, $vprice, $_1ndiskon, $_2ndiskon, $_3ndiskon, $_1vdiskon, $_2vdiskon, $_3vdiskon, $vdiskonadd, $vtdiskon, $vtotal, $vtotalbersih, $edesc, $nsisab);
+                $data2 = $this->mmaster->insertdetailspb($idbaru, $iproduct, $nsisa, $vprice, $_1ndiskon, $_2ndiskon, $_3ndiskon, $_1vdiskon, $_2vdiskon, $_3vdiskon, $vdiskonadd, $vtdiskon, $vtotal, $vtotalbersih, $edesc, $nsisab, $ijenis);
             }
-            $this->mmaster->updatedetailspbold($ireferensi, $iproduct, $nquantity, $vtotalold, $vtotalbersihold);
-            /* $this->mmaster->update_spb_new_word($idbaru);
-            $this->mmaster->update_spb_new_word($ireferensi); */
-            // $this->mmaster->update_spb_lama($ireferensi);
+            $data4 = $this->mmaster->updatedetailspbold($ireferensi, $iproduct, $nquantity, $vtotalold, $vtotalbersihold, $ijenis);
             $no++;
         }
 
         if ($this->db->trans_status() === false) {
             $this->db->trans_rollback();
-            $data = array(
-                'sukses' => false,
-            );
         } else {
             $this->db->trans_commit();
             $this->Logger->write('Insert SPB Turunan Baru' . $ireferensi);
-            $data = array(
-                'sukses' => true,
-            );
+            echo json_encode($data, $data2);
         }
-        echo json_encode($data);
-    }
-
-
-    public function insertspbnewtransfer()
-    {
-
-        $data = check_role($this->i_menu, 7);
-        if (!$data) {
-            redirect(base_url(), 'refresh');
-        }
-
-        $id             = $this->input->post('id', TRUE);
-        $ibagian        = $this->input->post('ibagianreff', TRUE);
-        $ddocument      = $this->input->post('ddocument', TRUE);
-        if ($ddocument) {
-            $datedocument = formatYmd($ddocument);
-        }
-        $iarea          = $this->input->post('iarea', TRUE);
-        $icustomer      = $this->input->post('icustomer', TRUE);
-        $ireferensi     = $this->input->post('ireferensi', TRUE);
-        $dreferensi     = $this->input->post('dreferensi', TRUE);
-        if ($dreferensi) {
-            $datereferensi = formatYmd($dreferensi);
-        }
-        $ndiskontotal   = $this->input->post('ndiskontotal', TRUE);
-        $nkotor         = $this->input->post('nkotor', TRUE);
-        $nbersih        = $this->input->post('nbersih', TRUE);
-        $vdpp           = $this->input->post('vdpp', TRUE);
-        $vppn           = $this->input->post('vppn', TRUE);
-
-        $nkotorold      = $this->input->post('nkotorold', TRUE);
-        $nbersihold     = $this->input->post('nbersihold', TRUE);
-        $vdppold        = $this->input->post('vdppold', TRUE);
-        $vppnold        = $this->input->post('vppnold', TRUE);
-        $eremark        = $this->input->post('eremark', TRUE);
-        $idkodeharga    = $this->input->post('idkodeharga', TRUE);
-        $ejenisspb      = $this->input->post('ejenisspb', TRUE);
-        $jml            = $this->input->post('jml', TRUE);
-
-        $i_product      = $this->input->post('idproduct[]', TRUE);
-        $n_sisa         = str_replace(',', '', $this->input->post('sisa[]', TRUE));
-        $n_sisab        = str_replace(',', '', $this->input->post('sisab[]', TRUE));
-        $n_quantity     = str_replace(',', '', $this->input->post('nquantity[]', TRUE));
-        $n_quantity_total     = str_replace(',', '', $this->input->post('nquantitytotal[]', TRUE));
-        $v_price        = $this->input->post('vprice[]', TRUE);
-        $_1_ndiskon     = $this->input->post('1ndiskon[]', TRUE);
-        $_2_ndiskon     = $this->input->post('2ndiskon[]', TRUE);
-        $_3_ndiskon     = $this->input->post('3ndiskon[]', TRUE);
-        $_1_vdiskon     = $this->input->post('1vdiskon[]', TRUE);
-        $_2_vdiskon     = $this->input->post('2vdiskon[]', TRUE);
-        $_3_vdiskon     = $this->input->post('3vdiskon[]', TRUE);
-        $v_diskonadd    = $this->input->post('vdiskonadd[]', TRUE);
-        $vt_diskon      = $this->input->post('vtdiskon[]', TRUE);
-        $v_total        = $this->input->post('vtotal[]', TRUE);
-        $v_totalbersih  = $this->input->post('vtotalbersih[]', TRUE);
-
-        $v_totalold        = $this->input->post('vtotalold[]', TRUE);
-        $v_totalbersihold  = $this->input->post('vtotalbersihold[]', TRUE);
-        $e_desc            = $this->input->post('edesc[]', TRUE);
-
-        $this->db->trans_begin();
-        $idbaru     = $this->mmaster->runningidspb();
-        $idocument  = $this->mmaster->runningnumberspb(date('ym', strtotime($ddocument)), date('Y', strtotime($ddocument)), $ibagian, $icustomer);
-
-        $this->mmaster->insertspbnew($idbaru, $ibagian, $idocument, $datedocument, $iarea, $icustomer, $ireferensi, $datereferensi, $ndiskontotal, $nkotor, $nbersih, $vdpp, $vppn, $eremark, $idkodeharga, $ejenisspb);
-        $this->mmaster->updatesj($id);
-        $this->mmaster->changestatustransfer($id, '6');
-
-        /* var_dump($_POST);
-        die; */
-
-        /* $this->mmaster->updateheaderspbold($ireferensi, $datereferensi, $nkotorold, $nbersihold, $vdppold, $vppnold, $ijenis);
-        $this->mmaster->updatestatus($id); */
-
-        $no = 0;
-        foreach ($i_product as $iproduct) {
-            $iproduct           = $iproduct;
-            $nsisa              = $n_sisa[$no];
-            $nsisab             = $n_sisab[$no];
-            $nquantity          = $n_quantity[$no];
-            $nquantity_total    = $n_quantity_total[$no];
-            $vprice             = $v_price[$no];
-            $_1ndiskon          = $_1_ndiskon[$no];
-            $_2ndiskon          = $_2_ndiskon[$no];
-            $_3ndiskon          = $_3_ndiskon[$no];
-            $_1vdiskon          = $_1_vdiskon[$no];
-            $_2vdiskon          = $_2_vdiskon[$no];
-            $_3vdiskon          = $_3_vdiskon[$no];
-            $vdiskonadd         = $v_diskonadd[$no];
-            $vtdiskon           = $vt_diskon[$no];
-            $vtotal             = $v_total[$no];
-            $vtotalbersih       = $v_totalbersih[$no];
-
-            $vtotalold          = $v_totalold[$no];
-            $vtotalbersihold    = $v_totalbersihold[$no];
-            $edesc              = $e_desc[$no];
-
-            $id_product_reff = $this->db->query("SELECT id_product FROM tm_spb_item WHERE id_document = '$ireferensi' AND id_product='$iproduct'");
-
-            if ($nsisab > 0 && $id_product_reff->num_rows() > 0) {
-                $this->mmaster->insertdetailspb($ireferensi, $idbaru, $iproduct, $nsisa, $vprice, $_1ndiskon, $_2ndiskon, $_3ndiskon, $_1vdiskon, $_2vdiskon, $_3vdiskon, $vdiskonadd, $vtdiskon, $vtotal, $vtotalbersih, $edesc, $nsisab);
-            }
-            $this->mmaster->updatedetailspbold($ireferensi, $iproduct, $nquantity_total, $vtotalold, $vtotalbersihold);
-            /* $this->mmaster->update_spb_new_word($idbaru);
-            $this->mmaster->update_spb_new_word($ireferensi); */
-            // $this->mmaster->update_spb_lama($ireferensi);
-            $no++;
-        }
-        
-        if ($this->db->trans_status() === false) {
-            $this->db->trans_rollback();
-            $data = array(
-                'sukses' => false,
-            );
-        } else {
-            $this->db->trans_commit();
-            $this->Logger->write('Insert SPB Turunan Baru' . $ireferensi);
-            $data = array(
-                'sukses' => true,
-            );
-        }
-        echo json_encode($data);
     }
 
     /*----------  CETAK SJ HARGA DAN NON HARGA  ----------*/
@@ -861,13 +636,13 @@ class Cform extends CI_Controller
     {
         $id         = $this->uri->segment(4);
         $type       = $this->uri->segment(5);
-        $id_customer = $this->uri->segment(6);
+        $jenisspb   = $this->uri->segment(6);
         $data = array(
             'folder'        => $this->global['folder'],
             'title'         => "Cetak " . $this->global['title'],
             'id'            => $id,
-            'data'          => $this->mmaster->baca_header($id, $id_customer),
-            'datadetail'    => $this->mmaster->baca_detail_cetak($id),
+            'data'          => $this->mmaster->baca_header($id, $jenisspb),
+            'datadetail'    => $this->mmaster->baca_detail($id, $jenisspb),
         );
 
         if ($type == 'y') {
@@ -895,191 +670,6 @@ class Cform extends CI_Controller
             $this->Logger->write('Print ' . $this->global['folder'] . ' Id : ' . $id);
             echo $id;
         }
-    }
-
-
-
-
-
-
-
-
-
-
-    /*----------  REDIRECT KE FORM TRANSFER  ----------*/
-
-    public function transfer()
-    {
-        $dfrom = $this->input->post('dfrom', TRUE);
-        if ($dfrom == '') {
-            $dfrom = $this->uri->segment(4);
-            if ($dfrom == '') {
-                $dfrom = '01-' . date('m-Y');
-            }
-        }
-        $dto = $this->input->post('dto', TRUE);
-        if ($dto == '') {
-            $dto = $this->uri->segment(5);
-            if ($dto == '') {
-                $dto = date('d-m-Y');
-            }
-        }
-
-        $customer = $this->input->post('idcustomer');
-        if ($customer == '') {
-            $customer  = $this->uri->segment(6);
-            if ($customer == '') {
-                $customer = 'SD';
-            }
-        }
-
-        $data = array(
-            'folder'     => $this->global['folder'],
-            'title'      => $this->global['title'],
-            'title_list' => 'List ' . $this->global['title'],
-            'dfrom'      => date('d-m-Y', strtotime($dfrom)),
-            'dto'        => date('d-m-Y', strtotime($dto)),
-            'idcustomer' => $customer,
-            'customer'   => $this->mmaster->customertransfer()->result(),
-        );
-
-        $this->Logger->write('Membuka Menu List Transfer ' . $this->global['title']);
-
-        $this->load->view($this->global['folder'] . '/vformlistop', $data);
-    }
-
-    /*----------  DAFTAR DATA TRANSFER OP  ----------*/
-
-    public function datatransfer()
-    {
-        $dfrom = $this->input->post('dfrom', TRUE);
-        if ($dfrom == '') {
-            $dfrom = $this->uri->segment(4);
-        }
-        $dto = $this->input->post('dto', TRUE);
-        if ($dto == '') {
-            $dto = $this->uri->segment(5);
-        }
-        $icustomer = $this->input->post('idcustomer', TRUE);
-        if ($icustomer == '') {
-            $icustomer = $this->uri->segment(6);
-        }
-
-        echo $this->mmaster->datatransfer($this->global['folder'], $this->i_menu, $dfrom, $dto, $icustomer);
-    }
-
-
-    public function prosesdata()
-    {
-        $data = check_role($this->i_menu, 1);
-        if (!$data) {
-            redirect(base_url(), 'refresh');
-        }
-
-        $dfrom    = $this->input->post('dfrom', true);
-        $dto      = $this->input->post('dto', true);
-
-        $customer = [];
-        $op       = [];
-        if ($this->input->post('jml', true) > 0) {
-            for ($i = 1; $i <= $this->input->post('jml', true); $i++) {
-                $check      = $this->input->post('chk' . $i, true);
-                $iop        = $this->input->post('iop' . $i, true);
-                $idcustomer = $this->input->post('idcustomer' . $i, true);
-                if ($check == 'on') {
-                    array_push($customer, $idcustomer);
-                    array_push($op, $iop);
-                }
-            }
-        }
-        $customer   = array_unique($customer);
-        $op         = array_unique($op);
-        $idcustomer = implode(",", $customer);
-        $op         = "'" . implode("', '", $op) . "'";
-
-        if (count($customer) == 1) {
-            $data = array(
-                'folder'     => $this->global['folder'],
-                'title'      => "Transfer " . $this->global['title'],
-                'title_list' => 'List ' . $this->global['title'],
-                'data'       => $this->mmaster->dataheader($idcustomer)->row(),
-                'idcustomer' => $idcustomer,
-                'datadetail' => $this->mmaster->datadetail($idcustomer, $op, $dfrom, $dto)->result(),
-                'dfrom'      => $dfrom,
-                'dto'        => $dto,
-                'bagian'     => $this->mmaster->bagian()->result(),
-            );
-            $this->Logger->write('Membuka Menu Transfer Item ' . $this->global['title']);
-            $this->load->view($this->global['folder'] . '/vformtransfer', $data);
-        } else {
-            echo '<script>
-            swal({
-                title: "Maaf :(",
-                text: "Distributor Tidak Boleh Beda!",
-                showConfirmButton: true,
-                type: "error",
-                },function(){
-                    show("' . $this->global['folder'] . '/cform/transfer/' . $dfrom . '/' . $dto . '","#main");
-                    });
-            </script>';
-        }
-    }
-
-    public function approve_validation()
-    {
-        $id = $this->input->post('id');
-        $id_customer = $this->input->post('i_customer');
-        $d_document = $this->input->post('d_document');
-        $e_jenis_spb = $this->input->post('e_jenis_spb');
-        $id_spb = $this->input->post('id_spb');
-        $query = $this->mmaster->baca_detail($id, $id_customer, $d_document, $e_jenis_spb, $id_spb);
-        $data = [];
-        $sudah = false;
-        $stock = false;
-        $turunan = false;
-        if ($query->num_rows() > 0) {
-            if ($e_jenis_spb == 'Transfer') {
-                foreach ($query->result() as $key) {
-                    if ($key->n_quantity_total_per_product > $key->nquantity_pemenuhan) {
-                        $sudah = true;
-                        break;
-                    }
-    
-                    if ($key->n_quantity > $key->saldo_akhir) {
-                        $stock = true;
-                        break;
-                    }
-                    if (($key->nquantity_permintaan - $key->n_quantity_total_per_product) > 0) {
-                        $turunan = true;
-                        break;
-                    }
-                }
-            } else {
-                foreach ($query->result() as $key) {
-                    if ($key->n_quantity > $key->nquantity_pemenuhan) {
-                        $sudah = true;
-                        break;
-                    }
-    
-                    if ($key->n_quantity > $key->saldo_akhir) {
-                        $stock = true;
-                        break;
-                    }
-                    if (($key->nquantity_permintaan - $key->n_quantity) > 0) {
-                        $turunan = true;
-                        break;
-                    }
-                }
-            }
-        }
-        $data = array(
-            'sudah' => $sudah,
-            'stock' => $stock,
-            'turunan' => $turunan,
-        );
-        echo json_encode($data);
-        // var_dump($query->num_rows());
-
     }
 }
 /* End of file Cform.php */

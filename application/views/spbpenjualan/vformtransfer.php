@@ -84,8 +84,14 @@
                             <th class="text-center" width="3%">No</th>
                             <th class="text-center" width="10%;">Kode</th>
                             <th class="text-center" width="30%;">Nama Barang</th>
-                            <th class="text-center" width="7%">Qty OP</th>
-                            <th class="text-center" width="7%">Qty OP <br> Internal</th>
+                            <th class="text-center" width="10%;">Warna</th>
+                            <th class="text-center" width="7%">Total FC</th>
+                            <th class="text-center" width="7%">Stock</th>
+                            <th class="text-center" width="7%">Stock <br>Outstanding</th>
+                            <th class="text-center" width="7%">Qty OP <br>Kumulatif</th>
+                            <th class="text-center" width="7%">Qty DO <br>Kumulatif</th>
+                            <th class="text-center" width="7%">Qty OP Distributor</th>
+                            <th class="text-center" width="7%">Qty OP <br> Per Warna</th>
                             <th class="text-center" width="12%">Harga</th>
                             <th class="text-center" width="20%">Keterangan</th>
                             <th class="text-center" width="3%"><input type="checkbox" id="ceklisall"></th>
@@ -112,16 +118,15 @@
                                     <td><input readonly class="form-control input-sm" type="text" id="i_product<?=$i;?>" name="i_product<?=$i;?>" value="<?= $key->i_product;?>">
                                         <input type="hidden" id="iop<?=$i;?>" name="iop<?=$i;?>" value="<?= $key->i_op;?>">
                                         <input type="hidden" name="idarea<?=$i;?>" value="<?= $key->id_area;?>">
-                                        <input type="hidden" name="i_area_distributor<?=$i;?>" value="<?=$key->i_area;?>">
                                         <input type="hidden" id="idproduct<?=$i;?>" name="idproduct<?=$i;?>" value="<?= $key->id_product_base;?>">
-                                        <input class="form-control input-sm" type="hidden" value="<?= $key->e_color_name;?>">
-                                        <input class="form-control input-sm text-right" type="hidden" id="fc<?=$i;?>" value="<?= $key->fc;?>">
-                                        <input class="form-control input-sm text-right" type="hidden" id="n_stock<?=$i;?>" value="<?= $key->saldo_akhir;?>">
-                                        <input class="form-control input-sm text-right" type="hidden" id="n_stock_os<?=$i;?>" value="<?= $key->n_stock_outstanding;?>">
-                                        <input class="form-control input-sm text-right" type="hidden" id="n_op_kumulatif<?=$i;?>" value="<?= $key->n_op_kumulatif;?>">
-                                        <input class="form-control input-sm text-right" type="hidden" id="n_do_kumulatif<?=$i;?>" value="<?= $key->n_do_kumulatif;?>">
                                     </td>
                                     <td><input readonly class="form-control input-sm" type="text" value="<?= $key->e_product_basename;?>"></td>
+                                    <td><input readonly class="form-control input-sm" type="text" value="<?= $key->e_color_name;?>"></td>
+                                    <td><input readonly class="form-control input-sm text-right" type="text" id="fc<?=$i;?>" value="<?= $key->fc;?>"></td>
+                                    <td><input readonly class="form-control input-sm text-right" type="text" id="n_stock<?=$i;?>" value="<?= $key->saldo_akhir;?>"></td>
+                                    <td><input readonly class="form-control input-sm text-right" type="text" id="n_stock_os<?=$i;?>" value="<?= $key->n_stock_outstanding;?>"></td>
+                                    <td><input readonly class="form-control input-sm text-right" type="text" id="n_op_kumulatif<?=$i;?>" value="<?= $key->n_op_kumulatif;?>"></td>
+                                    <td><input readonly class="form-control input-sm text-right" type="text" id="n_do_kumulatif<?=$i;?>" value="<?= $key->n_do_kumulatif;?>"></td>
                                     <td><input readonly class="form-control input-sm text-right" type="text" id="n_order<?=$i;?>" value="<?= $key->n_order;?>"></td>
                                     <td><input class="form-control input-sm text-right inputitem <?= $key->i_product.$key->i_op;?>" type="text" id="qty<?=$i;?>" name="qty<?=$i;?>" value="<?= $key->n_order_warna;?>" placeholder="0" autocomplete="off" onblur="if(this.value==''){this.value='0';}" onfocus="if(this.value=='0'){this.value='';}" onkeyup="angkahungkul(this);ngetang(<?=$i;?>)">
                                     </td>
@@ -188,21 +193,21 @@
     
     /*----------  VALIDASI CEKLIS SATU  ----------*/
     function cek(i) {
-        // if($('#ceklis'+i).is(':checked')){
-        //     if (parseInt($('#qty'+i).val()) > parseInt($('#fc'+i).val())) {
-        //         swal('Maaf :(','Qty SPB tidak boleh lebih dari Qty Sisa FC!!!','error');
-        //         $('#ceklis'+i).attr('checked', false);
-        //         return false;
-        //     }
-        // }
+        if($('#ceklis'+i).is(':checked')){
+            if (parseInt($('#qty'+i).val()) > parseInt($('#fc'+i).val())) {
+                swal('Maaf :(','Qty SPB tidak boleh lebih dari Qty Sisa FC!!!','error');
+                $('#ceklis'+i).attr('checked', false);
+                return false;
+            }
+        }
     }
 
     /*----------  VALIDASI INPUT SPB  ----------*/
     function ngetang(i) {
-        // if (parseInt($('#qty'+i).val()) > parseInt($('#fc'+i).val())) {
-        //     swal('Maaf :(','Qty SPB tidak boleh lebih dari Qty Sisa FC!!!','error');
-        //     $('#qty'+i).val($('#fc'+i).val());
-        // }
+        if (parseInt($('#qty'+i).val()) > parseInt($('#fc'+i).val())) {
+            swal('Maaf :(','Qty SPB tidak boleh lebih dari Qty Sisa FC!!!','error');
+            $('#qty'+i).val($('#fc'+i).val());
+        }
     }
 
     /*----------  VALIDASI UPDATE DATA  ----------*/    
@@ -245,10 +250,11 @@
                                                 }
                                                 
                                             });
-                                            //swal(sum + " " + order);
+                                            swal(sum + " " + order);
                                             if (sum > order) {
                                                 swal('Quantity '+i_product+' Tidak Boleh Lebih Dari OP ' + order);
-                                                // return false;
+                                                $('#qty'+i).focus();
+                                                return false;
                                             }
                                         // }
                                         
@@ -256,32 +262,36 @@
                                         // var kelas = row.find('').val();
 
                                     }
-                                    //if($('#ceklis'+i).is(':checked')){
-                                        // if (parseInt($('#qty'+i).val()) <= 0) {
-                                        //     swal('Maaf :(','Quantity Tidak Boleh Kosong Atau 0!','error');
-                                        //     $('#ceklis'+i).attr('checked', false);
-                                        //     return false;
-                                        // } else {
-                                            // var sumfc = 0;
-                                            // var sumspb = 0;
-                                            // for (var j = 0; j <= $('#jml').val(); j++) { 
-                                            //     if($('#ceklis'+j).is(':checked')){
-                                            //         if ($('#idproduct'+i).val() == $('#idproduct'+j).val()) {
-                                            //             sumspb = parseInt(sumspb) + parseInt($('#qty'+j).val());
-                                            //             sumfc =  parseInt($('#fc'+i).val());
-                                            //         }
-                                            //     }     
-                                            // }
+                                    if($('#ceklis'+i).is(':checked')){
+                                        if (parseFloat($('#qty'+i).val()) <= 0.0) {
+                                            swal('Maaf :(','Quantity Tidak Boleh Kosong Atau 0!','error');
+                                            // $('#ceklis'+i).attr('checked', false);
+                                            return false;
+                                        } else if(parseFloat($('#fc'+i).val()) == 0) {
+                                            swal('Maaf :(','Jumlah FC kode ' + i_product + ' Tidak Boleh Kosong Atau 0!','error');
+                                            $('#ceklis'+i).attr('checked', false);
+                                            return false;
+                                        } else {
+                                            var sumfc = 0;
+                                            var sumspb = 0;
+                                            for (var j = 0; j <= $('#jml').val(); j++) { 
+                                                if($('#ceklis'+j).is(':checked')){
+                                                    if ($('#idproduct'+i).val() == $('#idproduct'+j).val()) {
+                                                        sumspb = parseInt(sumspb) + parseInt($('#qty'+j).val());
+                                                        sumfc =  parseInt($('#fc'+i).val());
+                                                    }
+                                                }     
+                                            }
 
-                                            //console.log(sumfc+ " " + sumspb);
-                                            // if (sumspb > sumfc) {
-                                            //     swal('Maaf :(','Jumlah Barang '+ $('#i_product'+i).val()+' melebihi jumlah forecast','error');
-                                            //     //$('#ceklis'+i).attr('checked', false);
-                                            //     return false;
-                                            // }
+                                            // console.log(sumfc+ " " + sumspb);
+                                            if (sumspb > sumfc) {
+                                                swal('Maaf :(','Jumlah Barang '+ $('#i_product'+i).val()+' melebihi jumlah forecast','error');
+                                                //$('#ceklis'+i).attr('checked', false);
+                                                return false;
+                                            }
 
-                                        //}
-                                    //}
+                                        }
+                                    }
                                 }
                                 //swal(""+ada);
                                 //return false;

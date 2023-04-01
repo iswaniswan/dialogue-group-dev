@@ -163,12 +163,17 @@ class Cform extends CI_Controller {
         $filter = [];       
         
         if ($this->input->get('ipengirim')!='' && $this->input->get('ibagian')!='') {
-            $data = $this->mmaster->datareferensi(str_replace("'", "", $this->input->get('q')),$this->input->get('ipengirim'),$this->input->get('ibagian'));
+            $q = str_replace("'", "", $this->input->get('q'));
+            $pengirim = $this->input->get('ipengirim');
+            $ibagian = $this->input->get('ibagian');
+            
+            $data = $this->mmaster->datareferensi($q, $pengirim, $ibagian);
+
             if ($data->num_rows()>0) {
                 foreach($data->result() as $key){
                     $filter[] = array(
                         'id'   => $key->id,  
-                        'text' => $key->i_document
+                        'text' => "$key->i_document - $key->e_remark"
                     );
                 }
             }else{

@@ -17,7 +17,6 @@
                             <div class="col-sm-3">
                                 <input type="text" class="form-control input-sm" value="<?= $data->e_bagian_name; ?>" readonly>
                                 <input type="hidden" name="ibagianreff" id="ibagianreff" class="form-control" value="<?= $data->ibagian_reff; ?>" readonly>
-                                <input type="hidden" name="id_jenis_barang_keluar" id="id_jenis_barang_keluar" class="form-control" value="<?= $data->id_jenis_barang_keluar; ?>" readonly>
                             </div>
                             <div class="col-sm-3">
                                 <div class="input-group">
@@ -47,7 +46,7 @@
                             </div>
                             <div class="col-sm-3">
                                 <select name="ireferensi" id="ireferensi" class="form-control select2">
-                                    <option value="<?= $data->id_document_reff; ?>"><?= $data->i_referensi; ?> ~ <?= $data->e_jenis_spb ?></option>
+                                    <option value="<?= $data->id_document_reff; ?>"><?= $data->i_referensi; ?></option>
                                 </select>
                             </div>
                             <div class="col-sm-3">
@@ -75,7 +74,7 @@
                                 <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>','#main')"> <i class="fa fa-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;
                                 <button type="button" class="btn btn-warning btn-rounded btn-sm" onclick="statuschange('<?= $folder . "','" . $data->id; ?>','1','<?= $dfrom . "','" . $dto; ?>');"> <i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;Change Requested</button>&nbsp;
                                 <button type="button" class="btn btn-danger btn-rounded btn-sm" onclick="statuschange('<?= $folder . "','" . $data->id; ?>','4','<?= $dfrom . "','" . $dto; ?>');"> <i class="fa fa-times"></i>&nbsp;&nbsp;Reject</button>&nbsp;
-                                <button type="button" onclick="return validation('<?= $data->e_jenis_spb ?>', '<?= $data->id_spb ?>');" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Approve</button>&nbsp;
+                                <button type="button" id="submit" class="btn btn-success btn-rounded btn-sm"> <i class="fa fa-check-square-o"></i>&nbsp;&nbsp;Approve</button>&nbsp;
                             </div>
                         </div>
                     </div>
@@ -93,17 +92,13 @@
                             <thead>
                                 <tr>
                                     <th class="text-center" width="3%;">No</th>
-                                    <th class="text-center" width="6%;">Kode</th>
-                                    <th class="text-center" width="23%;">Nama Barang</th>
-                                    <th class="text-center" width="6%;">Warna</th>
-                                    <th class="text-center" width="5%;">FC</th>
-                                    <th class="text-center" width="8%;">Total Order <br>Belum proses</th>
-                                    <th class="text-center" width="5%;">Stock</th>
-                                    <th class="text-center" width="8%;">Stock - <br>DO Belum Approve</th>
-                                    <th class="text-center" width="5%;">Qty <br> Order</th>
-                                    <th class="text-center" width="5%;">Qty <br> SJ</th>
-                                    <th class="text-center" width="10%;">Keterangan</th>
-                                    <th class="text-center" width="10%;">Ket OP</th>
+                                    <th class="text-center" width="12%;">Kode</th>
+                                    <th class="text-center" width="30%;">Nama Barang</th>
+                                    <th class="text-center">Saldo</th>
+                                    <th class="text-center">Qty SPB</th>
+                                    <th class="text-center">Qty Sisa</th>
+                                    <th class="text-center">Qty SJ</th>
+                                    <th class="text-center" width="20%;">Keterangan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -118,9 +113,8 @@
                                             <td class="text-center"><?= $i; ?></td>
                                             <td>
                                                 <input type="hidden" class="form-control input-sm" id="idproduct<?= $i; ?>" name="idproduct[]" value="<?= $row->id_product; ?>" readonly>
-                                                <input type="hidden" class="form-control input-sm text-right" id="sisab<?= $i; ?>" name="sisab[]" value="<?= $sisa_b; ?>" readonly>
-                                                <input type="hidden" class="form-control input-sm text-right" id="sisa<?= $i; ?>" name="sisa[]" value="<?= $row->nquantity_permintaan; ?>" readonly>
-                                                <input type="hidden" class="form-control input-sm text-right" id="nquantity<?= $i; ?>" name="nquantity[]" value="<?= $row->n_quantity; ?>" readonly>
+                                                <input type="text" class="form-control input-sm" id="iproduct<?= $i; ?>" name="iproduct[]" value="<?= $row->i_product_base; ?>" readonly>
+
                                                 <input type="hidden" class="form-control input-sm" id="vprice<?= $i; ?>" name="vprice[]" value="<?= $row->v_price; ?>" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="1ndiskon<?= $i; ?>" name="1ndiskon[]" value="<?= $row->n_diskon1; ?>" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="2ndiskon<?= $i; ?>" name="2ndiskon[]" value="<?= $row->n_diskon2; ?>" readonly>
@@ -130,23 +124,34 @@
                                                 <input type="hidden" class="form-control input-sm" id="3vdiskon<?= $i; ?>" name="3vdiskon[]" value="" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="vdiskonadd<?= $i; ?>" name="vdiskonadd[]" value="<?= $row->v_diskon_tambahan; ?>" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="vtdiskon<?= $i; ?>" name="vtdiskon[]" value="" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm" id="eproduct<?= $i; ?>" name="eproduct[]" value="<?= $row->e_product_basename; ?>" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm text-right" id="nsaldo<?= $i; ?>" name="nsaldo[]" value="0" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm text-right" id="nquantitymemo<?= $i; ?>" name="nquantitymemo[]" value="<?= $row->nquantity_permintaan; ?>" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm text-right" id="sisa<?= $i; ?>" name="sisa[]" value="<?= $row->nquantity_pemenuhan; ?>" readonly>
+
+                                                <input type="hidden" class="form-control input-sm text-right" id="sisab<?= $i; ?>" name="sisab[]" value="<?= $sisa_b; ?>" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm text-right" id="nquantity<?= $i; ?>" name="nquantity[]" value="<?= $row->n_quantity; ?>" onkeyup="ceksaldo(<?= $i; ?>);" readonly>
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control input-sm" id="edesc<?= $i; ?>" name="edesc[]" value="<?= $row->e_remark; ?>" readonly>
+                                                <!-- hitungan u/ spb baru -->
                                                 <input type="hidden" class="form-control input-sm" id="vtotal<?= $i; ?>" name="vtotal[]" value="" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="vtotalbersih<?= $i; ?>" name="vtotalbersih[]" value="" readonly>
+
+                                                <!-- hitungan u/ spb lama -->
                                                 <input type="hidden" class="form-control input-sm" id="vtotalold<?= $i; ?>" name="vtotalold[]" value="" readonly>
                                                 <input type="hidden" class="form-control input-sm" id="vtotalbersihold<?= $i; ?>" name="vtotalbersihold[]" value="" readonly>
-                                                <input type="hidden" class="form-control input-sm" id="edesc<?= $i; ?>" name="edesc[]" value="<?= $row->e_remark; ?>" readonly>
-                                                <?= $row->i_product_base; ?>
                                             </td>
-                                            <td><?= $row->e_product_basename; ?></td>
-                                            <td><?= $row->e_color_name; ?></td>
-                                            <td class="text-right"><?= $row->n_quantity_fc; ?></td>
-                                            <td class="text-right"><?= $row->n_quantity_sisa_total; ?></td>
-                                            <td class="text-right"><?= $row->saldo_akhir; ?></td>
-                                            <td class="text-right"><?= $row->n_stock_outstanding; ?></td>
-                                            <td class="text-right"><?= $row->nquantity_permintaan; ?></td>
-                                            <td class="text-right"><?= $row->n_quantity; ?></td>
-                                            <td><?= $row->e_remark; ?></td>
-                                            <td><?= $row->e_remark_op; ?></td>
                                         </tr>
 
                                     <?php
@@ -165,50 +170,19 @@
         fixedtable($('#tabledatax'));
         $('.select2').select2();
         showCalendar('.date');
+        hitungb();
+        hitungold();
+
         $("#submit").on('click', function() {
             ada = false;
-            var stock = 0;
             for (var i = 1; i <= $('#jml').val(); i++) {
                 if (parseInt($('#nquantity' + i).val()) > parseInt($('#sisa' + i).val())) {
                     swal('Dokumen Referensi sudah pernah dibuat, silahkan dicek kembali');
                     ada = true;
                     return false;
-
                 }
             }
             if (!ada) {
-                for (var i = 1; i <= $('#jml').val(); i++) {
-                    $.ajax({
-                        url: '<?= base_url($folder . '/cform/get_stock/'); ?>',
-                        type: "POST",
-                        dataType: 'json',
-                        data: {
-                            id_product: $('#idproduct' + i).val(),
-                            d_document: $('#ddocument').val(),
-                            id_jenis_barang_keluar: $('#id_jenis_barang_keluar').val(),
-                            x: i,
-                        },
-                        success: function(data) {
-                            // alert(data['i']);
-                            //alert($('#nquantity' + data['i']).val()+' = '+data['n_quantity']);
-                            // alert()
-                            if (parseInt($('#nquantity' + data['i']).val()) > data['n_quantity']) {
-                                stock = 1;
-                                swal("Maaf", "Stock ada yang kurang :(", "error");
-                                $('#set').val(1);
-                                //alert(stock);
-                                //return false;
-                            }
-                        },
-                        error: function() {
-                            swal("Maaf", "Gagal cek stock :(", "error");
-                        }
-                    });
-                }
-                // alert($('#set').val());
-                /* if ($('#set').val() == 0) {
-                    alert('x'); */
-                return false;
                 for (var i = 1; i <= $('#jml').val(); i++) {
                     if (parseInt($('#sisab' + i).val()) > 0) {
                         cek = true;
@@ -216,101 +190,6 @@
                         cek = false;
                     }
                 }
-                if (cek) {
-                    swal({
-                        title: "Quantity masih belum terpenuhi!",
-                        text: " Buat SPB baru?",
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#DD6B55",
-                        cancelButtonText: "Tidak, hanya Approve!",
-                        confirmButtonText: "Ya, Buat SPB baru!",
-                        closeOnConfirm: false,
-                        closeOnCancel: false
-                    }, function(isConfirm) {
-                        if (isConfirm) {
-                            $.ajax({
-                                url: '<?= base_url($folder . '/cform/insertspbnew/'); ?>',
-                                type: "POST", // type of action POST || GET
-                                dataType: 'json', // data type
-                                data: $("#form").serialize(), // post data || get data
-                                success: function(data) {
-                                    if (data.sukses == true) {
-
-                                        // you can see the result from the console
-                                        // tab of the developer tools
-                                        // statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-                                        swal("Success!", "Data berhasil Diapprove dan Disimpan menjadi SPB Baru :)", "success");
-                                        show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>', '#main');
-                                        //console.log(result);
-                                        //return false;
-                                    } else {
-                                        swal("Maaf!", "Data gagal diapprove dan disimpan :(", "error");
-                                    }
-                                },
-                                error: function() {
-                                    swal("Maaf", "Data gagal insert :(", "error");
-                                    //console.log(xhr, resp, text);
-                                }
-                            });
-                        } else {
-                            /*swal("Dibatalkan", "Anda membatalkan insert spb baru :)", "error");*/
-                            statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-                        }
-                    });
-                } else {
-                    statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-                }
-            } else {
-                return false;
-            }
-        });
-    });
-
-    function cubmit() {
-        var ada = false;
-        var cek = true;
-        for (var i = 1; i <= $('#jml').val(); i++) {
-            if (parseInt($('#nquantity' + i).val()) > parseInt($('#sisa' + i).val())) {
-                swal('Dokumen Referensi sudah pernah dibuat, silahkan dicek kembali');
-                ada = true;
-                return false;
-
-            } else {
-                $.ajax({
-                    url: '<?= base_url($folder . '/cform/get_stock/'); ?>',
-                    type: "POST",
-                    dataType: 'json',
-                    data: {
-                        id_product: $('#idproduct' + i).val(),
-                        d_document: $('#ddocument').val(),
-                        n_quantity: $('#nquantity' + i).val(),
-                        id_jenis_barang_keluar: $('#id_jenis_barang_keluar').val(),
-                    },
-                    success: function(data) {
-                        if (data['sukses'] == false) {
-                            swal("Maaf", "Stock ada yang kurang :(", "error");
-                            ada = true;
-                            return false;
-                        }
-                    },
-                    error: function() {
-                        swal("Maaf", "Gagal cek stock :(", "error");
-                    }
-                });
-            }
-        }
-        if (!ada) {
-            for (var i = 1; i <= $('#jml').val(); i++) {
-                if (parseInt($('#sisab' + i).val()) > 0) {
-                    cek = true;
-                } else {
-                    cek = false;
-                }
-            }
-            // alert(cek);
-            // return false;
-            if (cek) {
                 swal({
                     title: "Quantity masih belum terpenuhi!",
                     text: " Buat SPB baru?",
@@ -329,97 +208,118 @@
                             dataType: 'json', // data type
                             data: $("#form").serialize(), // post data || get data
                             success: function(data) {
-                                if (data.sukses == true) {
-                                    swal("Success!", "Data berhasil Diapprove dan Disimpan menjadi SPB Baru :)", "success");
-                                    show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>', '#main');
-                                } else {
-                                    swal("Maaf!", "Data gagal diapprove dan disimpan :(", "error");
-                                }
+                                // you can see the result from the console
+                                // tab of the developer tools
+                                statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
+                                swal("Insert!", "Data berhasil Di insert :)", "success");
+                                show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>', '#main');
+                                //console.log(result);
+                                //return false;
                             },
                             error: function() {
                                 swal("Maaf", "Data gagal insert :(", "error");
+                                //console.log(xhr, resp, text);
                             }
                         });
                     } else {
+                        /*swal("Dibatalkan", "Anda membatalkan insert spb baru :)", "error");*/
                         statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
                     }
                 });
             } else {
-                statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-            }
-        } else {
-            return false;
-        }
-    }
-
-
-    function validation(e_jenis_spb = null, id_spb = null) {
-        $.ajax({
-            url: '<?= base_url($folder . '/cform/approve_validation/'); ?>',
-            type: "POST", // type of action POST || GET
-            dataType: 'json', // data type
-            data: {
-                id: $('#id').val(),
-                i_customer: $('#icustomer').val(),
-                d_document: $('#ddocument').val(),
-                e_jenis_spb: e_jenis_spb,
-                id_spb: id_spb
-            }, // post data || get data
-            success: function(data) {
-                /** Jika Dokumen SPB, sudah ada yang pernah Approve */
-                if (data['sudah'] === true) {
-                    swal('Dokumen Referensi sudah pernah dibuat, silahkan dicek kembali');
-                    return false;
-                }
-                /** Jika Qty SJ Melebihi Stock */
-                if (data['stock'] === true) {
-                    swal("Maaf", "Stock ada yang kurang :(", "error");
-                    return false;
-                }
-
-                /** Jika Qty SJ tidak Sama Dengan QTY SPB */
-                if (data['turunan'] === true) {
-                    swal({
-                        title: "Quantity masih belum terpenuhi!",
-                        text: " Buat SPB baru?",
-                        type: "warning",
-                        showCancelButton: true,
-                        confirmButtonColor: "#DD6B55",
-                        cancelButtonText: "Tidak, hanya Approve!",
-                        confirmButtonText: "Ya, Buat SPB baru!",
-                        closeOnConfirm: false,
-                        closeOnCancel: false
-                    }, function(isConfirm) {
-                        if (isConfirm) {
-                            $.ajax({
-                                url: '<?= base_url($folder . '/cform/insertspbnew/'); ?>',
-                                type: "POST", // type of action POST || GET
-                                dataType: 'json', // data type
-                                data: $("#form").serialize(), // post data || get data
-                                success: function(data) {
-                                    if (data.sukses == true) {
-                                        swal("Success!", "Data berhasil Diapprove dan Disimpan menjadi SPB Baru :)", "success");
-                                        show('<?= $folder; ?>/cform/index/<?= $dfrom . "/" . $dto; ?>', '#main');
-                                    } else {
-                                        swal("Maaf!", "Data gagal diapprove dan disimpan :(", "error");
-                                    }
-                                },
-                                error: function() {
-                                    swal("Maaf", "Data gagal insert :(", "error");
-                                }
-                            });
-                        } else {
-                            statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-                        }
-                    });
-                }else{
-                    statuschange('<?= $folder; ?>', $('#id').val(), '6', '<?= $dfrom . "','" . $dto; ?>');
-                }
-                // console.log(data);
-            },
-            error: function() {
-                swal("Maaf", "Data gagal diapprove :(", "error");
+                return false;
             }
         });
+    });
+
+    function hitungb() {
+        var total = 0;
+        var totaldis = 0;
+        var vjumlah = 0;
+        var dpp = 0;
+        var ppn = 0;
+        var grand = 0;
+
+        for (var i = 1; i <= $('#jml').val(); i++) {
+            var sisa = $('#sisab' + i).val();
+            var vprice = $('#vprice' + i).val();
+            var disc1 = formatulang($('#1ndiskon' + i).val());
+            var disc2 = formatulang($('#2ndiskon' + i).val());
+            var disc3 = formatulang($('#3ndiskon' + i).val());
+            var disc4 = formatulang($('#vdiskonadd' + i).val());
+
+            jumlah = sisa * vprice;
+            var ndisc1 = jumlah * (disc1 / 100);
+            var ndisc2 = (jumlah - ndisc1) * (disc2 / 100);
+            var ndisc3 = (jumlah - ndisc1 - ndisc2) * (disc3 / 100);
+
+            var vtotaldis = (ndisc1 + ndisc2 + ndisc3 + parseInt(disc4));
+
+            var vtotal = jumlah - vtotaldis;
+
+            $('#1vdiskon' + i).val(ndisc1);
+            $('#2vdiskon' + i).val(ndisc2);
+            $('#3vdiskon' + i).val(ndisc3);
+            $('#vtdiskon' + i).val(vtotaldis);
+            $('#vtotal' + i).val(jumlah);
+            $('#vtotalbersih' + i).val(vtotal);
+
+            totaldis += vtotaldis;
+            vjumlah += jumlah;
+            total += vtotal;
+        }
+        $('#nkotor').val(vjumlah);
+        $('#ndiskontotal').val(totaldis);
+
+        dpp = vjumlah - totaldis;
+        ppn = dpp * 0.1;
+        grand = dpp + ppn;
+
+        $('#nbersih').val(grand);
+        $('#vdpp').val(dpp);
+        $('#vppn').val(ppn);
+    }
+
+    function hitungold() {
+        var total = 0;
+        var totaldis = 0;
+        var vjumlah = 0;
+        var dpp = 0;
+        var ppn = 0;
+        var grand = 0;
+
+        for (var i = 1; i <= $('#jml').val(); i++) {
+            var sisa = $('#nquantity' + i).val();
+            var vprice = $('#vprice' + i).val();
+            var disc1 = formatulang($('#1ndiskon' + i).val());
+            var disc2 = formatulang($('#2ndiskon' + i).val());
+            var disc3 = formatulang($('#3ndiskon' + i).val());
+            var disc4 = formatulang($('#vdiskonadd' + i).val());
+
+            jumlah = sisa * vprice;
+            var ndisc1 = jumlah * (disc1 / 100);
+            var ndisc2 = (jumlah - ndisc1) * (disc2 / 100);
+            var ndisc3 = (jumlah - ndisc1 - ndisc2) * (disc3 / 100);
+
+            var vtotaldis = (ndisc1 + ndisc2 + ndisc3 + parseInt(disc4));
+
+            var vtotal = jumlah - vtotaldis;
+
+            $('#vtotalold' + i).val(jumlah);
+            $('#vtotalbersihold' + i).val(vtotal);
+
+            totaldis += vtotaldis;
+            vjumlah += jumlah;
+            total += vtotal;
+        }
+        $('#nkotorold').val(vjumlah);
+
+        dpp = vjumlah - totaldis;
+        ppn = dpp * 0.1;
+        grand = dpp + ppn;
+
+        $('#nbersihold').val(grand);
+        $('#vdppold').val(dpp);
+        $('#vppnold').val(ppn);
     }
 </script>

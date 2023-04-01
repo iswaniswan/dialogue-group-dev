@@ -11,18 +11,12 @@
       padding: 0px 8px !important;
    }
 
-   .border {
-      border-collapse: collapse;
-      border: 1px solid #8d9ea7;
-   }
-
    .table-bordered tbody td {
       font-size: 11px; padding: 1px 8px !important;
    }
 
    .huruf10{
       font-size: 10px !important;
-      line-height: 0.8;
    }
 
    .huruf11{
@@ -76,10 +70,6 @@
    #kotak {
       border-collapse: collapse;
       border: 1px solid black;
-   }
-   .border {
-      border-collapse: collapse;
-      border: 1px solid #8d9ea7;
    }
    .noDisplay{
       display:none;
@@ -151,36 +141,22 @@ foreach($data->result() as $row){?>
                <hr class="hrna">
                <div class="row">
                   <div class="col-sm-12">
-                     <!-- <div class="pull-left"> -->
+                     <div class="pull-left">
                         <address style="padding:0px">
-                           <div class="d-flex justify-content-between p-0">
-                              <table cellpadding="0" cellspacing="0">
-                                 <tr>
-                                    <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor Surat Jalan</b></td> 
-                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                    <td width="150px" class="text-muted m-l-3 huruf12"><b><?= $row->i_document;?></b></td> 
-                                 </tr>
-                                 <tr>
-                                    <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor SPB</b></td> 
-                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                    <td width="150px" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi; ?></b></td> 
-                                 </tr>
-                              </table>
-                              <table cellpadding="0" cellspacing="0">
-                                 <tr>
-                                    <td width="135px" class="text-muted m-l-3 huruf12"><b>Nomor OP Distributor</b></td> 
-                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                    <td width="0" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi_op; ?></b></td> 
-                                 </tr>
-                                 <tr>
-                                    <td width="135px" class="text-muted m-l-3 huruf12"><b>Area</b></td> 
-                                    <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
-                                    <td width="0" class="text-muted m-l-3 huruf12"><b><?= $row->e_area; ?></b></td> 
-                                 </tr>
-                              </table>
-                           </div>
+                           <table cellpadding="0" cellspacing="0" >
+                              <tr>
+                                 <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor Surat Jalan</b></td> 
+                                 <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                 <td width="300px" class="text-muted m-l-3 huruf12"><b><?= $row->i_document;?></b></td> 
+                              </tr>
+                              <tr>
+                                 <td width="130px" class="text-muted m-l-3 huruf12"><b>Nomor SPB</b></td> 
+                                 <td width="15px" class="text-muted m-l-3 huruf12"><b>:</b></td> 
+                                 <td width="300px" class="text-muted m-l-3 huruf12"><b><?= $row->i_referensi; ?></b></td> 
+                              </tr>
+                           </table>
                         </address>
-                     <!-- </div> -->
+                     </div>
                   </div>
                   <div class="col-sm-12">
                      <p class="text-muted pna"> Harap diterima barang-barang berikut ini : </p>
@@ -203,9 +179,15 @@ foreach($data->result() as $row){?>
                               <?php 
                               $no = 0;
                               if ($datadetail) {
+                                 $hasiltotal = 0;
+                                 $total = 0;
+                                 $qty   = 0;
                                  foreach ($datadetail->result() as $rowi) {
                                     $no++;
-                                    ?>
+                                    $total = $rowi->n_quantity * $rowi->v_price;
+                                    $total = (int)$total;
+                                    $qty   = $qty + $rowi->n_quantity;
+                                    $hasiltotal = $hasiltotal + $total;?>
                                     <tr>
                                        <td class="text-center"><?= $no;?></td>
                                        <td>
@@ -214,58 +196,34 @@ foreach($data->result() as $row){?>
                                           }else{
                                              $nam    = $rowi->e_product_basename.str_repeat(" ",50-strlen($rowi->e_product_basename ));
                                           }
-                                          echo $rowi->i_product_base." - ".$nam. " - ".$rowi->e_color_name;
+                                          echo $rowi->i_product_base." - ".$nam;
                                           ?>
                                        </td>
                                        <td class="text-right">
                                           <?= $rowi->n_quantity;?>
                                        </td>
-                                       <td class="text-left"><?= $rowi->i_satuan_code;?></td>
+                                       <td class="text-left"><?= $rowi->e_satuan_name;?></td>
                                        <td class="text-right"> Rp. <?= number_format($rowi->v_price,2,',','.');?></td>
-                                       <td class="text-right"> Rp. <?= number_format($rowi->v_total,2,',','.');?></td>
+                                       <td class="text-right"> Rp. <?= number_format($total,2,',','.');?></td>
                                        <td><?= $rowi->e_remark;?></td>
                                     </tr>
-                                 <?php 
-                              } 
-                              ?>
+                                 <?php } ?>
                               </tbody>
                               <tfoot>
-                                 <?php if($row->f_plus_meterai = 't' && $row->v_bersih >= $row->v_meterai_limit) { ?>
-                                    <tr>
-                                       <th rowspan="3" colspan="4">
-                                          <div class="border p-2 m-1 w-50">
-                                             <span class="font-weight-semibold">Catatan:</span>
-                                             <br>
-                                             <span class="font-weight-semibold">Nilai belum termasuk Bea Meterai Rp. <?= number_format($row->v_meterai) ?></span>
-                                          </div>
-                                       </th>
-                                       <th colspan="1" class="text-right">Total : </th>
-                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
-                                    </tr>
-                                    <tr>
-                                       <th colspan="1" class="text-right">Diskon : </th>
-                                       <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
-                                    </tr>
-                                    <tr>
-                                       <th colspan="1" class="text-right">DPP : </th>
-                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
-                                    </tr>
-                                 <?php } else { ?>
-                                    <tr>
-                                       <th colspan="5" class="text-right">Total : </th>
-                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
-                                    </tr>
-                                    <tr>
-                                       <th colspan="5" class="text-right">Diskon : </th>
-                                       <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
-                                    </tr>
-                                    <tr>
-                                       <th colspan="5" class="text-right">DPP : </th>
-                                       <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
-                                    </tr>
-                                 <?php } ?>
                                  <tr>
-                                    <th colspan="5" class="text-right">PPN (<?= $row->n_ppn;?>%) : </th>
+                                    <th colspan="5" class="text-right">Total : </th>
+                                    <th colspan="1" class="text-right">Rp. <?= number_format($row->v_kotor,2,',','.');?></th>
+                                 </tr>
+                                 <tr>
+                                    <th colspan="5" class="text-right">Diskon : </th>
+                                    <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_diskon,2,',','.');?></u></th>
+                                 </tr>
+                                 <tr>
+                                    <th colspan="5" class="text-right">DPP : </th>
+                                    <th colspan="1" class="text-right">Rp. <?= number_format($row->v_dpp,2,',','.');?></th>
+                                 </tr>
+                                 <tr>
+                                    <th colspan="5" class="text-right">PPN (10%) : </th>
                                     <th colspan="1" class="text-right"><u>Rp. <?= number_format($row->v_ppn,2,',','.');?></u></th>
                                  </tr>
                                  <tr>
@@ -293,25 +251,19 @@ foreach($data->result() as $row){?>
                   </div>
                   <div class="col-sm-12">
                      <div class="row">
-                        <div class="col-sm-3">
+                        <div class="col-sm-4">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Penerima,</p>
                               <h3 class="huruf12">(...................................)</h3>
                            </div>
                         </div>
-                        <div class="col-sm-3">
-                           <div class="pull-center m-t-30 text-center">
-                              <p class="p">Pengirim,</p>
-                              <h3 class="huruf12">(...................................)</h3>
-                           </div>
-                        </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-4">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Mengetahui,</p>
                               <h3 class="huruf12">(...................................)</h3>
                            </div>
                         </div>
-                        <div class="col-sm-3">
+                        <div class="col-sm-4">
                            <div class="pull-center m-t-30 text-center">
                               <p class="p">Hormat Kami,</p>
                               <h3 class="huruf12">(...................................)</h3>

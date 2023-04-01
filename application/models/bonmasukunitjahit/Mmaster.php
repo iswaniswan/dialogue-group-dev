@@ -82,6 +82,13 @@ class Mmaster extends CI_Model
     public function referensi($cari, $iasal, $ibagian)
     {
         $cari = str_replace("'", "", $cari);
+
+        /** dokumen gantung, yg punya status draft, change request, wait approve  */
+        $sql_pending_penerimaan = "SELECT tmui.id_referensi_item
+                                    FROM tm_masuk_unitjahit_item tmui 
+                                    INNER JOIN tm_masuk_unitjahit tmu ON tmu.id = tmui.id_document 
+                                    WHERE tmu.i_status IN ('1', '2', '3')";
+
         return $this->db->query(
             "SELECT DISTINCT
                 a.id||'|'||c.id as id,
@@ -100,6 +107,8 @@ class Mmaster extends CI_Model
                 AND b.n_sisa_wip <> 0
                 AND a.i_keluar_pengadaan ILIKE '%$cari%'
                 AND a.i_tujuan = '$ibagian'
+                AND b.id NOT IN ($sql_pending_penerimaan)
+                 /*and a.id not in (select id_reff from tm_masuk_unitjahit where i_status in ('2','6'))*/
             ORDER BY
                 i_document,
                 d_document
@@ -259,6 +268,12 @@ class Mmaster extends CI_Model
 
     public function getdataitem($idreff, $ipengirim)
     {
+        /** dokumen gantung, yg punya status draft, change request, wait approve  */
+        $sql_pending_penerimaan = "SELECT tmui.id_referensi_item
+                                    FROM tm_masuk_unitjahit_item tmui 
+                                    INNER JOIN tm_masuk_unitjahit tmu ON tmu.id = tmui.id_document 
+                                    WHERE tmu.i_status IN ('1', '2', '3')";
+
         return $this->db->query(
             "SELECT DISTINCT 
                 a.id,
@@ -291,7 +306,9 @@ class Mmaster extends CI_Model
                 AND a.id_keluar_pengadaan = '$idreff'
                 AND b.id_company_bagian = '$this->idcompany'
                 AND b.i_bagian = '$ipengirim'
-                AND a.n_sisa_wip <> 0",false);
+                AND a.n_sisa_wip <> 0
+                AND a.id NOT IN ($sql_pending_penerimaan)
+                ",false);
     }
 
     public function runningid()

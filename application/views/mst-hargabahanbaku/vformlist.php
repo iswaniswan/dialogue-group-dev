@@ -20,9 +20,9 @@
                             <select name="isupplier" id="isupplier" class="form-control select2">
                                 <?php if($isupplier == 'ALL'){?>
                                     <option value="ALL"> All Supplier </option>
-                                <?}else{?>
+                                <?php }else{?>
                                     <option value="<?=$isupplier;?>" selected="true"><?=$esupplier->e_supplier_name;?></option>
-                                <?}?>
+                                <?php }?>
                             </select>
                         </div>
                         <div class="col-sm-3">

@@ -66,78 +66,49 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="3%;">No</th>
-                        <th class="text-center">Kode</th>
-                        <th class="text-center">Nama Barang</th>
-                        <th class="text-center">Warna</th>
-                        <th class="text-right">FC</th>
-                        <!-- <th class="text-right">Stock</th>
-                        <th class="text-right">Stock Outstanding</th> -->
-                        <th class="text-right">Qty Order</th>
-                        <th class="text-right">Qty SJ</th>
-                        <th class="text-center">Keterangan</th>
+                        <th class="text-center" width="12%;">Kode</th>
+                        <th class="text-center" width="30%;">Nama Barang</th>
+                        <th class="text-center">Saldo</th>
+                        <th class="text-center">Qty SPB</th>
+                        <th class="text-center">Qty Sisa</th>
+                        <th class="text-center">Qty SJ</th>
+                        <th class="text-center" width="20%;">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php
+                    <?php
                     if ($datadetail) {
-                        if($data->e_jenis_spb == 'Transfer') { 
-                            $i = 0;
-                            $ii = 0;
-                            $group = "";
-                            foreach ($datadetail as $d) {
-                                $ii++;
-                                if ($group != $d->i_product_base) {
-                                    $i++; ?>
-                                    <tr class="tr list-item tr_first<?= $i ?>">
-                                        <td class="text-center">
-                                            <spanlistx id="snum<?= $i ?>"><b><?= $i ?></b></spanlistx>
-                                        </td>
-                                        <td><?= $d->i_product_base ?></td>
-                                        <td><?= $d->e_product_basename ?></td>
-                                        <td colspan="2"></td>
-                                        <td class="text-right"><?= $d->nquantity_permintaan ?></td>
-                                        <td colspan="2"></td>
-                                    </tr>
-                                <?php }
-                                $group = $d->i_product_base; ?>
-                                <tr>
-                                    <td class="text-center"><i class="fa fa-check-circle-o fa-lg text-info" aria-hidden="true"></i></td>
-                                    <td><?= $d->i_product_base; ?></td>
-                                    <td><?= $d->e_product_basename; ?></td>
-                                    <td><?= $d->e_color_name; ?></td>
-                                    <td class="text-right"><?= $d->n_quantity_fc; ?></td>
-                                    <!-- <td class="text-right"><?= $d->saldo_akhir; ?></td>
-                                    <td class="text-right"><?= $d->n_stock_outstanding; ?></td> -->
-                                    <td class="text-right"></td>
-                                    <td class="text-right"><?= $d->n_quantity; ?></td>
-                                    <td><?= $d->e_remark; ?></td>
-                                </tr>
-                                <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
-                        <?php } ?>
-                            <input type="hidden" name="jml" id="jml" value="<?= $ii; ?>">
-                        <?php } else {
                         $i = 0;
                         foreach ($datadetail as $row) {
                             $i++;
                     ?>
                             <tr>
-                                <td class="text-center"><?= $i; ?></td>
-                                <td><?= $row->i_product_base; ?></td>
-                                <td><?= $row->e_product_basename; ?></td>
-                                <td><?= $row->e_color_name; ?></td>
-                                <td class="text-right"><?= $row->n_quantity_fc; ?></td>
-                                <!-- <td class="text-right"><?= $row->saldo_akhir; ?></td>
-                                <td class="text-right"><?= $row->n_stock_outstanding; ?></td> -->
-                                <td class="text-right"><?= $row->nquantity_permintaan; ?></td>
-                                <td class="text-right"><?= $row->n_quantity; ?></td>
-                                <td><?= $row->e_remark; ?></td>
+                                <td class="text-center">
+                                    <?= $i; ?>
+                                </td>
+                                <td>
+                                    <?= $row->i_product_base; ?>
+                                </td>
+                                <td>
+                                    <?= $row->e_product_basename; ?>
+                                <td class="text-right">
+                                    0
+                                </td>
+                                <td class="text-right">
+                                    <?= $row->nquantity_permintaan; ?>
+                                </td>
+                                <td class="text-right">
+                                    <?= $row->nquantity_pemenuhan; ?>
+                                </td>
+                                <td class="text-right">
+                                    <?= $row->n_quantity; ?>
+                                <td>
+                                    <?= $row->e_remark; ?>
+                                </td>
                             </tr>
-                            
-                    <?php }  ?>
-                        <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
+                            <input type="hidden" name="jml" id="jml" value="<?= $i; ?>">
                     <?php }
-                    ?>
-                    <?php } ?>
+                    } ?>
                 </tbody>
             </table>
         </div>

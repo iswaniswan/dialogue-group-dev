@@ -139,7 +139,7 @@
                                 foreach ($data->result() as $key) {
 
                                     // DEBUG
-                                    if ($key->i_product_wip != 'DGA4205') continue;
+                                    // if ($key->i_product_wip != 'DGA4205') continue;
                                     // DEBUG
 
                                     $sum_saldo_awalb += $key->saldoawal;
@@ -190,7 +190,7 @@
                                 foreach ($data->result() as $row) {
 
                                     // DEBUG
-                                    if ($row->i_product_wip != 'DGA4205') continue;
+                                    // if ($row->i_product_wip != 'DGA4205') continue;
                                     // DEBUG
 
                                     $i++; ?>

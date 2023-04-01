@@ -126,11 +126,14 @@ class Cform extends CI_Controller {
         if ($this->input->post('tgl', TRUE) != '') {
             // $thbl = date('ym', strtotime($this->input->post('tgl', TRUE)));
             // $tahun = date('Y', strtotime($this->input->post('tgl', TRUE)));
+            $tgl = $this->input->post('tgl');
+            $tgl = date('Y-m-d', strtotime($tgl));       
+
             $ibagian = $this->input->post('ibagian', TRUE);
             $itujuan = $this->input->post('itujuan', TRUE);
             
             // $number = $this->mmaster->runningnumber($thbl, $tahun, $ibagian, $itujuan);
-            $number = $this->mmaster->generate_nomor_dokumen($ibagian, $itujuan);
+            $number = $this->mmaster->generate_nomor_dokumen($ibagian, $itujuan, $tgl);
         }
         echo json_encode($number);
     }
@@ -424,6 +427,49 @@ class Cform extends CI_Controller {
 
         $this->Logger->write('Membuka Menu Edit '.$this->global['title']);
         $this->load->view($this->global['folder'].'/vformapprove', $data);
+    }
+
+    /** format periode yyyy-mm */
+    public function reindex_nomor_dokumen()
+    {
+        $periode = $this->input->get('periode');
+        $periode = date('Y-m', strtotime($periode));        
+        $current = date('Y-m');
+
+        // var_dump($periode, $current);
+        if ($current == $periode){
+            die('periode masih berjalan');
+        }
+
+        $all_data = $this->mmaster->get_all_dokumen($periode);
+
+        $start = 0;
+        $stb = 0;
+        $sj = 0;
+        foreach ($all_data->result() as $data) {
+            $id = $data->id;
+
+            $prefix = "STB";
+            
+            if (strpos($data->i_keluar_qc, $prefix) === false) {
+                $prefix = "SJ";
+                $sj++;
+                $start = $sj;
+            } else {
+                $stb++;
+                $start = $stb;
+            }
+
+            $e_periode = date('ym', strtotime($data->d_keluar_qc));
+            $new_document = "$prefix-$e_periode-" . sprintf('%04d', $start);
+
+            $this->mmaster->update_dokumen($new_document, $id);
+            
+            // sprintf('%04d', $e_periode);
+            // if ($start >= 3) break;
+        }
+
+        echo ($stb + $sj) . " rows updated";
     }
 }
 /* End of file Cform.php */

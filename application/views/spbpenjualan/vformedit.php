@@ -204,7 +204,6 @@
                             <label class="col-md-2">Salesman</label>
                             <label class="col-md-2">Penentuan Stok</label>
                             <label class="col-md-3">Nomor Referensi</label>
-
                             <div class="col-sm-3">
                                 <select name="icustomer" id="icustomer" class="form-control select2" required="">
                                     <option value="<?= $data->id_customer; ?>"><?= $data->e_customer_name . ' (' . $data->i_customer . ')'; ?></option>
@@ -229,7 +228,6 @@
                                     } ?>
                                 </select>
                             </div>
-
                             <div class="col-sm-2">
                                 <div class="toggle-button-cover">
                                   <div class="button-cover">
@@ -243,7 +241,6 @@
                                   </div>
                                 </div>
                             </div>
-
                             <div class="col-sm-3">
                                 <input type="text" id="ireferensi" name="ireferensi" class="form-control input-sm" onkeyup="gede(this);" maxlength="20" placeholder="No Referensi Pelanggan" value="<?= $data->i_referensi; ?>">
                             </div>
@@ -937,7 +934,7 @@
                 });
 
                 for (var i = 1; i <= $('#jml').val(); i++) {
-                    if (parseInt($('#nquantity' + i).val()) > parseInt($('#fc' + i).val())) {
+                    if (parseFloat($('#nquantity' + i).val()) > parseFloat($('#fc' + i).val())) {
                         swal('Maaf :(', 'Quantity ' + $('#idproduct' + i).text() + ' Tidak Boleh lebih dari ' + $('#fc' + i).val() + ' !', 'error');
                         return false;
                     }

@@ -136,7 +136,9 @@ class Mmaster extends CI_Model
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close fa-lg text-danger'></i></a>";
             }
-
+            if (check_role($i_menu, 2) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$ibagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
             return $data;
         });
 
@@ -581,6 +583,61 @@ class Mmaster extends CI_Model
                 FROM tm_keluar_qc a
                 INNER JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
                 WHERE a.id = '$id' AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql, FALSE);
+    }
+
+    public function cek_data_print($id, $idcompany)
+    {
+        $sql = "SELECT a.id,
+                    a.i_keluar_qc AS i_document,
+                    to_char(a.d_keluar_qc, 'dd-mm-yyyy') as date_document,
+                    a.i_bagian,
+                    a.i_tujuan,
+                    a.i_status,
+                    a.e_remark,
+                    a.id_jenis_barang_keluar,
+                    e_jenis_name,
+                    a.id_company_tujuan,
+                    tb.e_bagian_name,
+                    tb2.e_bagian_name AS e_bagian_receive_name,
+                    c2.name AS e_company_receive_name,
+                    0 AS show_as_product
+                FROM tm_keluar_qc a
+                INNER JOIN tr_jenis_barang_keluar b ON (b.id = a.id_jenis_barang_keluar)
+                INNER JOIN tr_bagian tb ON tb.i_bagian = a.i_bagian AND tb.id_company = a.id_company
+                INNER JOIN tr_bagian tb2 ON tb2.i_bagian = a.i_tujuan AND tb2.id_company = a.id_company_tujuan
+                INNER JOIN public.company c2 ON c2.id = a.id_company_tujuan
+                WHERE a.id = '$id' AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql, FALSE);
+    }
+
+    public function cek_data_detail_print($id, $id_company=null)
+    {
+        $sql = "SELECT tkqi.id, 0 AS id_bundling, tpb.i_product_wip,  concat(tpb.e_product_basename, ' - ', tc.e_color_name) AS e_product_basename, 
+                    tpb.i_satuan_code, tkqi.e_remark,  
+                    tkqi.n_quantity_product AS n_quantity, 'M' AS status, c.count AS count_bundling
+                FROM tm_keluar_qc tkq
+                INNER JOIN tm_keluar_qc_item tkqi ON tkqi.id_keluar_qc = tkq.id
+                INNER JOIN tr_product_base tpb ON tpb.id = tkqi.id_product 
+                INNER JOIN tr_color tc ON tc.id = tkqi.id_color 
+                LEFT JOIN (
+                                        SELECT id_keluar_qc_item, count(id)  
+                                        FROM tm_keluar_qc_bundling tkqb 
+                                        GROUP BY id_keluar_qc_item 
+                            ) c ON c.id_keluar_qc_item = tkqi.id
+                WHERE tkq.id = '$id'
+                UNION ALL
+                SELECT tkqi.id, tkqb.id AS id_bundling, tpb.i_product_wip,  concat(tpb.e_product_basename, ' - ', tc.e_color_name) AS e_product_basename, 
+                    tpb.i_satuan_code, tkqb.e_remark,  
+                    tkqb.n_quantity_bundling AS n_quantity, 'B' AS status, 0 AS count_bundling
+                FROM tm_keluar_qc_bundling tkqb
+                INNER JOIN tm_keluar_qc_item tkqi ON tkqi.id = tkqb.id_keluar_qc_item 
+                INNER JOIN tr_product_base tpb ON tpb.id = tkqb.id_product
+                INNER JOIN tr_color tc ON tc.i_color = tpb.i_color  AND tc.id_company = tpb.id_company 
+                WHERE tkqb.id_keluar_qc = '$id'
+                ORDER BY id ASC, id_bundling ASC";
 
         return $this->db->query($sql, FALSE);
     }
@@ -1250,6 +1307,29 @@ class Mmaster extends CI_Model
         $query = $this->db->query($sql);
 
         return $query->row();
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

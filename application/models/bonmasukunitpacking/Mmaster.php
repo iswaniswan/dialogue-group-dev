@@ -313,33 +313,33 @@ class Mmaster extends CI_Model
         //         WHERE id_bagian = '$ipengirim'
         //         ORDER BY 1";
 
-        $sql = "SELECT id, i_document, id_bagian
+        $sql = "SELECT id, i_document, id_bagian, e_remark
                 FROM (
-                        SELECT DISTINCT a.id, i_document, a.id_bagian_tujuan AS id_bagian
+                        SELECT DISTINCT a.id, i_document, a.id_bagian_tujuan AS id_bagian, a.e_remark
                         FROM tm_keluar_gudang_jadi a
                         INNER JOIN tr_bagian b ON (b.id = a.id_bagian_tujuan)
                         INNER JOIN tm_keluar_gudang_jadi_item c ON (c.id_document = a.id)
                         WHERE a.id_company = '$idcompany'
                         AND a.i_status = '6'
                         AND c.n_quantity_sisa > 0
-                    UNION ALL
-                    SELECT DISTINCT tkq.id, tkq.i_keluar_qc AS i_document, tb.id AS id_bagian
-                    FROM tm_keluar_qc tkq
-                    INNER JOIN tm_keluar_qc_item tkqi ON (tkqi.id_keluar_qc = tkq.id)
-                    INNER JOIN tr_bagian tb ON (
-                                    tb.i_bagian = tkq.i_bagian AND tb.id_company = tkq.id_company
-                                )
-                    WHERE tkq.id_company_tujuan = '$idcompany'
-                        AND tkq.i_tujuan = '$ibagian'
-                        AND i_status = '6'
-                        AND tkqi.n_sisa > 0
-                        AND tkq.id NOT IN (
-                                            SELECT id_document_reff
-                                            FROM tm_masuk_unit_packing
-                                            WHERE i_status NOT IN ('9', '7', '6', '5', '4')
-                                        )
+                        UNION ALL
+                        SELECT DISTINCT tkq.id, tkq.i_keluar_qc AS i_document, tb.id AS id_bagian, tkq.e_remark
+                        FROM tm_keluar_qc tkq
+                        INNER JOIN tm_keluar_qc_item tkqi ON (tkqi.id_keluar_qc = tkq.id)
+                        INNER JOIN tr_bagian tb ON (
+                                        tb.i_bagian = tkq.i_bagian AND tb.id_company = tkq.id_company
+                                    )
+                        WHERE tkq.id_company_tujuan = '$idcompany'
+                            AND tkq.i_tujuan = '$ibagian'
+                            AND i_status = '6'
+                            AND tkqi.n_sisa > 0
+                            AND tkq.id NOT IN (
+                                                SELECT id_document_reff
+                                                FROM tm_masuk_unit_packing
+                                                WHERE i_status NOT IN ('9', '7', '6', '5', '4')
+                                            )
                     ) AS x
-                WHERE id_bagian = '$ipengirim'
+                WHERE id_bagian = '$ipengirim' AND (e_remark ILIKE '%$cari%' OR i_document ILIKE '%$cari%')
                 ORDER BY 1";
 
         // var_dump($sql); die();                                

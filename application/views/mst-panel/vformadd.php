@@ -76,8 +76,8 @@
                                     class="ti-upload fa-lg mr-2"></i>Upload Data</button>
                         </div>
                         <div class="col-sm-2">
-                            <button type="button" class="btn btn-primary btn-block btn-sm"><i
-                                    class="ti-download fa-lg mr-2"></i>Donwload Template</button>
+                            <a id="href" onclick="return export_data();"><button type="button" class="btn btn-primary btn-block btn-sm"><i
+                                    class="ti-download fa-lg mr-2"></i>Download Template</button> </a>
                         </div>
                     </div>
                 </div>
@@ -234,6 +234,47 @@
                         var sama = json.sama;
                         var status = json.status;
                         var detail = json.datadetail;
+                        console.log(json);
+                        if(status == 'berhasil') {
+                            swal({
+                                title: "Success!",
+                                text: "File Success Diupload :)",
+                                type: "success",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            }, function() {
+                                if(detail.length > 0) {
+                                    let cols = '';
+                                    detail.map((data) => {
+                                        cols += `Kode material (${data.i_material}) baris cell no ${data.baris_excel}\n`;
+                                    })
+                                    swal({
+                                        title: "Terdapat data yang tidak tersimpan!",
+                                        text: cols,
+                                        type: "warning",
+                                        showConfirmButton: true,
+                                    });
+                                } else {
+                                    swal.close();
+                                }
+                            });
+                        } else if (status == 'gagal id_product tidak cocok') {
+                            swal({
+                                title: "Failed!",
+                                text: detail,
+                                type: "error",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            })
+                        } else {
+                            swal({
+                                title: "Failed!",
+                                text: detail,
+                                type: "error",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            })
+                        }
                         // if (sama == true) {
                         //     if (status == 'berhasil') {
                         //         // console.log(detail);
@@ -507,6 +548,21 @@
             id = value.id;
             $('#' + id).html(key + 1);
         });
+    }
+
+    function export_data()
+    {
+        var idproduct = $('#idproduct').val();
+        var idmarker = $('#idmarker').val();
+        var dfrom = <?= $dfrom; ?>;
+        var dto = <?= $dto; ?>;
+        if (idproduct == '' || idmarker == '') {
+            swal('Product dan Marker Harus Dipilih Terlebih Dahulu!!!');
+            return false;
+        } else {
+            $('#href').attr('href', '<?php echo site_url($folder . '/cform/export/' . $dfrom . '/' . $dto . '/'); ?>' + idproduct + '/' + idmarker);
+            return true;
+        }
     }
 
     function konfirm() {

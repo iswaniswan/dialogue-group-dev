@@ -74,4 +74,10 @@
             }
         }
     });
+
+    function downloads(id,id_marker){
+        console.log('masuk ga bray?')
+        // $('#download').attr('href', '<?php echo site_url($folder . '/cform/download/'); ?>' + id + '/' + id_marker);
+        eval(`window.open('${base_url}<?= $folder ?>/Cform/download/${id}/${id_marker}')`)
+    }
 </script>

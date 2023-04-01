@@ -646,56 +646,29 @@ class Mmaster extends CI_Model
 
     public function insertheader($id, $idocument, $ddocument, $ibagian, $idcustomer, $ecustomername, $idarea, $idsales, $ireferensi, $vdiskon, $vkotor, $vppn, $vbersih, $eremarkh, $vdpp, $idharga, $etypespb, $id_jenis_barang_keluar, $nppn, $i_area_distributor, $f_spb_stockdaerah)
     {
-        if ($etypespb == 'Transfer') {
-            $data = array(
-                'id' => $id,
-                'id_company' => $this->company,
-                'i_document' => $idocument,
-                'd_document' => $ddocument,
-                'i_bagian' => $ibagian,
-                'id_customer' => $idcustomer,
-                'id_area' => $idarea,
-                'id_salesman' => $idsales,
-                'i_referensi' => $ireferensi,
-                'v_bruto' => $vkotor,
-                'v_discount' => $vdiskon,
-                'v_dpp' => $vdpp,
-                'v_ppn' => $vppn,
-                'v_netto' => $vbersih,
-                'id_harga_kode' => $idharga,
-                'e_remark' => $eremarkh,
-                'e_jenis_spb' => $etypespb,
-                'd_entry' => current_datetime(),
-                'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
-                'n_ppn' => $nppn,
-                'i_status' => '6',
-                'i_area_distributor' => $i_area_distributor,
-            );
-        } else {
-            $data = array(
-                'id' => $id,
-                'id_company' => $this->company,
-                'i_document' => $idocument,
-                'd_document' => $ddocument,
-                'i_bagian' => $ibagian,
-                'id_customer' => $idcustomer,
-                'id_area' => $idarea,
-                'id_salesman' => $idsales,
-                'i_referensi' => $ireferensi,
-                'v_bruto' => $vkotor,
-                'v_discount' => $vdiskon,
-                'v_dpp' => $vdpp,
-                'v_ppn' => $vppn,
-                'v_netto' => $vbersih,
-                'id_harga_kode' => $idharga,
-                'e_remark' => $eremarkh,
-                'e_jenis_spb' => $etypespb,
-                'd_entry' => current_datetime(),
-                'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
-                'n_ppn' => $nppn,
-                'f_spb_stockdaerah' => $f_spb_stockdaerah
-            );
-        }
+        $data = array(
+            'id'                => $id,
+            'id_company'        => $this->company,
+            'i_document'        => $idocument,
+            'd_document'        => $ddocument,
+            'i_bagian'          => $ibagian,
+            'id_customer'       => $idcustomer,
+            'id_area'           => $idarea,
+            'id_salesman'       => $idsales,
+            'i_referensi'       => $ireferensi,
+            'v_bruto'           => $vkotor,
+            'v_discount'        => $vdiskon,
+            'v_dpp'             => $vdpp,
+            'v_ppn'             => $vppn,
+            'v_netto'           => $vbersih,
+            'id_harga_kode'     => $idharga,
+            'e_remark'          => $eremarkh,
+            'e_jenis_spb'       => $etypespb,
+            'd_entry'           => current_datetime(),
+            'id_jenis_barang_keluar' => $id_jenis_barang_keluar,
+            'n_ppn'             => $nppn,
+            'f_spb_stockdaerah' => $f_spb_stockdaerah
+        );
         $this->db->insert('produksi.tm_spb', $data);
     }
 
@@ -1365,15 +1338,7 @@ class Mmaster extends CI_Model
                                    n_order NUMERIC, id_customer integer
                               )
                          ) AS x 
-                         INNER JOIN (SELECT t.id, t.i_product_base, t.e_product_basename, t.id_company, t.f_status, t.i_color
-                                        FROM (
-                                            SELECT t.*, LAG(i_product_base) OVER (ORDER BY i_product_base) AS prev_name FROM tr_product_base t where id_company = '$this->id_company' and f_status = true
-                                        ) t
-                                    WHERE
-                                        (prev_name IS NULL
-                                            OR prev_name <> i_product_base)
-                                            AND id_company = $this->id_company AND f_status='t'
-                         ) a ON (a.i_product_base = x.i_product AND a.id_company =  $this->id_company and a.f_status = true) 
+                         INNER JOIN tr_product_base a ON (a.i_product_base = x.i_product AND a.id_company =  $this->id_company and a.f_status = true) 
                          inner join tr_color co on (a.i_color = co.i_color and a.id_company = co.id_company)
                          INNER JOIN tr_area b ON (b.i_area = x.i_area AND a.id_company =  $this->id_company) 
                          INNER JOIN tr_customer d ON (d.id = x.id_customer) 

@@ -128,7 +128,7 @@
 
                     foreach ($datadetail as $key) {
                         //DEBUG
-                        if ($key['i_product_base'] != 'DGA4205') continue;
+                        // if ($key['i_product_base'] != 'DGA4205') continue;
                         //DEBUG
 
                         $i++;

@@ -1,3 +1,8 @@
+<style>
+    .dropify-wrapper {
+        height: 86px !important;
+    }
+</style>
 <?php echo $this->pquery->form_remote_tag(array('url' => site_url($folder . '/cform/update'), 'update' => '#pesan', 'type' => 'post', 'class' => 'form-horizontal')); ?>
 <div class="row">
     <div class="col-lg-12">
@@ -37,16 +42,28 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-md-12">Keterangan</label>
-                            <div class="col-sm-12">
-                                <textarea id="eremarkh" placeholder="Isi Keterangan Jika Ada!!!" name="eremarkh" class="form-control"><?= $data->e_remark; ?></textarea>
+                            <label class="col-md-8">Keterangan</label>
+                            <label class="col-md-4 notekode">Upload File Formatnya .xls (Optional)</label>
+                            <div class="col-sm-8">
+                                <textarea id="eremarkh" rows="4" placeholder="Isi Keterangan Jika Ada!!!" name="eremarkh" class="form-control"><?= $data->e_remark; ?></textarea>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="file" id="input-file-now" name="userfile" class="dropify" />
                             </div>
                         </div>
                         <div class="form-group row">
-                            <div class="col-md-12">
+                            <div class="col-md-8">
                                 <button type="submit" id="submit" class="btn btn-success btn-rounded btn-sm" onclick="return konfirm();"><i class="fa fa-save"></i>&nbsp;&nbsp;Simpan</button>
                                 <button type="button" id="addrow" class="btn btn-info btn-rounded btn-sm"><i class="fa fa-plus"></i>&nbsp;&nbsp;Item</button>
                                 <button type="button" class="btn btn-inverse btn-rounded btn-sm" onclick="show('<?= $folder; ?>/cform/index/','#main'); return false;"><i class="ti-arrow-circle-left"></i>&nbsp;&nbsp;Kembali</button>&nbsp;&nbsp;
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" id="upload" class="btn btn-success btn-block btn-sm"><i
+                                    class="ti-upload fa-lg mr-2"></i>Upload Data</button>
+                            </div>
+                            <div class="col-sm-2">
+                                <a id="href" onclick="return export_data();"><button type="button" class="btn btn-primary btn-block btn-sm"><i
+                                        class="ti-download fa-lg mr-2"></i>Download Template</button> </a>
                             </div>
                         </div>
                     </div>
@@ -133,6 +150,7 @@
 
         <script>
             $(document).ready(function() {
+                $('.dropify').dropify();
                 // $('.select2').select2();
 
                 // $('#product').select2({
@@ -312,6 +330,81 @@
                 statuschange('<?= $folder; ?>', $('#id').val(), '2', '<?= $dfrom . "','" . $dto; ?>');
             });
 
+            $("#upload").on("click", function () {
+            var idproduct = $('#idproduct').val();
+            var idmarker = $('#idmarker').val();
+            if (idproduct.length > 0 && idmarker.length > 0) {
+                var formData = new FormData();
+                formData.append('userfile', $('input[type=file]')[0].files[0]);
+                formData.append('idproduct', idproduct);
+                formData.append('idmarker', idmarker);
+                $.ajax({
+                    type: "POST",
+                    url: "<?= base_url($folder . '/cform/load_edit'); ?>",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    cache: false,
+                    async: false,
+                    success: function (data) {
+                        var json = JSON.parse(data);
+                        var sama = json.sama;
+                        var status = json.status;
+                        var detail = json.datadetail;
+                        console.log(json);
+                        if(status == 'berhasil') {
+                            swal({
+                                title: "Success!",
+                                text: "File Success Diupload :)",
+                                type: "success",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            }, function() {
+                                if(detail.length > 0) {
+                                    let cols = '';
+                                    detail.map((data) => {
+                                        cols += `Kode material (${data.i_material}) baris cell no ${data.baris_excel}\n`;
+                                    })
+                                    swal({
+                                        title: "Terdapat data yang tidak tersimpan!",
+                                        text: cols,
+                                        type: "warning",
+                                        showConfirmButton: true,
+                                    });
+                                } else {
+                                    swal.close();
+                                }
+                            });
+                        } else if (status == 'gagal id_product tidak cocok') {
+                            swal({
+                                title: "Failed!",
+                                text: detail,
+                                type: "error",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            })
+                        } else {
+                            swal({
+                                title: "Failed!",
+                                text: detail,
+                                type: "error",
+                                showConfirmButton: true,
+                                closeOnConfirm: false
+                            })
+                        }
+                    },
+                });
+            } else {
+                swal({
+                    title: "Maaf!",
+                    text: "Barang dan Marker tidak boleh kosong :)",
+                    type: "info",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        });
+
             /**
              * Tambah Item
              */
@@ -465,7 +558,22 @@
                     id=value.id;
                     $('#'+id).html(key+1);
                 });
-            }     
+            }
+
+            function export_data()
+            {
+                var idproduct = $('#idproduct').val();
+                var idmarker = $('#idmarker').val();
+                var dfrom = <?= $dfrom; ?>;
+                var dto = <?= $dto; ?>;
+                if (idproduct == '' || idmarker == '') {
+                    swal('Product dan Marker Harus Dipilih Terlebih Dahulu!!!');
+                    return false;
+                } else {
+                    $('#href').attr('href', '<?php echo site_url($folder . '/cform/export_edit/' . $dfrom . '/' . $dto . '/'); ?>' + idproduct + '/' + idmarker);
+                    return true;
+                }
+            }
 
             function konfirm() {
                 var jml = $('#jml').val();

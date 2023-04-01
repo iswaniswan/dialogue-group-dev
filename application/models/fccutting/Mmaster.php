@@ -1508,7 +1508,7 @@ class Mmaster extends CI_Model
         // }
         $this->db->query("delete from tm_fccutting_material where id_forecast = '$id'; ");
         $res = $this->db->query("WITH CTE AS (
-            SELECT 0 AS no, aa.id_forecast, ab.id_referensi, ab.i_periode, c.i_product_wip, initcap(c.e_product_wipname) e_product_wipname,  a.id_product_wip, e.e_color_name, 
+            SELECT 0 AS no, a.id_forecast, ab.id_referensi, ab.i_periode, c.i_product_wip, initcap(c.e_product_wipname) e_product_wipname,  a.id_product_wip, e.e_color_name, 
             b.id_material, d.i_material, initcap(d.e_material_name) e_material_name, initcap(f.e_satuan_name) e_satuan_name, a.n_fc_cutting, b.n_quantity as n_quantity, 
             (round(b.n_quantity * a.n_fc_cutting, 2) - COALESCE(h.n_quantity,0)) qty,
             string_agg(g.d_document::varchar,', ') tanggal_schedule, ROW_NUMBER() OVER (ORDER BY a.id) AS i, a.id, b.id_type_makloon

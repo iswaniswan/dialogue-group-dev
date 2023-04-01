@@ -228,7 +228,13 @@ class Mmaster extends CI_Model
 
         // var_dump($sql); die();
 
-        return $this->db->query($sql);
+        // return $this->db->query($sql);
+
+        return $this->db->query(
+            "SELECT a.id, a.i_bagian,a.e_bagian_name, c.name FROM tr_bagian a
+            JOIN public.company c ON c.id = a.id_company 
+            WHERE i_type IN ('12','23') AND (a.i_bagian ILIKE '%$cari%' OR a.e_bagian_name ILIKE '%$cari%')"
+        );
     }    
 
     public function jeniskeluar(){

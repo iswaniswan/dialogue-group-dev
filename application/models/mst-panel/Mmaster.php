@@ -55,6 +55,10 @@ class Mmaster extends CI_Model
                 $data .= "<a href=\"#\" title='Print' onclick='cetak($id); return false;'><i class='ti-printer fa-lg text-warning'></i></a>&nbsp;&nbsp;&nbsp;";
             }
 
+            if (check_role($i_menu, 6)) {
+                $data .= "<a href=\"#\" title='Download' id='download' onclick='downloads($id, $id_marker); return false;'><i class='ti-download fa-lg text-success'></i></a>&nbsp;&nbsp;&nbsp;";
+            }
+
             // if (check_role($i_menu, 4)) {
             //     $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger'></i></a>";
             // }
@@ -274,6 +278,69 @@ class Mmaster extends CI_Model
             AND a.e_marker_name ILIKE '%$cari%';", false);
     }
 
+    public function get_header_print($idproduct, $idmarker)
+    {
+        $product = $this->db->query("            
+            SELECT 
+                a.id,
+                a.i_product_wip,
+                UPPER(a.e_product_wipname) AS e_product_wipname,
+                b.id as id_color,
+                a.i_color,
+                b.e_color_name,
+                c.e_brand_name,
+                d.e_style_name
+            FROM
+                tr_product_wip a
+            INNER JOIN tr_color b ON
+                (a.i_color = b.i_color
+                AND a.id_company = b.id_company)
+            LEFT JOIN tr_brand c ON
+                (c.i_brand = a.i_brand
+                AND c.id_company = a.id_company)
+            LEFT JOIN tr_style d ON
+                (d.i_style = a.i_style
+                AND d.id_company = a.id_company)
+            WHERE
+                a.id = '$idproduct'
+            ORDER BY
+                a.i_product_wip ASC
+                                ", FALSE);
+
+        $marker = $this->db->query("SELECT
+                a.id as id_marker,
+                a.e_marker_name
+            FROM tr_marker a
+            WHERE
+                a.id = '$idmarker' AND
+                a.f_status = 't'", false);
+        $obj_merged = (object) array_merge((array) $product->row(), (array) $marker->row());
+        return $obj_merged;
+    }
+
+    public function get_material()
+    {
+        $idcompany = $this->session->userdata('id_company');
+        return $this->db->query("            
+                SELECT 
+                    a.id,
+                    a.i_material,
+                    a.e_material_name,
+                    b.e_satuan_name,
+                    c.e_type_name,
+                    d.e_nama_kelompok,
+                    e.e_nama_group_barang
+                FROM tr_material a
+                INNER JOIN tr_satuan b ON (b.i_satuan_code = a.i_satuan_code AND b.id_company = a.id_company)
+                LEFT JOIN tr_item_type c ON (c.i_type_code = a.i_type_code AND c.id_company = a.id_company)
+                LEFT JOIN tr_kelompok_barang d ON (d.i_kode_kelompok = a.i_kode_kelompok AND d.id_company = a.id_company)
+                LEFT JOIN tr_group_barang e ON (e.i_kode_group_barang = a.i_kode_group_barang AND e.id_company = a.id_company)
+                WHERE
+                    a.id_company = '$idcompany' AND a.i_kode_group_barang = 'GRB0001'
+                ORDER BY 3 ASC;
+                                ", FALSE);
+    }
+
     public function material($cari, $id_marker, $id_product)
     {
         return $this->db->query("            
@@ -464,6 +531,15 @@ class Mmaster extends CI_Model
         );
         $this->db->where('id', $id);
         $this->db->update('tm_panel', $data);
+    }
+
+    public function updatestatus($id, $status)
+    {
+        $data = [
+            'f_status' => $status,
+        ];
+        $this->db->where('id', $id);
+        $this->db->update('tm_panel_item', $data);
     }
 
     public function updatedetail($id, $idproduct, $idmarker, $imaterial, $ebagian, $ipanel, $edesc, $n_qty_penyusun, $n_panjang_cm, $n_lebar_cm, $status, $print, $bordir,$n_pg_cm, $n_lg_cm, $n_hg_set, $n_efficiency, $f_khusus_pengadaan, $imaterialmakloon)
