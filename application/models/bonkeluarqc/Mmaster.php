@@ -136,7 +136,7 @@ class Mmaster extends CI_Model
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close fa-lg text-danger'></i></a>";
             }
-            if (check_role($i_menu, 2) && ($i_status == '6')) {
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
                 $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$ibagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
             }
             return $data;

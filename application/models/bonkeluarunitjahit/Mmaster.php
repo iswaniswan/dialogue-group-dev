@@ -141,6 +141,10 @@ class Mmaster extends CI_Model
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg'></i></a>";
             }
 
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
+
             return $data;
         });
 
@@ -591,6 +595,24 @@ class Mmaster extends CI_Model
                 a.id_company = '$idcompany' ", FALSE);
     }
 
+    public function cek_data_print($id, $idcompany)
+    {
+        $sql = "SELECT a.*, 
+                        a.i_keluar_jahit AS i_document,
+                        to_char(a.d_keluar_jahit, 'dd-mm-yyyy') as date_document,
+                    b.e_bagian_name,
+                    b2.e_bagian_name AS e_bagian_receive_name,
+                    c.name AS e_company_receive_name
+                    FROM tm_keluar_jahit a
+                    INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
+                    INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company_bagian
+                    INNER JOIN public.company c ON c.id = a.id_company_bagian
+                    WHERE a.id = '$id'
+                    AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql, FALSE);
+    }
+
     public function cek_datadetail($id, $idcompany, $i_bagian)
     {
         $today = date('Y-m-d');
@@ -656,6 +678,29 @@ class Mmaster extends CI_Model
         $this->db->where('id_keluar_jahit', $id);
         $this->db->where('id_company', $idcompany);
         $this->db->delete('tm_keluar_jahit_item');
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

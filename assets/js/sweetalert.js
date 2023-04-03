@@ -103,6 +103,94 @@ function statuschange(folder, id, istatus, dfrom, dto) {
     }
 }
 
+function statuschangetransfer(folder, id, istatus, dfrom, dto) {
+    if (id == '' || id == null) {
+        swal("Maaf", "Data gagal diupdate :(", "error");
+        return false;
+    } else {
+        if (istatus == '2') {
+            teks = 'Dokumen Terkirim ke Atasan :)';
+        } else if (istatus == '3') {
+            teks = 'Change Request Dokumen :)';
+        } else if (istatus == '4') {
+            teks = 'Dokumen Telah Ditolak :)';
+        } else if (istatus == '5') {
+            teks = 'Dokumen Berhasil Dihapus :)';
+        } else if (istatus == '6') {
+            teks = 'Dokumen Telah Diapprove :)';
+        } else if (istatus == '7') {
+            teks = 'Dokumen Telah Dicancel :)';
+        } else if (istatus == '9') {
+            teks = 'Dokumen Telah Dibatalkan :)';
+        } else if (istatus == '11') {
+            teks = 'Dokumen Telah Terkirim :)';
+        } else {
+            teks = 'Dokumen Berhasil Diupdate :)';
+        }
+
+        if (istatus == '2') {
+            teksx = 'Dokumen Gagal Dikirim ke Atasan :(';
+        } else if (istatus == '3') {
+            teksx = 'Gagal Change Request Dokumen :(';
+        } else if (istatus == '4') {
+            teksx = 'Dokumen Gagal Ditolak :(';
+        } else if (istatus == '5') {
+            teksx = 'Dokumen Gagal Dihapus :(';
+        } else if (istatus == '6') {
+            teksx = 'Dokumen Gagal Diapprove :(';
+        } else if (istatus == '7') {
+            teksx = 'Dokumen Gagal Dicancel :(';
+        } else if (istatus == '9') {
+            teksx = 'Dokumen Gagal Dibatalkan :(';
+        } else if (istatus == '11') {
+            teksx = 'Dokumen Gagal Terkirim :(';
+        } else {
+            teksx = 'Dokumen Gagal Diupdate :(';
+        }
+        $.ajax({
+            type: "post",
+            data: {
+                'id': id,
+                'istatus': istatus,
+            },
+            url: folder + '/cform/changestatustransfer',
+            dataType: "json",
+            success: function(data) {
+                if (data == true) {
+                    swal({
+                        title: "Berhasil!",
+                        text: teks,
+                        /*timer: 3000,*/
+                        showConfirmButton: true,
+                        type: "success",
+                    }, function() {
+                        show(folder + '/cform/index/' + dfrom + '/' + dto, '#main');
+                    });
+                } else {
+                    swal({
+                        title: "Maaf!",
+                        text: teksx,
+                        showConfirmButton: true,
+                        type: "error",
+                    }, function() {
+                        show(folder + '/cform/index/' + dfrom + '/' + dto, '#main');
+                    });
+                }
+            },
+            error: function() {
+                swal({
+                    title: "Maaf!",
+                    text: teksx,
+                    showConfirmButton: true,
+                    type: "error",
+                }, function() {
+                    show(folder + '/cform/index/' + dfrom + '/' + dto, '#main');
+                });
+            }
+        });
+    }
+}
+
 function statuschangearray(folder, id, istatus, dfrom, dto) {
     if (id == '' || id == null) {
         swal("Maaf", "Data gagal diupdate :(", "error");

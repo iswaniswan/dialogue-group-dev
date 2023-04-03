@@ -33,6 +33,7 @@
         @media print {
             body {
                 width: 100% !important;
+                margin: auto;
             }
             body, section {
                 -webkit-print-color-adjust: exact;
@@ -53,6 +54,21 @@
                 font-size: inherit !important;            
             }
         }
+        @page  { 
+            size: auto;
+            margin: 0mm 0mm 0mm 0mm;
+        } 
+
+        <?php 
+        $ua = getBrowser(); 
+        $browser_name = strtolower($ua['name']);
+        if (strpos($browser_name, 'mozilla') !== false) { ?>           
+            @media print {
+                table tbody td {
+                    font-size: 7pt !important;
+                }
+            }
+        <?php } ?>
     </style>
 </head>
 <body class="area-print">

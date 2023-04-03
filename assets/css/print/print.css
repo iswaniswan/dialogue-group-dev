@@ -1,0 +1,171 @@
+@media print {
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+}
+
+@page {
+    size: 21cm 29.7cm;
+    margin: 0.25in 0.25in 0.25in 0.25in
+}
+
+.text-right {
+    text-align: right;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+#kotak {
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.kotak {
+    font-family: Reem Kufi;
+    font-size: 11px;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.border {
+    border: solid black 1px;
+}
+
+.empty {
+    padding: 5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: black;
+}
+
+.header {
+    font-size: 24px;
+    font-family: Reem Kufi;
+}
+.header2 {
+    font-size: 21px;
+    font-family: Reem Kufi;
+}
+
+.judul4 {
+    font-size: 15px;
+    font-family: Century Gothic;
+}
+
+.judul {
+    font-size: 14px;
+    font-family: Century Gothic;
+}
+
+.judul2 {
+    font-size: 13px;
+    font-family: Century Gothic;
+}
+
+.judul3 {
+    font-size: 12px;
+    font-family: Century Gothic;
+}
+
+.font-20 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-19 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-18 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-17 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-16 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-15 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-14 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-13 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-12 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-11 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.font-10 {
+    font-size: 12px;
+    font-family: Reem Kufi;
+}
+
+.button {
+    background-color: #154360;
+    /* Green */
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin: 4px 2px;
+    cursor: pointer;
+}
+
+.button1 {
+    font-size: 12px;
+    border-radius: 8px;
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.hr1 {
+    border: 0;
+    border-top: 1px dashed #8c8c8c;
+    text-align: center;
+}
+
+.hr3 {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+}
+
+.hr4 {
+    border: none;
+    height: 1px;
+    /* Set the hr color */
+    color: #333;
+    /* old IE */
+    background-color: #333;
+    /* Modern Browsers */
+}

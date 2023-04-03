@@ -270,8 +270,22 @@ if (!function_exists('format_ym')) {
 	}
 }
 
+if (!function_exists('format_to_ym')) {
+	function format_to_ym($date)
+	{
+		return date('ym', strtotime($date));
+	}
+}
+
 if (!function_exists('format_Ym')) {
 	function format_Ym($date)
+	{
+		return date('Ym', strtotime($date));
+	}
+}
+
+if (!function_exists('formatYm')) {
+	function formatYm($date)
 	{
 		return date('Ym', strtotime($date));
 	}
@@ -365,3 +379,153 @@ if (!function_exists('replace_space')) {
 		return str_replace("%20"," ",$str);
 	}
 }
+
+function v_js()
+{
+    return date('YmdHis');
+}
+
+function penyebut($nilai)
+{
+	$nilai = abs($nilai);
+	$huruf = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+	$temp = "";
+	if ($nilai < 12) {
+		$temp = " " . $huruf[$nilai];
+	} else if ($nilai < 20) {
+		$temp = penyebut($nilai - 10) . " belas";
+	} else if ($nilai < 100) {
+		$temp = penyebut($nilai / 10) . " puluh" . penyebut($nilai % 10);
+	} else if ($nilai < 200) {
+		$temp = " seratus" . penyebut($nilai - 100);
+	} else if ($nilai < 1000) {
+		$temp = penyebut($nilai / 100) . " ratus" . penyebut($nilai % 100);
+	} else if ($nilai < 2000) {
+		$temp = " seribu" . penyebut($nilai - 1000);
+	} else if ($nilai < 1000000) {
+		$temp = penyebut($nilai / 1000) . " ribu" . penyebut($nilai % 1000);
+	} else if ($nilai < 1000000000) {
+		$temp = penyebut($nilai / 1000000) . " juta" . penyebut($nilai % 1000000);
+	} else if ($nilai < 1000000000000) {
+		$temp = penyebut($nilai / 1000000000) . " milyar" . penyebut(fmod($nilai, 1000000000));
+	} else if ($nilai < 1000000000000000) {
+		$temp = penyebut($nilai / 1000000000000) . " trilyun" . penyebut(fmod($nilai, 1000000000000));
+	}
+	return $temp;
+}
+
+function terbilang($nilai)
+{
+	if ($nilai < 0) {
+		$hasil = "minus " . trim(penyebut($nilai));
+	} else {
+		$hasil = trim(penyebut($nilai));
+	}
+	return $hasil;
+}
+
+function angkaRomawi($angka)
+{
+	$angka = intval($angka);
+	$result = '';
+	 
+	$array = [
+		'M' => 1000,
+		'CM' => 900,
+		'D' => 500,
+		'CD' => 400,
+		'C' => 100,
+		'XC' => 90,
+		'L' => 50,
+		'XL' => 40,
+		'X' => 10,
+		'IX' => 9,
+		'V' => 5,
+		'IV' => 4,
+		'I' => 1
+	];
+	
+	foreach($array as $roman => $value){
+		$matches = intval($angka/$value);
+		
+		$result .= str_repeat($roman,$matches);
+		
+		$angka = $angka % $value;
+	}
+	
+	return $result;
+}
+
+function getBrowser() { 
+	$u_agent = $_SERVER['HTTP_USER_AGENT'];
+	$bname = 'Unknown';
+	$platform = 'Unknown';
+	$version= "";
+
+	//First get the platform?
+	if (preg_match('/linux/i', $u_agent)) {
+		$platform = 'linux';
+	}elseif (preg_match('/macintosh|mac os x/i', $u_agent)) {
+		$platform = 'mac';
+	}elseif (preg_match('/windows|win32/i', $u_agent)) {
+		$platform = 'windows';
+	}
+
+	// Next get the name of the useragent yes seperately and for good reason
+	if(preg_match('/MSIE/i',$u_agent) && !preg_match('/Opera/i',$u_agent)){
+		$bname = 'Internet Explorer';
+		$ub = "MSIE";
+	}elseif(preg_match('/Firefox/i',$u_agent)){
+		$bname = 'Mozilla Firefox';
+		$ub = "Firefox";
+	}elseif(preg_match('/OPR/i',$u_agent)){
+		$bname = 'Opera';
+		$ub = "Opera";
+	}elseif(preg_match('/Chrome/i',$u_agent) && !preg_match('/Edge/i',$u_agent)){
+		$bname = 'Google Chrome';
+		$ub = "Chrome";
+	}elseif(preg_match('/Safari/i',$u_agent) && !preg_match('/Edge/i',$u_agent)){
+		$bname = 'Apple Safari';
+		$ub = "Safari";
+	}elseif(preg_match('/Netscape/i',$u_agent)){
+		$bname = 'Netscape';
+		$ub = "Netscape";
+	}elseif(preg_match('/Edge/i',$u_agent)){
+		$bname = 'Edge';
+		$ub = "Edge";
+	}elseif(preg_match('/Trident/i',$u_agent)){
+		$bname = 'Internet Explorer';
+		$ub = "MSIE";
+	}
+
+	// finally get the correct version number
+	$known = array('Version', $ub, 'other');
+	$pattern = '#(?<browser>' . join('|', $known) .	')[/ ]+(?<version>[0-9.|a-zA-Z.]*)#';
+	if (!preg_match_all($pattern, $u_agent, $matches)) {
+	// we have no matching number just continue
+	}
+	// see how many we have
+	$i = count($matches['browser']);
+	if ($i != 1) {
+	//we will have two since we are not using 'other' argument yet
+	//see if version is before or after the name
+	if (strripos($u_agent,"Version") < strripos($u_agent,$ub)){
+		$version= $matches['version'][0];
+	}else {
+		$version= $matches['version'][1];
+	}
+	}else {
+		$version= $matches['version'][0];
+	}
+
+	// check if we have a number
+	if ($version==null || $version=="") {$version="?";}
+
+	return [
+		'userAgent' => $u_agent,
+		'name'      => $bname,
+		'version'   => $version,
+		'platform'  => $platform,
+		'pattern'    => $pattern
+	];
+} 

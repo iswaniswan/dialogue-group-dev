@@ -717,5 +717,65 @@ class Cform extends CI_Controller {
             echo json_encode($param);
         }
     }
+
+    public function cetak()
+    {
+        $data = check_role($this->i_menu, 5);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id = $this->uri->segment(4);
+        $dfrom = $this->uri->segment(5);
+        $dto = $this->uri->segment(6);
+        $ibagian = $this->uri->segment(7);
+
+        $id_company = $this->session->userdata('id_company');
+
+        $_data = $this->mmaster->cek_data_print($id, $id_company)->row();
+        $no_urut = $this->generate_nomor_urut_cetak($_data->i_keluar_jahit, $ibagian);
+
+        $data = [            
+            'folder' => $this->global['folder'],
+            'title' => "View ".$this->global['title'],
+            'title_list' => 'List '.$this->global['title'],
+            'dfrom' => $dfrom,
+            'dto' => $dto,
+            'id' => $id,
+            'bagian' => $this->mmaster->bagian()->result(),
+            'tujuan' => $this->mmaster->tujuan($this->i_menu, $id_company)->result(),
+            'jenis' => $this->db->query("SELECT * from tr_jenis_barang_keluar where id in (1,2)")->result(),
+            'data' => $_data,
+            'datadetail' => $this->mmaster->cek_datadetail($id, $id_company, $ibagian)->result(),
+            'company' => $this->mmaster->session_company()->row(),
+            'no_urut' => $no_urut,
+        ];
+
+        $this->Logger->write('Cetak Data ' . $this->global['title'].' Id : '.$id);
+        
+        $this->load->view($this->global['folder'] . '/vformprint', $data);
+    }
+
+    public function generate_nomor_urut_cetak($i_document=null, $i_bagian=null)
+    {
+        $array = explode('-', $i_document);
+        $_urutan = $array[2];
+        
+        $_ym = $array[1];
+        $ym = str_split($_ym, 2);
+        $y = $ym[0];
+        $m = $ym[1];
+
+        $kode_lokasi = null;
+        $query = $this->mmaster->get_kode_lokasi_bagian($i_bagian);
+        if ($query->row() != null) {
+            $kode_lokasi = $query->row()->e_kode_lokasi;
+        }
+
+        $bulan = angkaRomawi($m);
+        
+        return "$_urutan-$kode_lokasi-$bulan-$y"; 
+        // return $text;
+    }
 }
 /* End of file Cform.php */

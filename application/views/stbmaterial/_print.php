@@ -1,4 +1,4 @@
-<div class="container pt-4">
+<div class="container-fluid pt-4">
     <!-- cetak kop hanya di halaman pertama -->
     <?php if ($index == 1) { ?>
 
@@ -146,4 +146,6 @@
         </section>
     <?php } ?>    
 </div>
-<div class="page-break"></div>
+<?php if ($index != $total_pages) { ?>
+    <div class="page-break"></div>
+<?php } ?>
