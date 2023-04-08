@@ -152,6 +152,11 @@ class Mmaster extends CI_Model
             // if (check_role($i_menu, 6) && $i_status == '6') {
             //     $data .= "<a href=\"".base_url($folder.'/cform/export/'.encrypt_url($id))."\" target='_blank' title='Export PP'><i class='ti-download text-dark mr-3 fa-lg'></i></a>";
             // }
+
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
+
             return $data;
         });
         $datatables->hide('id');
@@ -800,11 +805,14 @@ class Mmaster extends CI_Model
     public function changestatus($id, $istatus)
     {
         if ($istatus == '3' || $istatus == '6') {
-            $awal = $this->db->query("SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
-				from tm_retur_material_cutting a
-				inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
-				where a.id = '$id'
-				group by 1,2", FALSE)->row();
+            $sql = "SELECT b.i_menu, a.i_approve_urutan, coalesce(max(b.n_urut),1) as n_urut 
+                    from tm_retur_material_cutting a
+                    inner join tr_menu_approve b on (b.i_menu = '$this->i_menu')
+                    where a.id = '$id'
+                    group by 1,2";
+
+            $awal = $this->db->query($sql, FALSE)->row();
+            
             if ($istatus == '3') {
                 if ($awal->i_approve_urutan - 1 == 0) {
                     $data = array(
@@ -896,7 +904,7 @@ class Mmaster extends CI_Model
         $d_jangka_awal = date('Y-m-01');
         $d_jangka_akhir = date('Y-m-d', strtotime("-1 days"));
         $i_periode = date('Ym');
-        $this->db->select('aa.*, b.i_material, b.e_material_name, c.e_satuan_name, c.i_satuan_code, x.n_saldo_akhir AS saldo_akhir');
+        $this->db->select('a.*, b.i_material, b.e_material_name, c.e_satuan_name, c.i_satuan_code, x.n_saldo_akhir AS saldo_akhir');
         $this->db->from('tm_retur_material_cutting_item a');
         $this->db->join('tr_material b', 'b.id = a.id_material', 'inner');
         $this->db->join('tr_satuan c', 'c.i_satuan_code = b.i_satuan_code AND b.id_company = c.id_company', 'inner');
@@ -986,5 +994,68 @@ class Mmaster extends CI_Model
         $this->db->order_by(1);
         return $this->db->get();
     }
+
+    public function dataheader_print($id)
+    {
+        $sql = "SELECT a.*, a.d_document AS date_document,
+                    b.e_bagian_name, b2.e_bagian_name AS e_bagian_receive_name, c.name AS e_company_receive_name
+                FROM tm_retur_material_cutting a
+                INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company
+                INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_bagian_receive AND a.id_company_receive = b2.id_company
+                INNER JOIN public.company c ON c.id = a.id_company_receive
+                WHERE a.id = '$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function datadetail1_print($id)
+    {
+        return $this->db->query("SELECT a.*, b.i_material, b.e_material_name, c.e_satuan_name
+            FROM tm_retur_material_cutting_item a
+            INNER JOIN tr_material b ON b.id = a.id_material
+            INNER JOIN tr_satuan c ON c.i_satuan_code = b.i_satuan_code AND b.id_company = c.id_company
+            WHERE a.id_document = '$id'
+            AND b.i_kode_group_barang = CASE
+                WHEN (
+                SELECT
+                    i_kode_group_barang
+                FROM
+                    tr_type
+                WHERE
+                    i_departement = '$this->i_departement') ISNULL THEN b.i_kode_group_barang
+                ELSE (
+                SELECT
+                    i_kode_group_barang
+                FROM
+                    tr_type
+                WHERE
+                    i_departement = '$this->i_departement')
+            END
+            ORDER BY b.e_material_name
+        ");
+    }
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
+    }
+    
 }
 /* End of file Mmaster.php */

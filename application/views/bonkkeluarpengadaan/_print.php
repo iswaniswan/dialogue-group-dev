@@ -82,59 +82,22 @@
                 <table class="table table-hover table-bordered">
                     <thead style="background: #f8f9fa!important">
                         <tr>
-                            <th style="width: 45px;">No</th>
-                            <th style="width: 55px;">Kode</th>
-                            <th style="width: auto;">Nama Barang</th>
-                            <th style="width: 55px;">Jumlah</th>
+                            <th style="width: 40px;">No</th>
+                            <th style="width: auto;">Barang</th>
+                            <th style="width: 55px;">Qty</th>
+                            <th style="width: 80pxpx;">Periode</th>
                             <th style="width: 150px;">Keterangan</th>
                         </tr>    
                     </thead>
-                    <tbody>
-                    <?php $group=''; $last_product_id = null;
-                        
-                        foreach($datadetail as $item) { ?>
-
-                            <?php if ($item['status'] == 'M') { ?>
-                                <tr>
-                                    <td><?= @$item['seq'] ?></td>
-                                    <td><?= $item['i_product_wip'] ?></td>
-                                    <td><?= $item['e_product_basename'] ?></td>
-                                    <td><?= number_format($item['n_quantity'], 2, ".", ",") ?></td> 
-                                    <td><?= $item['e_remark']; ?></td>
-                                </tr>
-                            <?php $last_product_id = $item['id']; 
-                            } ?>
-
-                            <?php if ($item['count_bundling'] > 0) { ?>
-                                <tr>
-                                    <td style="background: #f1f1f1; text-align:right"><b>#</b></td>
-                                    <td colspan="5" style="background: #f1f1f1"><b>Bundling Produk</b></td>
-                                </tr>
-
-                            
-                            
-                                <?php $o = 97; foreach ($bundling as $b) { $b = (array) $b;
-
-                                        if($b['id_keluar_qc_item'] == $last_product_id) { 
-
-                                            if ($o > 122) {
-                                                $o = 97;
-                                            }
-
-                                            $seq =  @$item['seq']. ". ". chr($o); ?>
-                                            <tr>
-                                                <td><?= $seq ?></td>
-                                                <td><?= $b['i_product_base'] ?></td>
-                                                <td><?= $b['e_product_basename'] ?></td>
-                                                <td><?= number_format($b['n_quantity_bundling'], 2, ".", ",") ?></td> 
-                                                <td><?= $b['e_remark']; ?></td>
-                                            </tr>
-                                        <?php $o++; } ?>
-
-                                <?php } ?>
-
-                            <?php } ?>
-
+                    <tbody>                    
+                    <?php foreach ($datadetail as $key) { ?>
+                        <tr>
+                            <td><?= $key['seq'] ?></td>
+                            <td><?= $key['i_product_wip'] . ' - ' . $key['e_product_wipname'] . ' - ' . $key['e_color_name']; ?></td>
+                            <td><?= $key['n_quantity_wip']; ?></td>
+                            <td><?= $key['periode']; ?></td>
+                            <td><?= $key['e_remark']; ?></td>
+                        </tr>
                     <?php } ?>
                     </tbody>
                 </table>

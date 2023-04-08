@@ -69,11 +69,10 @@
     </style>
 </head>
 <body>
-    <?php 
-        $page_break =  31; 
+    <?php
+        $page_break =  20; 
         $page_data = [
             'data' => $data,
-            'bundling' => (array) $bundling   
         ];
 
         $seq=1;
@@ -83,19 +82,13 @@
             /** cast object as array */
             $item = (array) $item;
 
-            if ($item['status'] == 'M') {
-                $item['seq'] = $seq;
-                $seq++;
-            }
-
-            if ($item['count_bundling'] > 0) {
-                $count_has_bundling++;
-            }
+            $item['seq'] = $seq;
+            $seq++;
+            
             $pages[$index][] = $item;      
 
-            if (count($pages[$index]) >= ($page_break - $count_has_bundling)) {
+            if (count($pages[$index]) >= $page_break) {
                 $index++;
-                $count_has_bundling = 0;
             }
         } 
         
@@ -109,7 +102,7 @@
             $page_data['index'] = $index;
             $page_data['total_pages'] = $total_pages;
             $page_data['page_break'] = $page_break;
-            $this->view('bonkeluarqc/_print', $page_data);
+            $this->view('stbcutting/_print', $page_data);
             $index++;
         }
     ?>

@@ -487,9 +487,20 @@ class Cform extends CI_Controller {
         $ibagian = $this->uri->segment(7);
 
         $_data = $this->mmaster->cek_data_print($id, $id_company)->row();
+        $_datadetail = [];
+        $query = $this->mmaster->cek_datadetail($id, $id_company);
+        foreach ($query->result() as $item) {            
+            $_bundling = [];
+            $query_bundling = $this->mmaster->get_item_bundling($id_item=$item->id);
+            foreach ($query_bundling->result() as $b) {
+                $_bundling[] = $b;
+            }
+            $item->bundling = $_bundling;
+            $_datadetail[] = $item;
+        }
+
         $no_urut = $this->generate_nomor_urut_cetak($_data->i_document, $ibagian);
         
-
         $data = [
             'folder'        => $this->global['folder'],
             'title'         => "View ".$this->global['title'],
@@ -499,9 +510,8 @@ class Cform extends CI_Controller {
             'id'            => $id,
             'bagian'        => $this->mmaster->bagian()->result(),
             'tujuan'        => $this->mmaster->tujuan($this->i_menu, $id_company)->result(),
-            'data'          => $this->mmaster->cek_data($id, $id_company)->row(),
-            'datadetail' => $this->mmaster->cek_datadetail($id, $id_company)->result(),
-            'bundling'      => $this->mmaster->view_databundling($id, $id_company)->result(),
+            'data'          => $_data,
+            'datadetail' => $_datadetail,
             'jenisbarang'   => $this->mmaster->jeniskeluar()->result(),   
             'doc'           => $this->mmaster->doc($this->i_menu)->row()->doc_qe,
             'company' => $this->mmaster->session_company()->row(),

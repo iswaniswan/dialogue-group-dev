@@ -129,17 +129,25 @@
                                         <td class="text-center"><i class="fa fa-hashtag fa-lg"></i></a></td>
                                         <td colspan="7"><b>Bundling Produk</b></td>
                                     </tr>
-                                    <?php $o = 1; foreach($bundling as $b) { ?>
-                                        <?php if($b->id_keluar_qc_item == $row->id) { ?>
+                                    <?php $o = 97; foreach($bundling as $b) { 
+                                                                                        
+                                            if($b->id_keluar_qc_item == $row->id) { 
+
+                                                if ($o > 122) {
+                                                    $o = 97;
+                                                }
+    
+                                                $seq = $j . ". ". chr($o);
+                                            ?>
                                             <tr>
-                                                <td class="text-center"><spanx id="snum<?= $i; ?>"><?= $o; ?></spanx></td>
+                                                <td class="text-center"><spanx id="snum<?= $i; ?>"><?= @$seq ?></spanx></td>
                                                 <td><?= $b->i_product_base; ?></td>
                                                 <td  class="d-flex justify-content-between"><span><?= $b->e_product_basename; ?></span></td>
                                                 <td><?= $b->e_color_name; ?></td>
                                                 <td class="text-right"><?= $b->n_quantity_bundling; ?></td>
                                                 <td colspan="2"><?= $b->e_remark; ?></td>
                                             </tr>
-                                        <?php } $o++; ?>
+                                        <?php $o++; } ?>
                                     <?php } ?>
                                 <?php // }
                                 //$group = $row->id_keluar_qc_item;

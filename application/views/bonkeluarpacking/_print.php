@@ -82,47 +82,40 @@
                 <table class="table table-hover table-bordered">
                     <thead style="background: #f8f9fa!important">
                         <tr>
-                            <th style="width: 35px;">No</th>
+                            <th style="width: 50px;">No</th>
                             <th style="width: 55px;">Kode</th>
                             <th style="width: auto;">Nama Barang</th>
                             <th style="width: 55px;">Jumlah</th>
-                            <th style="width: 55px;">Satuan</th>
                             <th style="width: 150px;">Keterangan</th>
                         </tr>    
                     </thead>
                     <tbody>
-                    <?php $no=1; 
-                        if ($index > 1) { 
-                            $no = ($index-1) * $page_break + 1;
-                        }
-
-                        $last_row_id = null;
-
-                        foreach($datadetail as $item) { ?>
-                            
-                            <?php $_bundling = "style='font-style: italic; font-size: small;'"; ?>
-                            <?php $style_bundling = $item['status'] == 'B' ? $_bundling : ''; ?>
-                            <tr>
-                                <td><?= @$item['seq'] ?></td>
-                                <td <?= $style_bundling ?>><?= $item['i_product_wip'] ?></td>
-                                <td <?= $style_bundling ?>><?= $item['e_product_basename'] ?></td>
-                                <td <?= $style_bundling ?>><?= number_format($item['n_quantity'], 2, ".", ",") ?></td> 
-                                <td <?= $style_bundling ?>><?= $item['i_satuan_code']; ?></td>
-                                <td <?= $style_bundling ?>><?= $item['e_remark']; ?></td>
-                            </tr>
-
-                            <?php if ($item['count_bundling'] > 0) { ?>
+                    <?php $_bundling = "style='font-style: italic;'"; ?>
+                    <?php foreach($datadetail as $item) { ?>                        
+                        <tr>
+                            <td><?= @$item['seq'] ?></td>
+                            <td><?= $item['i_product_base'] ?></td>
+                            <td><?= $item['e_product_basename'] . ' - ' . $item['e_color_name'] ?></td>
+                            <td><?= number_format($item['n_quantity_product'], 2, ".", ",") ?></td> 
+                            <td><?= $item['e_remark']; ?></td>
+                        </tr>                            
+                        
+                            <?php if (@count($item['bundling']) > 0) { ?>
                                 <tr>
-                                    <td style="background: #f1f1f1">
-                                        <b>#</b>
-                                    </td>
-                                    <td colspan="5" style="background: #f1f1f1">
-                                        <b>Bundling Produk</b>
-                                    </td>
+                                    <td style="background: #f1f1f1"><b>#</b></td>
+                                    <td colspan="5" style="background: #f1f1f1"><b>Bundling Produk</b></td>
                                 </tr>
+                                <?php foreach ($item['bundling'] as $bundling) { ?>
+                                    <tr>
+                                        <td <?= $_bundling ?>><?= $bundling['seq'] ?></td>
+                                        <td <?= $_bundling ?>><?= $bundling['i_product_base'] ?></td>
+                                        <td <?= $_bundling ?>><?= $bundling['e_product_basename'] . ' - ' . $bundling['e_color_name'] ?></span></td>
+                                        <td <?= $_bundling ?>><?= $bundling['n_quantity_bundling'] ?></td>
+                                        <td <?= $_bundling ?>><?= $bundling['e_remark'] ?></td>
+                                    </tr>
+                                <?php } ?>
                             <?php } ?>
-
-                    <?php $no++ ; } ?>
+                    <?php } ?>
                     </tbody>
                 </table>
             </div>
@@ -152,3 +145,6 @@
         </section>
     <?php } ?>    
 </div>
+<?php if ($index != $total_pages) { ?>
+    <div class="page-break"></div>
+<?php } ?>

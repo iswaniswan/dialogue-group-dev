@@ -10,7 +10,7 @@
     <link href="<?= base_url(); ?>assets/plugins/bower_components/bootstrap-extension/css/bootstrap-extension.css?v=2" rel="stylesheet">
     <link href="<?= base_url('assets/css/print.css'); ?>" rel="stylesheet" type="text/css">
 
-    <style>
+    <style>       
         .border-top {
             border-top: 1px solid #333;
         }
@@ -25,14 +25,17 @@
             border-bottom: 1px solid #333;
         }
         table tbody td {
-            padding: .25rem .5rem !important;            
+            padding: .25rem .5rem !important;
         }
         .ml--1 {
             margin-left: -15px;
         }
         @media print {
+            body {
+                width: 100% !important;
+                margin: auto;
+            }
             body, section {
-                width:100% !important;
                 -webkit-print-color-adjust: exact;
                 font-size: inherit !important;
             }
@@ -68,35 +71,46 @@
         <?php } ?>
     </style>
 </head>
-<body>
+<body class="area-print">
     <?php 
-        $page_break =  31; 
+        $page_break = 31; 
         $page_data = [
-            'data' => $data,
-            'bundling' => (array) $bundling   
+            'data' => $data       
         ];
 
-        $seq=1;
-        $index=1;
-        $count_has_bundling = 0;
+        /** grouping material */
+
+        $index=1;    
+        $rows=0;    
+        $pages=[];
+        $row_product_id = null;
+        $seq_material=1;
+        $skip_seq=false;
         foreach ($datadetail as $item) {
             /** cast object as array */
             $item = (array) $item;
 
-            if ($item['status'] == 'M') {
-                $item['seq'] = $seq;
-                $seq++;
+            if ($row_product_id != $item['id_product']) {
+                $item['show_as_product'] = true;
+                $pages[$index][] = $item;
+                $rows++;
+                $item['show_as_product'] = false;
+                $row_product_id = $item['id_product'];
             }
 
-            if ($item['count_bundling'] > 0) {
-                $count_has_bundling++;
-            }
-            $pages[$index][] = $item;      
+            $item['seq'] = $seq_material;
+            $pages[$index][] = $item;
+            $rows++;
+            $seq_material++;            
 
-            if (count($pages[$index]) >= ($page_break - $count_has_bundling)) {
+            if ($rows >= $page_break) {
                 $index++;
-                $count_has_bundling = 0;
+                $rows=0;
             }
+
+            // if ($rows == 5) {
+            //     break;
+            // }
         } 
         
         // echo '<pre>'; var_dump($pages[1]); echo '</pre>'; die();
@@ -109,7 +123,7 @@
             $page_data['index'] = $index;
             $page_data['total_pages'] = $total_pages;
             $page_data['page_break'] = $page_break;
-            $this->view('bonkeluarqc/_print', $page_data);
+            $this->view('stbmaterialcutting/_print', $page_data);
             $index++;
         }
     ?>

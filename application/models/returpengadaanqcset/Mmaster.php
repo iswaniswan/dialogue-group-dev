@@ -112,6 +112,7 @@ class Mmaster extends CI_Model
             $dfrom        = $data['dfrom'];
             $dto          = $data['dto'];
             $i_menu       = $data['i_menu'];
+            $i_bagian = $data['i_bagian'];
 
             $data       = '';
             if (check_role($i_menu, 2)) {
@@ -129,6 +130,10 @@ class Mmaster extends CI_Model
             }
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg mr-3'></i></a>";
+            }
+
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
             }
 
             return $data;
@@ -577,6 +582,75 @@ class Mmaster extends CI_Model
         $this->db->from('public.tm_menu');
         $this->db->where('i_menu', $imenu);
         return $this->db->get();
+    }
+
+    function cek_data_print($id, $idcompany)
+    {
+        $sql = "SELECT a.id,
+                    a.i_retur AS i_document,
+                    to_char(a.d_retur, 'dd-mm-yyyy') as date_document,
+                    a.i_bagian,
+                    a.i_tujuan,
+                    a.e_remark,
+                    a.i_status,
+                    a.id_document_reff,
+                    b2.e_bagian_name,
+                    b3.e_bagian_name AS e_bagian_receive_name
+                FROM tm_retur_keluar_pengadaan a 
+                INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_bagian AND b2.id_company = a.id_company
+                INNER JOIN tr_bagian b3 ON b3.i_bagian = a.i_tujuan AND b3.id_company = a.id_company
+                LEFT JOIN  tm_masuk_pengadaan b ON a.id_document_reff = b.id AND a.id_company = b.id_company
+                WHERE a.id = '$id' AND a.id_company = '$idcompany' 
+                ORDER BY d_retur asc";
+
+        // var_dump($sql); die();
+        
+        return $this->db->query($sql);
+    }
+
+    public function dataeditdetail_print($id)
+    {
+        $idcompany  = $this->session->userdata('id_company');
+
+        $sql = "SELECT a.* ,c.i_product_wip ,c.e_product_wipname , g.e_color_name ,f.i_material ,f.e_material_name , e.bagian , a.id_marker, d.e_marker_name, e.i_panel, max
+                    FROM tm_retur_keluar_pengadaan_item a
+                    inner JOIN tm_retur_keluar_pengadaan b ON (b.id = a.id_retur_keluar AND b.id_company = a.id_company)
+                    inner join tr_product_wip c ON (a.id_product_wip = c.id AND c.id_company = a.id_company)
+                    inner JOIN tm_panel_item e ON (a.id_panel_item = e.id)
+                    inner join tr_material f ON (f.id = a.id_material)
+                    inner JOIN tr_color g  ON (g.i_color = c.i_color AND g.id_company = a.id_company)
+                    inner join tr_marker d ON (d.id = a.id_marker)
+                    left join (
+                        select id_product_wip ,max(n_quantity_set_return) as max from tm_retur_keluar_pengadaan_item where id_retur_keluar = $id group by id_product_wip 
+                    ) as h on a.id_product_wip = h.id_product_wip
+                    WHERE a.id_retur_keluar = $id AND a.id_company = $idcompany";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

@@ -29,7 +29,7 @@ class Mmaster extends CI_Model
         }
         $datatables = new Datatables(new CodeigniterAdapter);
         $datatables->query("SELECT DISTINCT 0 AS NO, a.id AS id, a.i_document, to_char(a.d_document, 'dd-mm-yyyy') AS d_document,
-                a.e_remark, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name,
+                a.e_remark, e_status_name, label_color, a.i_status, l.i_level, l.e_level_name, a.i_bagian,
                 '$i_menu' AS i_menu, '$folder' AS folder, '$dfrom' AS dfrom,'$dto' AS dto
             FROM
                 tm_stb_cutting a
@@ -55,6 +55,7 @@ class Mmaster extends CI_Model
             $folder     = $data['folder'];
             $dfrom      = $data['dfrom'];
             $dto        = $data['dto'];
+            $ibagian = $data['i_bagian'];
             $data       = '';
             if (check_role($i_menu, 2)) {
                 $data .= "<a href=\"#\" title='Detail' onclick='show(\"$folder/cform/view/$id/$dfrom/$dto\",\"#main\"); return false;'><i class='ti-eye mr-2 fa-lg text-success'></i></a>";
@@ -72,6 +73,11 @@ class Mmaster extends CI_Model
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg'></i></a>";
             }
+
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$ibagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
+
             return $data;
         });
         $datatables->hide('id');
@@ -83,6 +89,7 @@ class Mmaster extends CI_Model
         $datatables->hide('i_status');
         $datatables->hide('dfrom');
         $datatables->hide('dto');
+        $datatables->hide('i_bagian');
         return $datatables->generate();
     }
 
@@ -283,6 +290,20 @@ class Mmaster extends CI_Model
         $this->db->where('a.id', $id);
         return $this->db->get();
     }
+
+    public function get_data_headers_print($id)
+    {
+        $sql = "SELECT a.*, b.e_bagian_name, c.name, d.e_jenis_name, 
+                a.d_document AS date_document, 
+                c.name AS e_bagian_receive_name, c.name AS e_company_receive_name
+                FROM tm_stb_cutting a
+                INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND a.id_company = b.id_company
+                INNER JOIN public.company c ON c.id = a.id_company_tujuan
+                LEFT JOIN tr_jenis_barang_keluar d ON d.id = a.id_jenis_barang_keluar
+                WHERE a.id = '$id'"; 
+
+        return $this->db->query($sql);
+    }
     
     public function get_data_items($id)
     {
@@ -293,6 +314,25 @@ class Mmaster extends CI_Model
         $this->db->where('a.id_document', $id);
         $this->db->order_by('a.id');
         return $this->db->get();
+    }
+
+    public function get_data_items_view($id)
+    {
+        $sql = "SELECT a.*, b.i_panel, bagian, i_material, e_material_name, d.id_product_wip, 
+                    d.id_material, i_product_wip, e_product_wipname, e_color_name,
+                    d.n_jumlah_gelar AS quantity_schedule
+                FROM tm_stb_cutting_item a
+                INNER JOIN tm_panel_item b ON b.id = a.id_panel_item
+                INNER JOIN tr_material c ON c.id = b.id_material
+                INNER JOIN tm_schedule_cutting_item d ON d.id = a.id_schedule_item 
+                INNER JOIN tr_product_wip e ON e.id = d.id_product_wip
+                INNER JOIN tr_color cc ON cc.i_color = e.i_color AND cc.id_company = e.id_company
+                WHERE a.id_document = '$id'
+                order by a.id ASC";
+
+        // var_dump($sql); die();
+
+        return $this->db->query($sql);
     }
 
     public function update_header($id, $i_document, $d_document, $i_bagian, $e_remark, $id_jenis_barang_keluar)
@@ -376,6 +416,29 @@ class Mmaster extends CI_Model
         $this->db->from("tr_status_document");
         $this->db->where("i_status", $istatus);
         return $this->db->get()->row()->e_status_name;
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
     }
 }
 /* End of file Mmaster.php */

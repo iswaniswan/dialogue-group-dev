@@ -70,33 +70,28 @@
 </head>
 <body>
     <?php 
-        $page_break =  31; 
+        $page_break = 29; 
         $page_data = [
-            'data' => $data,
-            'bundling' => (array) $bundling   
+            'data' => $data       
         ];
+
+        $pages = [];
 
         $seq=1;
         $index=1;
-        $count_has_bundling = 0;
         foreach ($datadetail as $item) {
             /** cast object as array */
             $item = (array) $item;
+            $item['seq'] = $seq;
 
-            if ($item['status'] == 'M') {
-                $item['seq'] = $seq;
-                $seq++;
-            }
+            $pages[$index][] = $item;
 
-            if ($item['count_bundling'] > 0) {
-                $count_has_bundling++;
-            }
-            $pages[$index][] = $item;      
-
-            if (count($pages[$index]) >= ($page_break - $count_has_bundling)) {
+            if (count($pages[$index]) >= $page_break) {
                 $index++;
                 $count_has_bundling = 0;
             }
+
+            $seq++;
         } 
         
         // echo '<pre>'; var_dump($pages[1]); echo '</pre>'; die();
@@ -109,7 +104,7 @@
             $page_data['index'] = $index;
             $page_data['total_pages'] = $total_pages;
             $page_data['page_break'] = $page_break;
-            $this->view('bonkeluarqc/_print', $page_data);
+            $this->view('bonkkeluarpengadaan/_print', $page_data);
             $index++;
         }
     ?>

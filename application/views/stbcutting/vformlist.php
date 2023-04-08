@@ -132,4 +132,10 @@
     function refreshview() {
         show('<?= $folder; ?>/cform/index/<?= $dfrom . '/' . $dto; ?>', '#main');
     }
+
+    function cetak(id, dfrom, dto, ibagian) {
+        var lebar = 1024;
+        var tinggi = 768;
+        eval('window.open("<?= site_url($folder); ?>"+"/cform/cetak/"+id+"/"+dfrom+"/"+dto+"/"+ibagian,"","width="+lebar+"px,height="+tinggi+"px,resizable=1,menubar=1,scrollbars=1,top='+(screen.height-tinggi)/2+',left='+(screen.width-lebar)/2+'")');
+    }
 </script>

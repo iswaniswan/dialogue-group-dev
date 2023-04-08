@@ -124,6 +124,9 @@ class Mmaster extends CI_Model {
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data.= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger mr-3'></i></a>";
             }
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$ibagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
             return $data;
         });
         $datatables->hide('folder');
@@ -525,6 +528,84 @@ class Mmaster extends CI_Model {
     public function get_bagian($i_bagian, $id_company)
     {
         $sql = "SELECT * FROM tr_bagian WHERE i_bagian ='$i_bagian' AND id_company='$id_company'";
+
+        return $this->db->query($sql);
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
+    }
+
+    function cek_data_print($id, $idcompany) {
+        $sql = "SELECT a.id,
+                    a.i_document,
+                    to_char(a.d_document, 'dd-mm-yyyy') as date_document,
+                    a.i_bagian,
+                    a.i_tujuan,
+                    a.e_remark,
+                    a.i_status,
+                    a.id_bagian_tujuan,
+                    b.e_bagian_name,
+                    b2.e_bagian_name AS e_bagian_receive_name,
+                    c.name AS e_company_receive_name
+                    FROM tm_retur_produksi_gdjd a 
+                    INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
+                    INNER JOIN tr_bagian b2 ON b2.id = a.id_bagian_tujuan
+                    INNER JOIN public.company c ON c.id = b2.id_company
+                    WHERE a.id = '$id'
+                    AND a.id_company = '$idcompany' 
+                    ORDER BY d_document asc";
+        
+        return $this->db->query($sql);
+    }
+
+    public function dataeditdetail_print($id,$ibagian) {
+        $today = date('Y-m-d');
+        $jangkaawal = date('Y-m-01');
+        $jangkaakhir = date('Y-m-d',strtotime("-1 days"));
+        $periode = date('Ym');
+        $idcompany = $this->session->userdata('id_company');
+        $sql = "SELECT a.id_document as i_retur, 
+                    a.id_product,
+                    b.i_product_base, 
+                    b.e_product_basename, 
+                    c.id as id_color,
+                    b.i_color, 
+                    c.e_color_name, 
+                    a.n_quantity,
+                    a.e_remark, 
+                    coalesce(n_saldo_akhir,0) 
+                    n_saldo_akhir
+                FROM tm_retur_produksi_gdjd_item a 
+                JOIN tm_retur_produksi_gdjd d ON a.id_document = d.id 
+                JOIN tr_product_base b ON a.id_product = b.id /*AND d.id_company = b.id_company */
+                JOIN tr_color c ON c.i_color = b.i_color AND c.id_company = b.id_company 
+                LEFT JOIN (
+                            SELECT * 
+                            FROM produksi.f_mutasi_packing($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$ibagian')
+                        ) e ON (e.id_product_base = a.id_product AND e.id_company = a.id_company)
+                WHERE a.id_document = '$id'";
+
+        // var_dump($sql); die();
 
         return $this->db->query($sql);
     }

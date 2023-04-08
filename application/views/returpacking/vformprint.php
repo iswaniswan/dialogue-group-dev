@@ -70,11 +70,12 @@
 </head>
 <body>
     <?php 
-        $page_break =  31; 
+        $page_break = 29; 
         $page_data = [
-            'data' => $data,
-            'bundling' => (array) $bundling   
+            'data' => $data       
         ];
+
+        $pages = [];
 
         $seq=1;
         $index=1;
@@ -82,21 +83,37 @@
         foreach ($datadetail as $item) {
             /** cast object as array */
             $item = (array) $item;
+            $item['seq'] = $seq;
 
-            if ($item['status'] == 'M') {
-                $item['seq'] = $seq;
-                $seq++;
-            }
-
-            if ($item['count_bundling'] > 0) {
+            if (@count($item['bundling']) > 0) {
                 $count_has_bundling++;
+                $seq_bundling = 97;
+
+                $_bundling = [];
+                foreach($item['bundling'] as $b) {
+                    $b = (array) $b;
+
+                    if ($seq_bundling > 122) {
+                        $seq_bundling = 97;
+                    }
+
+                    $b['seq'] = $seq . ". ". chr($seq_bundling);
+                    $_bundling[] = $b;
+
+                    $seq_bundling++;
+                    $count_has_bundling++;
+                }
+                $item['bundling'] = $_bundling;
             }
-            $pages[$index][] = $item;      
+
+            $pages[$index][] = $item;
 
             if (count($pages[$index]) >= ($page_break - $count_has_bundling)) {
                 $index++;
                 $count_has_bundling = 0;
             }
+
+            $seq++;
         } 
         
         // echo '<pre>'; var_dump($pages[1]); echo '</pre>'; die();
@@ -109,7 +126,7 @@
             $page_data['index'] = $index;
             $page_data['total_pages'] = $total_pages;
             $page_data['page_break'] = $page_break;
-            $this->view('bonkeluarqc/_print', $page_data);
+            $this->view('returpacking/_print', $page_data);
             $index++;
         }
     ?>

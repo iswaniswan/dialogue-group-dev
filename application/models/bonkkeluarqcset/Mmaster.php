@@ -627,7 +627,7 @@ class Mmaster extends CI_Model
                     a.i_status,
                     a.id_jenis_barang_keluar,
                     b.e_bagian_name,
-                    b2.e_bagian_name AS e_bagian_receive_name,
+                    b2.e_bagian_name AS e_bagian_receive_name
                 FROM tm_keluar_qcset a 
                 INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
                 INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company

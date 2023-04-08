@@ -377,7 +377,7 @@ class Cform extends CI_Controller
             'title'      => "Edit " . $this->global['title'],
             'title_list' => 'List ' . $this->global['title'],
             'data'       => $this->mmaster->get_data_headers($id)->row(),
-            'data_detail' => $this->mmaster->get_data_items($id),
+            'data_detail' => $this->mmaster->get_data_items_view($id),
             'dfrom'      => $this->uri->segment(5),
             'dto'        => $this->uri->segment(6),
             'bagian'     => $this->mmaster->bagian(),
@@ -386,6 +386,64 @@ class Cform extends CI_Controller
         $this->Logger->write('Membuka Menu View ' . $this->global['title']);
 
         $this->load->view($this->global['folder'] . '/vformview', $data);
+    }
+
+    public function cetak()
+    {
+        $data = check_role($this->i_menu, 2);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id_company = $this->session->userdata('id_company');
+
+        $id = $this->uri->segment(4);
+        $dfrom = $this->uri->segment(5);
+        $dto = $this->uri->segment(6);
+        $ibagian = $this->uri->segment(7);
+
+        $_data = $this->mmaster->get_data_headers_print($id)->row();
+        $no_urut = $this->generate_nomor_urut_cetak($_data->i_document, $ibagian);
+
+        $data = [
+            'folder'     => $this->global['folder'],
+            'title'      => "Cetak " . $this->global['title'],
+            'title_list' => 'List ' . $this->global['title'],
+            'data'       => $_data,
+            'datadetail' => $this->mmaster->get_data_items_view($id)->result(),
+            'dfrom'      => $dfrom,
+            'dto'        => $dto,
+            'bagian'     => $this->mmaster->bagian(),            
+            'company' => $this->mmaster->session_company()->row(),
+            'no_urut'   => $no_urut
+        ];
+
+        $this->Logger->write('Cetak Data ' . $this->global['title'].' Id : '.$id);
+
+        $this->load->view($this->global['folder'] . '/vformprint', $data);
+    }
+
+    public function generate_nomor_urut_cetak($i_document=null, $i_bagian=null)
+    {
+        $array = explode('-', $i_document);
+        $_urutan = $array[2];
+        
+        $_ym = $array[1];
+        $ym = str_split($_ym, 2);
+        $y = $ym[0];
+        $m = $ym[1];
+
+        $kode_lokasi = null;
+        $query = $this->mmaster->get_kode_lokasi_bagian($i_bagian);
+        
+        if ($query->row() != null) {
+            $kode_lokasi = $query->row()->e_kode_lokasi;
+        }
+
+        $bulan = angkaRomawi($m);
+        
+        return "$_urutan-$kode_lokasi-$bulan-$y"; 
+        // return $text;
     }
 }
 /* End of file Cform.php */

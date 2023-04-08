@@ -1199,8 +1199,10 @@ class Mmaster extends CI_Model
         return $this->db->query($sql);
     }
 
-    public function generate_memo($id = null)
+    public function generate_memo($id)
     {
+        $id_reff = $id; 
+
         $this->db->select("i_tujuan, i_bagian, id, id_company, id_company_tujuan");
         $this->db->where("id", $id);
         
@@ -1246,7 +1248,8 @@ class Mmaster extends CI_Model
             'e_remark' => $eremark,
             'i_tujuan' => $query_bagian->id,
             /** id_company penerima masih sama dengan bagian pembuat */
-            'id_company_penerima' => $this->id_company
+            'id_company_penerima' => $this->id_company,
+            'id_reff' => $id_reff
         );
 
         $this->db->insert("tm_memo_permintaan", $data_header);

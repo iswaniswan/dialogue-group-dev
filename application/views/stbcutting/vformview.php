@@ -80,10 +80,22 @@
                         </tr>
                     </thead>
                     <tbody id="tableBody">
-                        <?php $i = 0;
+                        <?php $i = 0; $group = '';
                         if ($data_detail->num_rows() > 0) {
                             foreach ($data_detail->result() as $key) {
-                                $i++; ?>
+                                $i++; 
+
+                                if ($group != $key->id_product_wip.$key->id_material) {?>
+                                <tr class="table-active">
+                                    <td class="text-center"><i class="fa fa-check-square-o fa-lg text-success"></i></td>
+                                    <td colspan="2">WIP : <?= $key->i_product_wip;?></td>
+                                    <td colspan="5"><?= $key->e_product_wipname . ' - ' . $key->e_color_name ?></td>
+                                    <td><input type="hidden" value="<?= $key->quantity_schedule ?>" class="form-control text-right input-sm" placeholder="" readonly></td>
+                                    <td></td>
+                                </tr>
+                                <?php }
+                                $group = $key->id_product_wip.$key->id_material;
+                                ?>
                                 <tr>
                                     <td class="text-center middle"><b><?= $i; ?></b></td>
                                     <td class="middle"><?= $key->i_material; ?></td>

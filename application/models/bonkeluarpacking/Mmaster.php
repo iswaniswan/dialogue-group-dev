@@ -807,5 +807,16 @@ class Mmaster extends CI_Model
 
         return $this->db->query($sql);
     }
+
+    public function get_item_bundling($id_item)
+    {
+        $sql = "SELECT tpb.i_product_base, tpb.e_product_basename, tc.e_color_name,  tkqb.*
+                FROM tm_keluar_qc_bundling tkqb 
+                INNER JOIN tr_product_base tpb ON tpb.id = tkqb.id_product 
+                INNER JOIN tr_color tc ON tc.i_color = tpb.i_color AND tc.id_company = tpb.id_company   
+                WHERE id_keluar_qc_item='$id_item'";
+
+        return $this->db->query($sql);
+    }
 }
 /* End of file Mmaster.php */

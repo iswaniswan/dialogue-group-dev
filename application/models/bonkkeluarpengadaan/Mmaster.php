@@ -109,6 +109,7 @@ class Mmaster extends CI_Model
             $dto        = $data['dto'];
             $i_level = $data['i_level'];
             $id_jenis = $data['id_jenis'];
+            $i_bagian = $data['i_bagian'];
             $data       = '';
 
             if (check_role($i_menu, 2)) {
@@ -131,9 +132,17 @@ class Mmaster extends CI_Model
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger mr-3 fa-lg'></i></a>";
             }
 
+            /** cetak format 1 */
             /** allow semua status document untuk bisa print */
-            if (check_role($i_menu, 5)) {
+            
+            if (check_role($i_menu, 5)) {                
                 $data .= "<a href=\"".base_url($folder.'/cform/cetak/'.encrypt_url($id))."\" title='Print' target='_blank'><i class='ti-printer text-warning mr-3 fa-lg'></i></a>";
+                
+                /** only if approve */
+                if ($i_status == '6') {
+                    $data .= "<a href=\"#\" title='Print STB' onclick='cetak_v2(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-danger fa-lg mr-3'></i></a>";
+                }
+
                 if ($i_status == '6' or $i_status == '4') {
                     // $data .= "<a href=\"#\" title='Print' target='_blank' onclick='cetak($id); return false;'><i class='ti-printer text-warning mr-3 fa-lg'></i></a>";
                     if($id_jenis == '1') {
@@ -142,6 +151,18 @@ class Mmaster extends CI_Model
                     }
                 }
             }
+            
+
+            /** cetak format excel */  
+            /*            
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+                if($id_jenis == '1') {
+                    $data .= "<a href=\"".base_url($folder.'/cform/cetak2/'.encrypt_url($id))."\" title='Print Barcode' target='_blank'><i class='ti-printer text-info mr-3 fa-lg'></i></a>";
+                    $data .= "<a href=\"".base_url($folder.'/cform/cetak3/'.encrypt_url($id))."\" title='Print QR Code' target='_blank'><i class='ti-printer text-success mr-3 fa-lg'></i></a>";
+                }
+            }
+            */
             return $data;
         });
 
@@ -820,6 +841,84 @@ class Mmaster extends CI_Model
         $generated = $kode . '-' . date('ym') . '-' . sprintf('%04d', $count);
 
         return $generated;
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
+    }
+
+    public function dataedit_print($id)
+    {
+        $idcompany  = $this->session->userdata('id_company');
+
+        $sql = "SELECT DISTINCT a.*, i_keluar_pengadaan AS i_document,
+                    to_char(a.d_keluar_pengadaan, 'dd-mm-yyyy') as date_document,
+                    b.e_bagian_name,
+                    b2.e_bagian_name AS e_bagian_receive_name,
+                    c.name AS e_company_receive_name
+                FROM tm_keluar_pengadaan a 
+                INNER JOIN tr_bagian b ON b.i_bagian = a.i_bagian AND b.id_company = a.id_company
+                INNER JOIN tr_bagian b2 ON b2.i_bagian = a.i_tujuan AND b2.id_company = a.id_company_bagian
+                INNER JOIN public.company c ON c.id = b2.id_company
+                WHERE a.id = '$id'
+                AND a.id_company = '$idcompany' 
+                ORDER BY a.d_keluar_pengadaan asc";
+
+        return $this->db->query($sql, FALSE);
+    }
+
+    /*----------  DATA EDIT DETAIL  ----------*/
+
+    public function dataeditdetail_print($id)
+    {
+        $idcompany = $this->session->userdata('id_company');
+        $today = date('Y-m-d');
+        $jangkaawal = date('Y-m-01');
+        $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
+        $periode = date('Ym');
+
+        $sql = "SELECT
+                b.id_product_wip,
+                c.i_product_wip,
+                c.e_product_wipname,
+                d.id,
+                c.i_color,
+                d.e_color_name,
+                b.n_quantity_product_wip as n_quantity_wip, 
+                b.e_remark,
+                e.n_saldo_akhir AS saldo_akhir,
+                to_char(b.i_periode, 'FMMonth YYYY') periode,
+                to_char(b.i_periode, 'YYYY-MM') i_periode
+            FROM tm_keluar_pengadaan a 
+            JOIN tm_keluar_pengadaan_item_new b  ON (a.id = b.id_keluar_pengadaan) 
+            JOIN tr_product_wip c ON (b.id_product_wip = c.id AND a.id_company = c.id_company) 
+            JOIN tr_color d ON (c.i_color = d.i_color AND a.id_company = d.id_company) 
+            LEFT JOIN (
+                    SELECT * FROM produksi.f_mutasi_saldoawal_pengadaan_newbie($idcompany, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', 'PGD05')) e ON
+                (e.id_product_wip = b.id_product_wip AND e.id_company = '$idcompany')
+            WHERE a.id = '$id'
+            AND a.id_company = '$idcompany'";
+
+        return $this->db->query($sql, FALSE);
     }
 }
 /* End of file Mmaster.php */

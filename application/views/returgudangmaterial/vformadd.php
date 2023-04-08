@@ -224,8 +224,9 @@
                     $("#submit").attr("disabled", false);
                 }
             },
-            error: function () {
-                swal('Error :)');
+            error: function (error) {
+                console.log(error);
+                // swal('Error :)');
             }
         });
     });
@@ -243,8 +244,9 @@
             success: function (data) {
                 $('#i_document').val(data);
             },
-            error: function () {
-                swal('Error :)');
+            error: function (error) {
+                console.log(error);
+                // swal('Error :)');
             }
         });
     }

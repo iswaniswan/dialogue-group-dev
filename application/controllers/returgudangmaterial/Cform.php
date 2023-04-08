@@ -137,8 +137,20 @@ class Cform extends CI_Controller
     {
         $number = "";
         if ($this->input->post('tgl', TRUE) != '') {
-            $itujuan = explode('|', $this->input->post('itujuan', TRUE));
-            $number = $this->mmaster->runningnumber(date('ym', strtotime($this->input->post('tgl', TRUE))), date('Y', strtotime($this->input->post('tgl', TRUE))), $this->input->post('ibagian', TRUE), $itujuan[2], $itujuan[0]);
+            $array_itujuan = explode('|', $this->input->post('itujuan', TRUE));
+
+            // var_dump($array_itujuan); die();
+
+            $thbl = date('ym', strtotime($this->input->post('tgl', TRUE)));
+            $tahun = date('Y', strtotime($this->input->post('tgl', TRUE)));
+            $ibagian = $this->input->post('ibagian', TRUE);
+
+            $itujuan = $array_itujuan[2];
+            $id_bagian = $array_itujuan[0];
+
+            $number = $this->mmaster->runningnumber(
+                $thbl, $tahun, $ibagian, $itujuan, $id_bagian                                
+            );
         }
         echo json_encode($number);
     }
@@ -516,7 +528,7 @@ class Cform extends CI_Controller
             'dto'        => $this->uri->segment(6),
             'bagian'     => $this->mmaster->bagian()->result(),
             'data'       => $this->mmaster->dataheader($this->uri->segment(4))->row(),
-            'detail'     => $this->mmaster->datadetail($this->uri->segment(4))->result(),
+            'detail'     => $this->mmaster->datadetail1($this->uri->segment(4))->result(),
         );
 
         $this->Logger->write('Membuka Menu View ' . $this->global['title']);
@@ -524,7 +536,7 @@ class Cform extends CI_Controller
         $this->load->view($this->global['folder'] . '/vformapprove', $data);
     }
 
-    public function cetak()
+    public function __cetak()
     {
 
         $data = array(
@@ -790,6 +802,65 @@ class Cform extends CI_Controller
         ob_end_clean();
         ob_start();
         $writer->save('php://output');
+    }
+
+    public function cetak()
+    {
+        $data = check_role($this->i_menu, 2);
+        if (!$data) {
+            redirect(base_url(), 'refresh');
+        }
+
+        $id_company = $this->session->userdata('id_company');
+
+        $id = $this->uri->segment(4);
+        $dfrom = $this->uri->segment(5);
+        $dto = $this->uri->segment(6);
+        $ibagian = $this->uri->segment(7);
+
+        $_data = $this->mmaster->dataheader_print($id)->row();
+        $no_urut = $this->generate_nomor_urut_cetak($_data->i_document, $ibagian);
+        
+        $data = [ 
+            'folder' => $this->global['folder'],
+            'title' => "Cetak ".$this->global['title'], 
+            'title_list' => 'List '.$this->global['title'],
+            'dfrom' => $dfrom,
+            'dto' => $dto,
+            'id' => $id,
+            'bagian' => $this->mmaster->bagian()->result(),
+            'data' => $_data,
+            'datadetail' => $this->mmaster->datadetail1_print($id)->result(),
+            'company' => $this->mmaster->session_company()->row(),
+            'no_urut'   => $no_urut
+        ];
+
+        $this->Logger->write('Cetak Data ' . $this->global['title'].' Id : '.$id);
+
+        $this->load->view($this->global['folder'] . '/vformprint', $data);
+    }
+
+    public function generate_nomor_urut_cetak($i_document=null, $i_bagian=null)
+    {
+        $array = explode('-', $i_document);
+        $_urutan = $array[2];
+        
+        $_ym = $array[1];
+        $ym = str_split($_ym, 2);
+        $y = $ym[0];
+        $m = $ym[1];
+
+        $kode_lokasi = null;
+        $query = $this->mmaster->get_kode_lokasi_bagian($i_bagian);
+        
+        if ($query->row() != null) {
+            $kode_lokasi = $query->row()->e_kode_lokasi;
+        }
+
+        $bulan = angkaRomawi($m);
+        
+        return "$_urutan-$kode_lokasi-$bulan-$y"; 
+        // return $text;
     }
 }
 /* End of file Cform.php */

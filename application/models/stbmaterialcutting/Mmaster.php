@@ -79,6 +79,11 @@ class Mmaster extends CI_Model
             if (check_role($i_menu, 4) && ($i_status == '1')) {
                 $data .= "<a href=\"#\" title='Batal' onclick='statuschange(\"$folder\",\"$id\",\"9\",\"$dfrom\",\"$dto\",); return false;'><i class='ti-close text-danger fa-lg'></i></a>";
             }
+
+            if (check_role($i_menu, 5) && ($i_status == '6')) {
+                $data .= "<a href=\"#\" title='Print STB' onclick='cetak(\"$id\",\"$dfrom\",\"$dto\",\"$i_bagian\"); return false;'><i class='ti-printer text-warning fa-lg mr-3'></i></a>";
+            }
+
             return $data;
         });
         $datatables->hide('id');
@@ -1090,6 +1095,60 @@ class Mmaster extends CI_Model
         )
         SELECT DISTINCT i_product_wip, e_product_wipname||' - '||initcap(e_color_name) as e_product_wipname, id_product_wip from CTE 
         /*where i_product_wip = 'DGT7403' and i_material = 'KAI0267'*/");
+    }
+
+    public function dataedit_print($id)
+    {
+        return $this->db->query("SELECT a.*, b.e_bagian_name, a.i_bagian_receive, d.name AS e_company_receive_name,
+                c.e_bagian_name AS e_bagian_receive_name, 
+                to_char(a.d_document, 'dd-mm-yyyy') AS date_document,
+                d.name AS e_company_receive_name
+            FROM tm_stb_material_cutting a
+            LEFT JOIN tr_bagian b ON (b.i_bagian = a.i_bagian AND a.id_company = b.id_company)
+            LEFT JOIN tr_bagian c ON (c.i_bagian = a.i_bagian_receive AND a.id_company_receive = c.id_company)
+            LEFT JOIN public.company d ON (d.id = c.id_company)
+            WHERE a.id = '$id'");
+    }
+
+    public function dataeditdetail_print($id, $i_bagian)
+    {
+        $today = date('Y-m-d');
+        $jangkaawal = date('Y-m-01');
+        $jangkaakhir = date('Y-m-d', strtotime("-1 days"));
+        $periode = date('Ym');
+        return $this->db->query("SELECT c.i_material, c.e_material_name, cc.e_satuan_name, a.*, coalesce(n_saldo_akhir,0) n_stock,
+        b.i_product_wip, b.e_product_wipname, bb.e_color_name, b.id AS id_product, b.i_satuan_code
+        FROM tm_stb_material_cutting_item a
+        LEFT JOIN tr_material c ON (c.id = a.id_material)
+        LEFT JOIN tr_satuan cc ON (cc.i_satuan_code = c.i_satuan_code AND c.id_company = cc.id_company)
+        LEFT JOIN tr_product_wip b ON (b.id = a.id_product_wip)
+        LEFT JOIN tr_color bb ON (bb.i_color = b.i_color AND b.id_company = bb.id_company)
+        LEFT JOIN (SELECT id_material, n_saldo_akhir FROM produksi.f_mutasi_material($this->id_company, '$periode', '$jangkaawal', '$jangkaakhir', '$today', '$today', '$i_bagian') ) ccc ON (ccc.id_material = a.id_material)
+        WHERE id_document = '$id'
+        ORDER BY c.i_material, c.id");
+    }
+
+    public function session_company()
+    {
+        $id = $this->session->userdata('id_company');
+
+        $sql = "SELECT * FROM public.company WHERE id='$id'";
+
+        return $this->db->query($sql);
+    }
+
+    public function get_kode_lokasi_bagian($i_bagian, $id_company=null) 
+    {
+        if ($id_company == null) {
+            $id_company = $this->session->id_company;
+        }
+
+        $sql = "SELECT e_kode_lokasi
+                FROM tr_bagian tb
+                INNER JOIN tr_type tt ON tt.i_type = tb.i_type AND tb.id_company = '$id_company'
+                AND tb.i_bagian = '$i_bagian'";
+
+        return $this->db->query($sql);
     }
 
 }

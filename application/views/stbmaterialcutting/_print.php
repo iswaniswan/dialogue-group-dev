@@ -4,7 +4,7 @@
 
         <section id="kop" style="border: 1px solid #333; background: #c9c9c9!important">
             <div class="row">
-                <div class="col-3 p-1 text-center" style="border-right: 1px solid #333;">
+                <div class="col-3 p-2 text-center" style="border-right: 1px solid #333;">
                     <img src="<?= base_url() . 'assets/images/logo/' .$company->logo ?>" class="img-fluid" alt="logo-perusahaan"/>
                 </div>
                 <div class="col-9 p-4 text-center">
@@ -47,7 +47,7 @@
                     <div class="col-2"><b>Untuk</b></div>
                     <?php $e_bagian_receive = $data->e_bagian_receive_name ?>
                     <?php if (strpos($data->i_document, "SJ") !== false) { 
-                        $e_bagian_receive .= " - $data->e_company_receive_name";
+                        $e_bagian_receive .= " - " . strtoupper($data->e_company_receive_name);
                     } ?>
                     <div class="col">: <?= $e_bagian_receive ?></div>
                 </div>
@@ -82,60 +82,41 @@
                 <table class="table table-hover table-bordered">
                     <thead style="background: #f8f9fa!important">
                         <tr>
-                            <th style="width: 45px;">No</th>
+                            <th style="width: 35px;">No</th>
                             <th style="width: 55px;">Kode</th>
                             <th style="width: auto;">Nama Barang</th>
                             <th style="width: 55px;">Jumlah</th>
-                            <th style="width: 150px;">Keterangan</th>
+                            <th style="width: 55px;">Satuan</th>
+                            <th style="width: 200px;">Keterangan</th>
                         </tr>    
                     </thead>
                     <tbody>
-                    <?php $group=''; $last_product_id = null;
-                        
+                    <?php $no=1; 
+                        if ($index > 1) { 
+                            $no = ($index-1) * $page_break + 1;
+                        }
+
+                        $last_row_id = null;
+
                         foreach($datadetail as $item) { ?>
 
-                            <?php if ($item['status'] == 'M') { ?>
-                                <tr>
-                                    <td><?= @$item['seq'] ?></td>
-                                    <td><?= $item['i_product_wip'] ?></td>
-                                    <td><?= $item['e_product_basename'] ?></td>
-                                    <td><?= number_format($item['n_quantity'], 2, ".", ",") ?></td> 
-                                    <td><?= $item['e_remark']; ?></td>
-                                </tr>
-                            <?php $last_product_id = $item['id']; 
-                            } ?>
+                        <?php if (@$item['show_as_product'])  { ?>
+                            <tr>
+                                <td colspan="2"><b><?= $item['i_product_wip'] ?></b></td>
+                                <td colspan="4"><b><?= $item['e_product_wipname']. ' - ' .$item['e_color_name'] ?></b></td>
+                            </tr>                            
+                        <?php } else { ?>
+                            <tr>
+                                <td><?= @$item['seq'] ?></td>
+                                <td><?= $item['i_material'] ?></td>
+                                <td><?= $item['e_material_name'] ?></td>
+                                <td><?= number_format($item['n_quantity'], 2, ".", ",") ?></td> 
+                                <td><?= $item['i_satuan_code']; ?></td>
+                                <td><?= $item['e_remark']; ?></td>
+                            </tr>
+                        <?php } ?>
 
-                            <?php if ($item['count_bundling'] > 0) { ?>
-                                <tr>
-                                    <td style="background: #f1f1f1; text-align:right"><b>#</b></td>
-                                    <td colspan="5" style="background: #f1f1f1"><b>Bundling Produk</b></td>
-                                </tr>
-
-                            
-                            
-                                <?php $o = 97; foreach ($bundling as $b) { $b = (array) $b;
-
-                                        if($b['id_keluar_qc_item'] == $last_product_id) { 
-
-                                            if ($o > 122) {
-                                                $o = 97;
-                                            }
-
-                                            $seq =  @$item['seq']. ". ". chr($o); ?>
-                                            <tr>
-                                                <td><?= $seq ?></td>
-                                                <td><?= $b['i_product_base'] ?></td>
-                                                <td><?= $b['e_product_basename'] ?></td>
-                                                <td><?= number_format($b['n_quantity_bundling'], 2, ".", ",") ?></td> 
-                                                <td><?= $b['e_remark']; ?></td>
-                                            </tr>
-                                        <?php $o++; } ?>
-
-                                <?php } ?>
-
-                            <?php } ?>
-
-                    <?php } ?>
+                    <?php $no++ ; } ?>
                     </tbody>
                 </table>
             </div>
